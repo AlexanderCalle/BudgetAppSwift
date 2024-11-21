@@ -11,7 +11,7 @@ import SwiftUI
 struct smart_budgetApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            HomeView()
         }
     }
 }
