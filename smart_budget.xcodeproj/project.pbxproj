@@ -6,13 +6,8 @@
 	objectVersion = 77;
 	objects = {
 
-/* Begin PBXBuildFile section */
-		6C70F4C72CEFBA8500117691 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C70F4C62CEFBA8500117691 /* Extensions.swift */; };
-/* End PBXBuildFile section */
-
 /* Begin PBXFileReference section */
 		6C38CF872CB2D0FB00AED4C1 /* smart_budget.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = smart_budget.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		6C70F4C62CEFBA8500117691 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -37,7 +32,6 @@
 		6C38CF7E2CB2D0FB00AED4C1 = {
 			isa = PBXGroup;
 			children = (
-				6C70F4C62CEFBA8500117691 /* Extensions.swift */,
 				6C38CF892CB2D0FB00AED4C1 /* smart_budget */,
 				6C38CF882CB2D0FB00AED4C1 /* Products */,
 			);
@@ -125,7 +119,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6C70F4C72CEFBA8500117691 /* Extensions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -46,19 +46,57 @@ struct ApiService: APIServiceProtocol {
         let task = URLSession.shared.dataTask(with: url) { data, response, error in
     
             guard error == nil else {
-                completion(.failure(error!))
+                
+                if let error = error as? URLError {
+                    switch error.code {
+                    case .notConnectedToInternet:
+                        print("No internet connection")
+                        completion(.failure(NetworkError.noInternet))
+                    case .timedOut:
+                        print("The request timed out")
+                        completion(.failure(NetworkError.timeout))
+                    case .cannotFindHost, .cannotConnectToHost:
+                        print("Cannot reach the server")
+                        completion(.failure(NetworkError.unReachable("Server cannot be reached")))
+                    default:
+                        print("Other error: \(error.localizedDescription)")
+                    }
+                } else {
+                    completion(.failure(error!))
+                }
                 return
             }
-        
-            do {
-                let decoder = JSONDecoder()
-                let formatter = DateFormatter.iso8601WithMilliseconds
-                decoder.dateDecodingStrategy = .formatted(formatter)
-                
-                let response = try decoder.decode(T.self, from: data!)
-                completion(.success(response))
-            } catch {
-                completion(.failure(error))
+                   
+            // TODO: Mapper for errors
+            if let response = response as? HTTPURLResponse {
+                if !(200...299).contains(response.statusCode) {
+                    switch response.statusCode {
+                    case 400:
+                        completion(.failure(ApiError.badRequest(response.description)))
+                    case 401:
+                        completion(.failure(ApiError.unauthorized))
+                    case 403:
+                        completion(.failure(ApiError.forbidden))
+                    case 404:
+                        completion(.failure(ApiError.notFound(response.description)))
+                    case 500:
+                        completion(.failure(ApiError.internalError))
+                    default :
+                        completion(.failure(ApiError.unknown(response.statusCode, response.description)))
+                    }
+                    return
+                } else {
+                    do {
+                        let decoder = JSONDecoder()
+                        let formatter = DateFormatter.iso8601WithMilliseconds
+                        decoder.dateDecodingStrategy = .formatted(formatter)
+                        
+                        let response = try decoder.decode(T.self, from: data!)
+                        completion(.success(response))
+                    } catch {
+                        completion(.failure(error))
+                    }
+                }
             }
         }
         
@@ -80,7 +118,17 @@ struct ApiService: APIServiceProtocol {
 
 enum NetworkError: Error {
     case invalidURL
-    case invalidResponse
-    case invalidData
+    case noInternet
+    case timeout
+    case unReachable(String)
     case interalError
+}
+
+enum ApiError: Error {
+    case notFound(String?)
+    case badRequest(String?)
+    case forbidden
+    case unauthorized
+    case internalError
+    case unknown(Int?, String?)
 }
