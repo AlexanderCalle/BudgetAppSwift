@@ -8,7 +8,7 @@
 import Foundation
 import SwiftUI
 
-class CategoriesStore: ObservableObject {
+class HomeViewModel: ObservableObject {
     
     @Published var categoriesState: ViewState<[Categorie]> = .idle
     {
@@ -20,6 +20,7 @@ class CategoriesStore: ObservableObject {
         }
     }
     @Published var mainCategoryState: ViewState<Categorie> = .idle
+    @Published var expenseOverview: ViewState<[DayExpense]> = .idle
     @Published var total_expenses: Float = 0.0 as Float
             
     let api: ApiService = ApiService()
@@ -27,6 +28,7 @@ class CategoriesStore: ObservableObject {
     init() {
         fetchMainCategory()
         fetchCategories()
+        fetchChartOverview()
     }
     
     func fetchMainCategory() {
@@ -35,7 +37,6 @@ class CategoriesStore: ObservableObject {
         let userId = "cm2ucugv70000tzkzql9986as"
         api.Get("categories/user/\(userId)") { [weak self] (result: Result<Categorie, Error>) in
             DispatchQueue.main.async {
-                
                 switch result {
                 case .success(let mainCategory):
                     self?.mainCategoryState = .success(mainCategory)
@@ -68,6 +69,29 @@ class CategoriesStore: ObservableObject {
                     }
                     if let apiError = error as? ApiError {
                         self?.categoriesState = .failure(apiError)
+                    }
+                    print(error)
+                }
+            }
+        }
+    }
+    
+    func fetchChartOverview() {
+        print("Getting overview...")
+        expenseOverview = .loading
+        api.Get("expenses/overview") { [weak self] (result: Result<[DayExpense], Error>) in
+            DispatchQueue.main.async {
+                
+                switch result {
+                case .success(let chartOverview):
+                    print("Fetched chart overview: \(chartOverview)")
+                    self?.expenseOverview = .success(chartOverview)
+                case .failure(let error):
+                    if let netwerkError = error as? NetworkError {
+                        self?.expenseOverview = .failure(netwerkError)
+                    }
+                    if let apiError = error as? ApiError {
+                        self?.expenseOverview = .failure(apiError)
                     }
                     print(error)
                 }

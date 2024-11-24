@@ -7,9 +7,14 @@
 
 import Foundation
 
-struct LineChartData {
-    var id = UUID()
+struct DayExpense: Identifiable, Codable {
+    var id: UUID = .init()
     
     var date: Date
     var value: Double
+    
+    private enum CodingKeys: String, CodingKey {
+        case date
+        case value
+    }
 }

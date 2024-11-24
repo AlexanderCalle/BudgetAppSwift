@@ -59,6 +59,7 @@ struct CategoryListView: View {
 }
 
 struct CategoryDisclosureGroup: View {
+    @EnvironmentObject var router: Router
     let category : Categorie
     @State var isExpanded: Bool = false
     
@@ -81,7 +82,7 @@ struct CategoryDisclosureGroup: View {
                         .padding(.top, 5)
                 }
                 Button {
-                    
+                    router.navigate(to: .expenses(categoryId: category.id))
                 } label: {
                     HStack{
                         Text("See more")

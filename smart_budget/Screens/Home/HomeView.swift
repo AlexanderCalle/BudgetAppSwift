@@ -9,7 +9,8 @@ import SwiftUI
 import Network
 
 struct HomeView: View {
-    @StateObject var categoriesStore = CategoriesStore()
+    @EnvironmentObject var router: Router
+    @StateObject var categoriesStore = HomeViewModel()
     @State private var isConnected = true
     
     var body: some View {
@@ -19,8 +20,13 @@ struct HomeView: View {
             } else {
                 TopBarView()
                 ScrollView {
-                    SevenDaysChartView()
-                        .frame(height: 200)
+                    if case .success(let overview) = categoriesStore.expenseOverview {
+                        SevenDaysChartView(data: overview)
+                            .frame(height: 200)
+                    } else {
+                        ProgressView()
+                            .frame(height: 200)
+                    }
                     mainCategoryOverview
                     Divider()
                     VStack {
@@ -40,15 +46,12 @@ struct HomeView: View {
                         }
                     }
                 }
-                ButtomBarView()
             }
         }
-        .frame(width: .infinity, height: .infinity)
-        .padding(8)
+        .padding()
         .onAppear {
             checkInternetConnection()
         }
-        .background(Color.background)
     }
     
     var mainCategoryOverview: some View {
@@ -127,5 +130,7 @@ struct HomeView: View {
 }
 
 #Preview {
+    @ObservedObject var router = Router()
     HomeView()
+        .environmentObject(router)
 }

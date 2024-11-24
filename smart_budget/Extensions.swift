@@ -19,6 +19,11 @@ extension DateFormatter {
     }()
 }
 
+extension View {
+    func withCustomBackButton() -> some View {
+        modifier(BackButtonModifier())
+    }
+}
 extension Color {
     init(hex: String) {
         let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)

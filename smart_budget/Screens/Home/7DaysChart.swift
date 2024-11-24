@@ -12,15 +12,8 @@ struct SevenDaysChartView: View {
     
     // TODO: Switch between week and month overview
     
-    let data: [LineChartData] = [
-        LineChartData(date: Date.from(year: 2024, month: 11, day: 18)!, value: 112),
-        LineChartData(date: Date.from(year: 2024, month: 11, day: 19)!, value: 53),
-        LineChartData(date: Date.from(year: 2024, month: 11, day: 20)!, value: 86),
-        LineChartData(date: Date.from(year: 2024, month: 11, day: 21)!, value: 23),
-        LineChartData(date: Date.from(year: 2024, month: 11, day: 22)!, value: 10),
-        LineChartData(date: Date.from(year: 2024, month: 11, day: 23)!, value: 73),
-        LineChartData(date: Date.from(year: 2024, month: 11, day: 24)!, value: 90)
-    ]
+   let data: [DayExpense]
+
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -40,8 +33,4 @@ struct SevenDaysChartView: View {
         }
         .frame(maxHeight: 200)
     }
-}
-
-#Preview {
-    SevenDaysChartView()
 }
