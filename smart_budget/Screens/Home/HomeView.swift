@@ -17,8 +17,12 @@ struct HomeView: View {
             if (!isConnected) {
                 OfflineView(message: "Offline mode")
             } else {
-                topBarView
-                Group {
+                TopBarView()
+                ScrollView {
+                    SevenDaysChartView()
+                        .frame(height: 200)
+                    mainCategoryOverview
+                    Divider()
                     VStack {
                         switch categoriesStore.categoriesState {
                         case .success(let data):
@@ -36,13 +40,48 @@ struct HomeView: View {
                         }
                     }
                 }
-                Spacer()
+                ButtomBarView()
             }
         }
-        .padding()
+        .frame(width: .infinity, height: .infinity)
+        .padding(8)
         .onAppear {
             checkInternetConnection()
         }
+        .background(Color.background)
+    }
+    
+    var mainCategoryOverview: some View {
+            VStack {
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading) {
+                        Text("Monthly")
+                        Text("\(categoriesStore.daysLeftInCurrentMonth()) Days left")
+                            .padding(5)
+                    }
+                    Spacer()
+                    VStack(alignment: .trailing) {
+                        Text("Budgeted")
+                        if  case .success(let main) = categoriesStore.mainCategoryState {
+                            Text(main.max_expense ?? 0.0, format: .currency(code: "EUR"))
+                                .padding(5)
+                        }
+                    }
+                    Spacer()
+                    VStack(alignment: .trailing) {
+                        Text("Spent")
+                        Group {
+                            Text(categoriesStore.total_expenses, format: .currency(code: "EUR"))
+                        }
+                        .padding(.all, 5)
+                        .background(.green.opacity(0.2))
+                        .foregroundColor(Color(hex: "#207520"))
+                        .cornerRadius(10)
+                    }
+                }
+                .padding(5)
+            }
+            .padding(.vertical, 10)
     }
     
     private func OfflineView(networkError: NetworkError?) -> some View {
@@ -72,23 +111,6 @@ struct HomeView: View {
             Text(message)
                 .font(.headline)
                 .padding()
-        }
-    }
-    
-    var topBarView: some View {
-        return HStack {
-            Text("Smart Budget")
-                .font(.title)
-                .padding()
-            Spacer()
-            if case .success(let data) = categoriesStore.mainCategoryState {
-                Group {
-                    Text("\(String(format: "%.f", categoriesStore.total_expenses)) / \(String(format: "%.f", data.max_expense!)) €")
-                        .padding(5)
-                }
-                .background(Color.purple.opacity(0.3))
-                .cornerRadius(5)
-            }
         }
     }
     

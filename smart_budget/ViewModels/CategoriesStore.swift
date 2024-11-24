@@ -14,13 +14,13 @@ class CategoriesStore: ObservableObject {
     {
         didSet {
             if case .success(let data) = categoriesState {
-                self.total_expenses = data.reduce(0 as Float) { $0 + ($1.totalExpenses ?? 0) }
+                self.total_expenses = data.reduce(0.0 as Float) { $0 + ($1.totalExpenses ?? 0) }
             }
             
         }
     }
     @Published var mainCategoryState: ViewState<Categorie> = .idle
-    @Published var total_expenses: Float = 0 as Float
+    @Published var total_expenses: Float = 0.0 as Float
             
     let api: ApiService = ApiService()
     
@@ -56,7 +56,7 @@ class CategoriesStore: ObservableObject {
         print("Getting items...")
         categoriesState = .loading
         api.Get("categories") { [weak self] (result: Result<[Categorie], Error>) in
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            DispatchQueue.main.async {
                 
                 switch result {
                 case .success(let categories):
@@ -73,6 +73,21 @@ class CategoriesStore: ObservableObject {
                 }
             }
         }
+    }
+    
+    func daysLeftInCurrentMonth() -> Int {
+        let calendar = Calendar.current
+        let today = Date()
+                guard let rangeOfDays = calendar.range(of: .day, in: .month, for: today) else {
+            return 0
+        }
+        
+        let currentDay = calendar.component(.day, from: today)
+        
+        let totalDays = rangeOfDays.count
+        let daysLeft = totalDays - currentDay
+        
+        return daysLeft
     }
 }
 

@@ -6,3 +6,10 @@
 //
 
 import Foundation
+
+struct LineChartData {
+    var id = UUID()
+    
+    var date: Date
+    var value: Double
+}

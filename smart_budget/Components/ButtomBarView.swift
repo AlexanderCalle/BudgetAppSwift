@@ -8,9 +8,48 @@
 import SwiftUI
 
 struct ButtomBarView: View {
+    @State var activeMenuItem: MenuItem = .home
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        Divider()
+            .padding(0)
+        HStack {
+            Spacer()
+            Button {
+                activeMenuItem = .home
+            } label: {
+                Image(systemName: "house")
+                    .imageScale(.large)
+                    .tint(activeMenuItem == .home ? .purple : .primary)
+            }
+            Spacer()
+            Button {
+                activeMenuItem = .currency
+            } label: {
+                Image(systemName: "coloncurrencysign.circle")
+                    .imageScale(.large)
+                    .tint(activeMenuItem == .currency ? .purple : .primary)
+
+            }
+            Spacer()
+            Button {
+                activeMenuItem = .settings
+            } label: {
+                Image(systemName: "gear")
+                    .imageScale(.large)
+                    .tint(activeMenuItem == .settings ? .purple : .primary)
+
+            }
+            Spacer()
+        }
+        .padding(.top)
+        .tint(.primary)
     }
+}
+
+enum MenuItem: CaseIterable {
+    case home
+    case currency
+    case settings
 }
 
 #Preview {

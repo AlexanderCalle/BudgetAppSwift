@@ -10,13 +10,16 @@ import SwiftUI
 struct TopBarView: View {
     var body: some View {
         HStack {
-            Text("Smart Budget")
+            Text("Dashboard")
                 .font(.title)
-                .padding()
             Spacer()
-            Image(systemName: "plus.circle")
-            Image(systemName: "person.crop.circle")
+            Button(action: {}) {
+                Image(systemName: "plus.circle.fill")
+                    .resizable()
+            }
+            .frame(width: 25, height: 25)
         }
+        .tint(.primary)
     }
 }
 
