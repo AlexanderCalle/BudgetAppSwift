@@ -9,28 +9,30 @@ import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-
-        RouterView {
-            TabView {
+        TabView {
+            RouterView {
                 HomeView()
-                    .tabItem { Image(systemName: "house") }
-                    .background(Color.background)
-
-                ExpensesView()
-                    .tabItem { Image(systemName: "list.bullet") }
-                    .background(Color.background)
-
-                SettingsView()
-                    .tabItem { Image(systemName: "gearshape") }
-                    .background(Color.background)
-
             }
-            .accentColor(.purple)
+                .tabItem { Image(systemName: "house") }
+                .background(Color.background)
+
+            RouterView {
+                ExpensesView()
+            }
+                .tabItem { Image(systemName: "banknote") }
+                .background(Color.background)
+
+            RouterView {
+                SettingsView()
+            }
+                .tabItem { Image(systemName: "gearshape") }
+                .background(Color.background)
 
         }
-    
+        .accentColor(.purple)
     }
 }
+
 
 #Preview {
     ContentView()

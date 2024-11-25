@@ -8,15 +8,17 @@
 import Foundation
 import SwiftUI
 
-final class Router: ObservableObject {
+@Observable
+final class Router {
     
     public enum Route: Codable, Hashable {
         case home
-        case expenses(categoryId: String?)
+        case expenses(category: Categorie)
         case settings
+        case newExpense
     }
     
-    @Published var path = NavigationPath()
+    var path = NavigationPath()
     
     @ViewBuilder func view(for route: Route) -> some View {
             switch route {
@@ -24,14 +26,17 @@ final class Router: ObservableObject {
                 HomeView()
                     .background(Color.background)
                     .withCustomBackButton()
-            case .expenses(let str):
-                ExpensesView()
+            case .expenses(let category):
+                ExpensesView(category: category)
                     .background(Color.background)
                     .withCustomBackButton()
             case .settings:
                 SettingsView()
                     .background(Color.background)
                     .withCustomBackButton()
+            case .newExpense:
+                NewExpenseView()
+                    .background(Color.background)
             }
         }
     

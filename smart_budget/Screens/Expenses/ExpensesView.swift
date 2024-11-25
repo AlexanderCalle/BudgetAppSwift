@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct ExpensesView: View {
+    @Environment(Router.self) var router: Router
+    var category: Categorie? = nil
     @StateObject var expensesViewModel = ExpensesViewModel()
     
     var body: some View {
@@ -16,13 +18,65 @@ struct ExpensesView: View {
                 Text("Expenses")
                     .font(.title)
                 Spacer()
-                Button(action: {}) {
+                Button(action: {
+                    router.navigate(to: .newExpense)
+                }) {
                     Image(systemName: "plus.circle.fill")
                         .resizable()
                 }
                 .frame(width: 25, height: 25)
             }
             .tint(.primary)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                if case .success(let categories) = expensesViewModel.categories {
+                    HStack {
+                        Text("All expenses")
+                            .foregroundColor(
+                                expensesViewModel.selectedCategory == nil ? .white : .purple
+                            )
+                            .font(.headline)
+                            .padding(.vertical, 8)
+                            .padding(.horizontal, 16)
+                            .background(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .inset(by: 1)
+                                    .stroke(.purple, lineWidth: 1)
+                                    .fill(expensesViewModel.selectedCategory == nil ? .purple : .purple.opacity(0.2))
+                            )
+                            .fixedSize(horizontal: true , vertical: false)
+                            .onTapGesture {
+                                expensesViewModel.SelectCategory(nil)
+                            }
+                        
+                        Divider()
+                        
+                        ForEach(categories) { category in
+                            Text(category.name)
+                                .foregroundColor(
+                                    expensesViewModel.selectedCategory?.id == category.id ? .white : .purple
+                                )
+                                .font(.headline)
+                                .padding(.vertical, 8)
+                                .padding(.horizontal, 16)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .inset(by: 1)
+                                        .stroke(.purple, lineWidth: 1)
+                                        .fill(
+                                            expensesViewModel.selectedCategory?.id == category.id ? .purple : .purple.opacity(0.2)
+                                        )
+                                )
+                                .fixedSize(horizontal: true , vertical: false)
+                                .onTapGesture {
+                                    expensesViewModel.SelectCategory(category)
+                                }
+                        }
+                    }
+                    .frame(maxHeight: 50)
+                }
+            }
+            .padding(.vertical, 8)
             ScrollView {
                 switch expensesViewModel.expenses {
                 case .success(let expenses):
@@ -45,6 +99,9 @@ struct ExpensesView: View {
             }
         }
         .padding()
+        .onAppear {
+            expensesViewModel.SelectCategory(category)
+        }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
     
@@ -99,6 +156,8 @@ struct ExpensesView: View {
 }
 
 #Preview {
+
     ExpensesView()
+        .environment(Router())
         .background(Color.background)
 }

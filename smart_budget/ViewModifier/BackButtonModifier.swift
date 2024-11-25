@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 
 struct BackButtonModifier: ViewModifier {
-    @EnvironmentObject private var router: Router
+    @Environment(Router.self) private var router: Router
     
     func body(content: Content) -> some View {
         content

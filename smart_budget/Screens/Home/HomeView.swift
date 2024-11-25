@@ -9,7 +9,7 @@ import SwiftUI
 import Network
 
 struct HomeView: View {
-    @EnvironmentObject var router: Router
+    @Environment(Router.self) var router: Router
     @StateObject var categoriesStore = HomeViewModel()
     @State private var isConnected = true
     
@@ -130,7 +130,6 @@ struct HomeView: View {
 }
 
 #Preview {
-    @ObservedObject var router = Router()
     HomeView()
-        .environmentObject(router)
+        .environment(Router())
 }

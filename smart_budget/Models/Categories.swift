@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Categorie: Codable, Identifiable {
+struct Categorie: Codable, Identifiable, Equatable, Hashable {
     var id: String
     var name: String
     var description: String?

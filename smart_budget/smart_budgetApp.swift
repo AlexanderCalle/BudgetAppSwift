@@ -9,8 +9,6 @@ import SwiftUI
 
 @main
 struct smart_budgetApp: App {
-    @ObservedObject var router = Router()
-    
     var body: some Scene {
         WindowGroup {
             ContentView()

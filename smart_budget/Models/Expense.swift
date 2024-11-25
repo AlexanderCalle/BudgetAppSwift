@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Expense: Codable, Identifiable {
+struct Expense: Codable, Identifiable, Equatable, Hashable {
     var id: String
     var name: String
     var description: String?

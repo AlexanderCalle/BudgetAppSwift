@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 
 struct RouterView<Content: View>: View {
-    @StateObject var router: Router = Router()
+     var router: Router = Router()
     // Our root view content
     private let content: Content
     
@@ -18,6 +18,7 @@ struct RouterView<Content: View>: View {
     }
     
     var body: some View {
+        @Bindable var router = router
         NavigationStack(path: $router.path) {
             ZStack {
                 Color.background
@@ -30,6 +31,6 @@ struct RouterView<Content: View>: View {
                     .frame(width: .infinity, height: .infinity)
             }
         }
-        .environmentObject(router)
+        .environment(router)
     }
 }

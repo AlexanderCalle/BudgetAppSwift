@@ -56,7 +56,7 @@ class HomeViewModel: ObservableObject {
     func fetchCategories() {
         print("Getting items...")
         categoriesState = .loading
-        api.Get("categories") { [weak self] (result: Result<[Categorie], Error>) in
+        api.Get("categories?expenses=true") { [weak self] (result: Result<[Categorie], Error>) in
             DispatchQueue.main.async {
                 
                 switch result {

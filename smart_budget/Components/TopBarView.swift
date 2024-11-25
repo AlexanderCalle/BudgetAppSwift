@@ -8,12 +8,15 @@
 import SwiftUI
 
 struct TopBarView: View {
+    @Environment(Router.self) var router
     var body: some View {
         HStack {
             Text("Dashboard")
                 .font(.title)
             Spacer()
-            Button(action: {}) {
+            Button(action: {
+                router.navigate(to: .newExpense)
+            }) {
                 Image(systemName: "plus.circle.fill")
                     .resizable()
             }
