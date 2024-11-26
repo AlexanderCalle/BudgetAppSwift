@@ -14,6 +14,8 @@ struct Expense: Codable, Identifiable, Equatable, Hashable {
     var amount: Float
     var date: Date?
     var type: ExpenseType?
+    
+    var category: Categorie?
 }
 
 enum ExpenseType: String, Codable, CaseIterable {

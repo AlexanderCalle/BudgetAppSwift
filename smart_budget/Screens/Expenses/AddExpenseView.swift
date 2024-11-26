@@ -9,6 +9,7 @@ import SwiftUI
 import MijickPopups
 
 struct AddExpenseView: View {
+    @Environment(Router.self ) var router
     let amount: Float
     
     @ObservedObject var addExpenseViewModel = AddExpenseViewModel()
@@ -20,6 +21,14 @@ struct AddExpenseView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
+            if !addExpenseViewModel.errors.isEmpty {
+                VStack(alignment: .leading, spacing: 10) {
+                    ForEach(addExpenseViewModel.errors, id: \.self) { error in
+                        Text(error)
+                            .foregroundColor(.dangerBackground)
+                    }
+                }
+            }
             Divider()
             HStack(alignment: .center, spacing: 50){
                 VStack(alignment: .leading, spacing: 30){
@@ -82,7 +91,8 @@ struct AddExpenseView: View {
                 }
             }
             Button(action: {
-                
+                addExpenseViewModel.onSubmitExpense(
+                    name: name, amount: amount, date: date, type: type, category: selectedCategory)
             }) {
                 Text("Save Expense")
                     .frame(maxWidth: .infinity)
@@ -93,6 +103,11 @@ struct AddExpenseView: View {
             }
             .padding(.top, 20)
         }
+        .onChange(of: addExpenseViewModel.shouldNavigate, perform: { _ in
+            if addExpenseViewModel.shouldNavigate {
+                router.navigateToRoot()
+            }
+        })
         .padding()
         //.navigationBarTitle(amount.formatted(.currency(code: "EUR")))
         .toolbar {
