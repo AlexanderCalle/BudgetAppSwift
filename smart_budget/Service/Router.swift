@@ -12,31 +12,26 @@ import SwiftUI
 final class Router {
     
     public enum Route: Codable, Hashable {
-        case home
         case expenses(category: Categorie)
-        case settings
-        case newExpense
+        case addAmount
+        case newExpense(amount: Float)
     }
     
     var path = NavigationPath()
     
     @ViewBuilder func view(for route: Route) -> some View {
             switch route {
-            case .home:
-                HomeView()
-                    .background(Color.background)
-                    .withCustomBackButton()
             case .expenses(let category):
                 ExpensesView(category: category)
                     .background(Color.background)
                     .withCustomBackButton()
-            case .settings:
-                SettingsView()
+            case .addAmount:
+                AddAmountView()
+                    .background(Color.background)
+            case .newExpense(let amount):
+                AddExpenseView(amount: amount)
                     .background(Color.background)
                     .withCustomBackButton()
-            case .newExpense:
-                NewExpenseView()
-                    .background(Color.background)
             }
         }
     

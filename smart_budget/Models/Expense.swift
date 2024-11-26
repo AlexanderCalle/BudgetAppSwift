@@ -20,5 +20,4 @@ enum ExpenseType: String, Codable, CaseIterable {
     case card = "CARD"
     case transfer = "TRANSFER"
     case cash = "CASH"
-    case unknown
 }

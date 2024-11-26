@@ -19,7 +19,7 @@ struct ExpensesView: View {
                     .font(.title)
                 Spacer()
                 Button(action: {
-                    router.navigate(to: .newExpense)
+                    router.navigate(to: .addAmount)
                 }) {
                     Image(systemName: "plus.circle.fill")
                         .resizable()

@@ -110,8 +110,9 @@ struct CategoryDisclosureGroup: View {
                         Text(category.totalExpenses ?? 0, format: .currency(code: "EUR"))
                     }
                     .padding(.all, 5)
-                    .background(.green.opacity(0.2))
-                    .foregroundColor(Color(hex: "#207520"))
+                    .foregroundColor(category.totalPercentage < 0.7 ? .successForeground : category.totalPercentage < 0.9 ? .warningForeground : .dangerForeground
+                    )
+                    .background(category.totalPercentage < 0.7 ? .successBackground : category.totalPercentage < 0.9 ? .warningBackground : .dangerBackground)
                     .cornerRadius(10)
                 }
                 .onTapGesture {
@@ -148,4 +149,5 @@ struct CategoryDisclosureGroup: View {
         Categorie(id: "2", name: "Transport", expenses: []),
         Categorie(id: "3", name: "Healthcare", expenses: []),
     ]).padding()
+        .environment(Router())
 }

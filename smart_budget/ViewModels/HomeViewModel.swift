@@ -61,7 +61,7 @@ class HomeViewModel: ObservableObject {
                 
                 switch result {
                 case .success(let categories):
-                    print("Fetched categories: \(categories)")
+                    print("Fetched categories: \(categories.map { $0.totalPercentage })")
                     self?.categoriesState = .success(categories)
                 case .failure(let error):
                     if let netwerkError = error as? NetworkError {

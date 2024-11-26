@@ -15,18 +15,22 @@ struct Categorie: Codable, Identifiable, Equatable, Hashable {
     var color: String?
     var totalExpenses: Float?
     var expenses: [Expense]?
+    var totalPercentage: Float {
+        return (totalExpenses ?? 0) / (max_expense ?? 0)
+    }
     
     init(data: Data) throws {
         self = try JSONDecoder().decode(Categorie.self, from: data)
     }
     
-    init(id: String, name: String, description: String? = nil, max_expense: Float? = nil, color: String? = nil, expenses: [Expense]? = nil, totalExpenses: Float? = nil) {
+    init(id: String, name: String, description: String? = nil, max_expense: Float? = nil, color: String? = nil, expenses: [Expense]? = nil, totalExpenses: Float? = nil, totalPercentage: Float? = nil) {
         self.id = id
         self.name = name
         self.description = description
         self.max_expense = max_expense
         self.color = color
         self.expenses = expenses
+        self.totalExpenses = totalExpenses
         self.totalExpenses = totalExpenses
     }
 }

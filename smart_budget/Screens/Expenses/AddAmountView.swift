@@ -1,5 +1,5 @@
 //
-//  NewExpenseView.swift
+//  AddAmountView.swift
 //  smart_budget
 //
 //  Created by Alexander Callebaut on 25/11/2024.
@@ -7,10 +7,11 @@
 
 import SwiftUI
 
-struct NewExpenseView: View {
+struct AddAmountView: View {
     @Environment(Router.self) var router: Router
     @State private var amount: String = "0" // Initial amount value
-        
+    @State private var isAnimating: Bool = false
+    
     let columns = [
         GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())
     ]
@@ -20,7 +21,6 @@ struct NewExpenseView: View {
             HStack {
                 Spacer()
                 Button(action: {
-                    // Add dismiss action here
                     router.navigateBack()
                 }) {
                     Image(systemName: "xmark")
@@ -29,22 +29,21 @@ struct NewExpenseView: View {
                 }
                 .padding()
             }
-            
             Spacer()
-            
             // Display amount
-            Text("€\(amount)")
-                .font(.system(size: 50, weight: .bold))
-                .foregroundColor(.primary)
-            
+            amountDisplay
             Spacer()
-            
             // Custom keypad
             NumPad(columns: columns, handleKeyPress: handleKeyPress, handleDelete: handleDelete)
-            
             // Continue button
             Button(action: {
-                // Add continue action here
+                if let parsedAmount = Float(amount) {
+                    print("Parsed amount: \(parsedAmount)")
+                    router.navigate(to: .newExpense(amount: parsedAmount))
+                } else {
+                    print("Invalid amount: \(amount)")
+                    // Handle invalid input (optional)
+                }
             }) {
                 Text("Continue")
                     .font(.headline)
@@ -63,14 +62,36 @@ struct NewExpenseView: View {
     
     // Handle button press logic
     private func handleKeyPress(_ key: String) {
-        if key == "." {
-            if !amount.contains(".") {
-                amount += "."
+        withAnimation(.easeOut(duration: 0.1)) {
+            if key == "." {
+                if !amount.contains(".") {
+                    amount += "."
+                }
+            } else if amount == "0" {
+                amount = key
+            } else {
+                // Check if there is already a decimal point in the amount
+                if let decimalIndex = amount.firstIndex(of: ".") {
+                    // Allow up to two digits after the decimal point
+                    let decimalPart = amount[amount.index(after: decimalIndex)...]
+                    if decimalPart.count < 2 {
+                        amount += key
+                    }
+                } else {
+                    // No decimal point yet, allow the number
+                    if amount == "0" {
+                        amount = key // Replace "0" if it's the first digit
+                    } else {
+                        amount += key
+                    }
+                }
             }
-        } else if amount == "0" {
-            amount = key // Replace leading 0
-        } else {
-            amount += key // Append key
+            // Trigger animation
+            isAnimating = true
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            isAnimating = false
         }
     }
 
@@ -81,6 +102,34 @@ struct NewExpenseView: View {
                 amount = "0" // Reset to 0 for empty or invalid state
             }
         }
+    }
+    
+    var amountDisplay: some View {
+        let lastDigit = amount.last.map(String.init) ?? ""
+        let remainingAmount = String(amount.dropLast())
+        
+        let maxWidth: CGFloat = UIScreen.main.bounds.width - 40 // Adjust for padding
+        let textWidth = CGFloat(amount.count) * 50 // Approximate width per character (tweak as needed)
+        let scale = min(1.0, maxWidth / textWidth) // Scale down if it exceeds maxWidth
+
+
+        return HStack(spacing: 0) {
+            Text("€\(remainingAmount)")
+                .font(.system(size: 50, weight: .bold))
+                .foregroundColor(.primary)
+                .contentTransition(.interpolate)
+
+            Text(lastDigit)
+                .font(.system(size: 50, weight: .bold))
+                .foregroundColor(.primary)
+                .contentTransition(.interpolate)
+                .scaleEffect(isAnimating ? 1.1 : 1.0) // Animate last digit
+                .animation(.easeOut(duration: 0.1), value: isAnimating)
+        }
+        .scaleEffect(scale)
+        .lineLimit(1)
+        .frame(maxWidth: .infinity, alignment: .center)
+        .padding(.horizontal, 16)
     }
 }
 
@@ -115,6 +164,6 @@ struct NumPad: View {
 }
 
 #Preview {
-    NewExpenseView()
+    AddAmountView()
         .environment(Router())
 }

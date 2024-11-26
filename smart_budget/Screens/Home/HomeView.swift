@@ -77,8 +77,8 @@ struct HomeView: View {
                             Text(categoriesStore.total_expenses, format: .currency(code: "EUR"))
                         }
                         .padding(.all, 5)
-                        .background(.green.opacity(0.2))
-                        .foregroundColor(Color(hex: "#207520"))
+                        .background(.successBackground)
+                        .foregroundColor(.successForeground)
                         .cornerRadius(10)
                     }
                 }
