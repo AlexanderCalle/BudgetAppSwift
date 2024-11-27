@@ -16,7 +16,7 @@ protocol APIServiceProtocol {
 
 class UrlComponent {
     var path: String
-    let baseUrl = "http://192.168.68.127:3000/api/"
+    let baseUrl = "https://budget-api-psi.vercel.app/api/"
     
     var url: URL {
         let urlString = baseUrl.appending(path)

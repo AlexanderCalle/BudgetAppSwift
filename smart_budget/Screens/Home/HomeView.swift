@@ -20,13 +20,11 @@ struct HomeView: View {
             } else {
                 TopBarView()
                 ScrollView {
-                    if case .success(let overview) = categoriesStore.expenseOverview {
-                        SevenDaysChartView(data: overview)
-                            .frame(height: 200)
-                    } else {
-                        ProgressView()
+                    if !categoriesStore.expenseOverview.isEmpty {
+                        SevenDaysChartView(categoriesStore.expenseOverview)
                             .frame(height: 200)
                     }
+                    
                     mainCategoryOverview
                     Divider()
                     VStack {
@@ -50,6 +48,8 @@ struct HomeView: View {
         }
         .padding()
         .onAppear {
+            categoriesStore.fetchCategories()
+            categoriesStore.fetchChartOverview()
             checkInternetConnection()
         }
     }
@@ -85,6 +85,9 @@ struct HomeView: View {
                 .padding(5)
             }
             .padding(.vertical, 10)
+            .onAppear {
+                categoriesStore.fetchMainCategory()
+            }
     }
     
     private func OfflineView(networkError: NetworkError?) -> some View {

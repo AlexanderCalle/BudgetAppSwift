@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct DayExpense: Identifiable, Codable {
+struct DayExpense: Identifiable, Codable, Equatable {
     var id: UUID = .init()
     
     var date: Date

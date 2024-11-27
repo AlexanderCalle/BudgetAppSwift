@@ -19,13 +19,25 @@ class HomeViewModel: ObservableObject {
             
         }
     }
+    
+    
+
     @Published var mainCategoryState: ViewState<Categorie> = .idle
-    @Published var expenseOverview: ViewState<[DayExpense]> = .idle
+    @Published var expenseOverview: [DayExpense]
     @Published var total_expenses: Float = 0.0 as Float
             
     let api: ApiService = ApiService()
     
     init() {
+        let today = Date()
+        let calendar = Calendar.current
+
+        let dayExpenses: [DayExpense] = (0...7).reversed().map { offset in
+            let date = calendar.date(byAdding: .day, value: -offset, to: today)!
+            return DayExpense(date: date, value: 0)
+        }
+
+        expenseOverview = dayExpenses
         fetchMainCategory()
         fetchCategories()
         fetchChartOverview()
@@ -78,21 +90,20 @@ class HomeViewModel: ObservableObject {
     
     func fetchChartOverview() {
         print("Getting overview...")
-        expenseOverview = .loading
         api.Get("expenses/overview") { [weak self] (result: Result<[DayExpense], Error>) in
             DispatchQueue.main.async {
                 
                 switch result {
                 case .success(let chartOverview):
                     print("Fetched chart overview: \(chartOverview)")
-                    self?.expenseOverview = .success(chartOverview)
+                    self?.expenseOverview = chartOverview
                 case .failure(let error):
-                    if let netwerkError = error as? NetworkError {
-                        self?.expenseOverview = .failure(netwerkError)
-                    }
-                    if let apiError = error as? ApiError {
-                        self?.expenseOverview = .failure(apiError)
-                    }
+//                    if let netwerkError = error as? NetworkError {
+//
+//                    }
+//                    if let apiError = error as? ApiError {
+//                        self?.expenseOverview = .failure(apiError)
+//                    }
                     print(error)
                 }
             }
