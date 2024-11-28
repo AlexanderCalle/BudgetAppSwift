@@ -2,23 +2,51 @@
 //  ContentView.swift
 //  smart_budget
 //
-//  Created by Alexander Callebaut on 06/10/2024.
+//  Created by Alexander Callebaut on 24/11/2024.
 //
 
 import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Smart budggeting Application")
+        TabView {
+            RouterView {
+                HomeView()
+            }
+                .tabItem { Image(systemName: "house") }
+                .background(Color.background)
+
+            RouterView {
+                ExpensesView()
+            }
+                .tabItem { Image(systemName: "banknote") }
+                .background(Color.background)
+
+            RouterView {
+                SettingsView()
+            }
+                .tabItem { Image(systemName: "gearshape") }
+                .background(Color.background)
+
         }
-        .padding()
+        .accentColor(.purple)
     }
 }
 
+
 #Preview {
     ContentView()
+        .registerPopups() { $0
+            .center {
+                $0.backgroundColor(.background)
+                  .cornerRadius(20)
+                  .popupHorizontalPadding(20)
+            }
+            .vertical {
+                $0.backgroundColor(.background)
+                  .cornerRadius(20)
+                  .enableStacking(true)
+                  .tapOutsideToDismissPopup(true)
+            }
+        }
 }

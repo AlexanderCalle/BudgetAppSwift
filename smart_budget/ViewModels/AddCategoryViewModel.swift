@@ -1,0 +1,62 @@
+//
+//  AddCategoryViewModel.swift
+//  smart_budget
+//
+//  Created by Alexander Callebaut on 28/11/2024.
+//
+
+import Foundation
+
+class AddCategoryViewModel: ObservableObject {
+    @Published var createdCatergoryState: ViewState<Bool> = .idle
+    @Published var validationErrors: [ValidationError] = []
+    
+    let api = ApiService()
+    
+    func addNewCategory(name: String, description: String, amount: Float?) {
+        print("Adding new category...")
+        createdCatergoryState = .loading
+        if validateForm(name: name, description: description, amount: amount) {
+            print("Validation failed.")
+            print(validationErrors)
+            return
+        }
+        
+        let newCategory = CreateCategorie(name: name, description: description, max_expense: amount!)
+        
+        api.Post("categories", body: newCategory) { [weak self] (result: Result<CreateCategorie, Error>) in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(_):
+                    print("Successfully added new category.")
+                    self?.createdCatergoryState = .success(true)
+                case .failure(let error):
+                    if let netwerkError = error as? NetworkError {
+                        self?.createdCatergoryState = .failure(netwerkError)
+                    }
+                    if let apiError = error as? ApiError {
+                        self?.createdCatergoryState = .failure(apiError)
+                    }
+                    print(error)
+                }
+            }
+        }
+        
+    }
+    
+    private func validateForm(name: String, description: String, amount: Float?) -> Bool {
+        validationErrors = []
+        if(name.isEmpty) {
+            validationErrors.append(ValidationError(key: "name", message: "Name is required"))
+        }
+        if let amount = amount {
+            if(amount < 0) {
+                validationErrors.append(ValidationError(key: "amount", message: "Amount must be positive"))
+            }
+        } else {
+            validationErrors.append(ValidationError(key: "amount", message: "Amount is required"))
+        }
+        
+        return validationErrors.count > 0
+    }
+}
