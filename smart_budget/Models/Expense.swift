@@ -23,3 +23,13 @@ enum ExpenseType: String, Codable, CaseIterable {
     case transfer = "TRANSFER"
     case cash = "CASH"
 }
+
+struct CreateExpense: Codable {
+    var name: String
+    var description: String?
+    var amount: Float
+    var date: Date
+    var type: ExpenseType
+    
+    var categoryId: String
+}

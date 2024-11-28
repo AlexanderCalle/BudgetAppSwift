@@ -93,13 +93,21 @@ struct AddExpenseView: View {
             Button(action: {
                 addExpenseViewModel.onSubmitExpense(
                     name: name, amount: amount, date: date, type: type, category: selectedCategory)
-            }) {
-                Text("Save Expense")
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.purple)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
+            }){
+                Group {
+                
+                    if case .loading = addExpenseViewModel.addExpenseState {
+                        ProgressView()
+                    } else {
+                        Text("Save Expense")
+                        
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(Color.purple)
+                .foregroundColor(.white)
+                .cornerRadius(10)
             }
             .padding(.top, 20)
         }

@@ -9,10 +9,12 @@ import SwiftUI
 
 struct CategoryListView: View {
     var categories: [Categorie]
+    var onAddCategory: () -> Void
     @State var isExpanded: Set<String> = []
     
-    init(categories: [Categorie]) {
+    init(_ categories: [Categorie], onAddCategory: @escaping () -> Void) {
         self.categories = categories
+        self.onAddCategory = onAddCategory
     }
     
     var body: some View {
@@ -28,7 +30,7 @@ struct CategoryListView: View {
                 Divider()
             }
             Button {
-               
+                onAddCategory()
             } label: {
                 Label("Add Category", systemImage: "plus")
                     .padding(.vertical, 3)
@@ -141,13 +143,15 @@ struct CategoryDisclosureGroup: View {
 }
 
 #Preview {
-    CategoryListView(categories: [
+    CategoryListView([
         Categorie(id: "1", name: "Food", max_expense: 100, color: "#d9ab2e", expenses: [
             Expense(id: "1", name: "Mc Donalds", amount: 10.5),
             Expense(id: "2", name: "Delhaize", amount: 23.34)
         ], totalExpenses: 10.5),
         Categorie(id: "2", name: "Transport", expenses: []),
         Categorie(id: "3", name: "Healthcare", expenses: []),
-    ]).padding()
+    ]){
+        
+    }.padding()
         .environment(Router())
 }

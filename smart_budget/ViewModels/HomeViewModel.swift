@@ -15,16 +15,24 @@ class HomeViewModel: ObservableObject {
         didSet {
             if case .success(let data) = categoriesState {
                 self.total_expenses = data.reduce(0.0 as Float) { $0 + ($1.totalExpenses ?? 0) }
+                self.total_budgetted = data.reduce(0.0 as Float) { $0 + ($1.max_expense ?? 0) }
+                self.total_percentage = (self.total_expenses / self.total_budgetted)
             }
             
         }
     }
     
-    
-
-    @Published var mainCategoryState: ViewState<Categorie> = .idle
     @Published var expenseOverview: [DayExpense]
     @Published var total_expenses: Float = 0.0 as Float
+    @Published var total_budgetted: Float = 0.0 as Float
+    @Published var total_percentage: Float = 0.0 as Float
+    @Published var validationErrors: [ValidationError] = []
+    
+    @Published var isCreatingCategorie: Bool = false
+    @Published var isSuccessfullyCreated: Bool = false
+    @Published var creatingError: Error?
+
+    
             
     let api: ApiService = ApiService()
     
@@ -38,31 +46,8 @@ class HomeViewModel: ObservableObject {
         }
 
         expenseOverview = dayExpenses
-        fetchMainCategory()
         fetchCategories()
         fetchChartOverview()
-    }
-    
-    func fetchMainCategory() {
-        print("Getting main category...")
-        mainCategoryState = .loading
-        let userId = "cm2ucugv70000tzkzql9986as"
-        api.Get("categories/user/\(userId)") { [weak self] (result: Result<Categorie, Error>) in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let mainCategory):
-                    self?.mainCategoryState = .success(mainCategory)
-                case .failure(let error):
-                    if let netwerkError = error as? NetworkError {
-                        self?.mainCategoryState = .failure(netwerkError)
-                    }
-                    if let apiError = error as? ApiError {
-                        self?.mainCategoryState = .failure(apiError)
-                    }
-                    print(error)
-                }
-            }
-        }
     }
 
     func fetchCategories() {
@@ -126,9 +111,24 @@ class HomeViewModel: ObservableObject {
     }
 }
 
-enum ViewState<T> {
+enum ViewState<T>: Equatable {
     case idle
     case loading
     case success(T)
     case failure(Error)
+    
+    static func == (lhs: ViewState<T>, rhs: ViewState<T>) -> Bool {
+        switch(lhs, rhs) {
+        case (.idle, .idle):
+            return true
+        case (.loading, .loading):
+            return true
+        case (.success(_), .success(_)):
+            return true
+        case (.failure, .failure):
+            return true
+        default:
+            return false
+        }
+    }
 }

@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Network
+import MijickPopups
 
 struct HomeView: View {
     @Environment(Router.self) var router: Router
@@ -30,7 +31,11 @@ struct HomeView: View {
                     VStack {
                         switch categoriesStore.categoriesState {
                         case .success(let data):
-                            CategoryListView(categories: data)
+                            CategoryListView(data) {
+                                Task { await AddCategoryPopup() {
+                                    categoriesStore.fetchCategories()
+                                }.present() }
+                            }
                         case .loading:
                             ProgressView()
                         case .failure(let error):
@@ -65,10 +70,8 @@ struct HomeView: View {
                     Spacer()
                     VStack(alignment: .trailing) {
                         Text("Budgeted")
-                        if  case .success(let main) = categoriesStore.mainCategoryState {
-                            Text(main.max_expense ?? 0.0, format: .currency(code: "EUR"))
-                                .padding(5)
-                        }
+                        Text(categoriesStore.total_budgetted, format: .currency(code: "EUR"))
+                            .padding(5)
                     }
                     Spacer()
                     VStack(alignment: .trailing) {
@@ -77,17 +80,15 @@ struct HomeView: View {
                             Text(categoriesStore.total_expenses, format: .currency(code: "EUR"))
                         }
                         .padding(.all, 5)
-                        .background(.successBackground)
-                        .foregroundColor(.successForeground)
+                        .foregroundColor(categoriesStore.total_percentage < 0.7 ? .successForeground : categoriesStore.total_percentage < 0.9 ? .warningForeground : .dangerForeground
+                        )
+                        .background(categoriesStore.total_percentage < 0.7 ? .successBackground : categoriesStore.total_percentage < 0.9 ? .warningBackground : .dangerBackground)
                         .cornerRadius(10)
                     }
                 }
                 .padding(5)
             }
             .padding(.vertical, 10)
-            .onAppear {
-                categoriesStore.fetchMainCategory()
-            }
     }
     
     private func OfflineView(networkError: NetworkError?) -> some View {
@@ -135,4 +136,17 @@ struct HomeView: View {
 #Preview {
     HomeView()
         .environment(Router())
+        .registerPopups() { $0
+            .center {
+                $0.backgroundColor(.background)
+                  .cornerRadius(20)
+                  .popupHorizontalPadding(20)
+            }
+            .vertical {
+                $0.backgroundColor(.background)
+                  .cornerRadius(20)
+                  .enableStacking(true)
+                  .tapOutsideToDismissPopup(true)
+            }
+        }
 }

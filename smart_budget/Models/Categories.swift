@@ -34,3 +34,9 @@ struct Categorie: Codable, Identifiable, Equatable, Hashable {
         self.totalExpenses = totalExpenses
     }
 }
+
+struct CreateCategorie: Codable {
+    let name: String
+    let description: String?
+    let max_expense: Float
+}
