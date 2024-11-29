@@ -150,6 +150,9 @@ struct ExpensesView: View {
             Text("\(expense.amount, specifier: "%.2f") €")
                 .font(.headline)
         }
+        .onTapGesture {
+            Task { await ExpenseDetailPopup(expense: expense).present() }
+        }
         .padding(.vertical, 8)
         .padding(.horizontal, 10)
     }
