@@ -10,6 +10,9 @@ import MijickPopups
 
 struct ExpenseDetailPopup: BottomPopup {
     let expense: Expense
+    
+    
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             HStack {
