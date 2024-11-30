@@ -147,7 +147,7 @@ class ExpensesViewModel: ObservableObject {
     }
     
     private func validate(name: String, amount: Float, date: Date, type: ExpenseType, category: Categorie) -> CreateExpense? {
-        
+        validationErrors.removeAll()
         if name.isEmpty {
             validationErrors.append(ValidationError(key: "name", message: "Name is required"))
         }

@@ -21,30 +21,80 @@ struct AddExpenseView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            if !addExpenseViewModel.errors.isEmpty {
-                VStack(alignment: .leading, spacing: 10) {
-                    ForEach(addExpenseViewModel.errors, id: \.self) { error in
-                        Text(error)
-                            .foregroundColor(.dangerBackground)
-                    }
-                }
-            }
-            Divider()
-            HStack(alignment: .center, spacing: 50){
-                VStack(alignment: .leading, spacing: 30){
+//            if !addExpenseViewModel.validationErrors.isEmpty {
+//                VStack(alignment: .leading, spacing: 10) {
+//                    ForEach(addExpenseViewModel.errors, id: \.self) { error in
+//                        Text(error)
+//                            .foregroundColor(.dangerBackground)
+//                    }
+//                }
+//            }
+//            HStack(alignment: .center, spacing: 50){
+//                VStack(alignment: .leading, spacing: 30){
+//                    Text("For")
+//                    Text("Date")
+//                    Text("Type")
+//                }
+//                .font(.headline)
+//                VStack(alignment: .leading, spacing: 30){
+//                    TextField("Spend on?", text: $name)
+//                    Button{
+//                        Task { await DatePickerPopup(date: $date).present()}
+//                    } label: {
+//                        Label(date.formatted(date: .abbreviated, time: .omitted), systemImage: "calendar")
+//                    }
+//                    .foregroundColor(.primary)
+//                    if type != nil {
+//                        Button {
+//                            Task { await ExpenseTypeSelectionPopup(SetExpenseType: {
+//                                type = $0
+//                            }).present() }
+//                        } label: {
+//                            Text(type!.rawValue)
+//                        }
+//                        .foregroundColor(.primary)
+//                    } else {
+//                        Button {
+//                            Task { await ExpenseTypeSelectionPopup(SetExpenseType: {
+//                                type = $0
+//                            }).present() }
+//                        } label: {
+//                            Label("Type", systemImage: "creditcard.fill")
+//                        }
+//                        .foregroundColor(.primary)
+//                    }
+//                }
+//                
+//            }
+            Grid(alignment: .leading, horizontalSpacing: 50, verticalSpacing: 20) {
+                Divider()
+                GridRow {
                     Text("For")
-                    Text("Date")
-                    Text("Type")
+                        .font(.headline)
+                    TextField("amount spent on?", text: $name)
                 }
-                .font(.headline)
-                VStack(alignment: .leading, spacing: 30){
-                    TextField("Spend on?", text: $name)
+                if addExpenseViewModel.validationErrors.contains(where: { $0.key == "name" }) {
+                    Text(addExpenseViewModel.validationErrors.first(where: { $0.key == "name" })?.message ?? "")
+                        .foregroundColor(.danger)
+                }
+                Divider()
+                GridRow {
+                    Label("Date", systemImage: "calendar")
+                        .font(.headline)
                     Button{
                         Task { await DatePickerPopup(date: $date).present()}
                     } label: {
-                        Label(date.formatted(date: .abbreviated, time: .omitted), systemImage: "calendar")
+                        Text(date.formatted(date: .abbreviated, time: .omitted))
                     }
                     .foregroundColor(.primary)
+                }
+                if addExpenseViewModel.validationErrors.contains(where: { $0.key == "date" }) {
+                    Text(addExpenseViewModel.validationErrors.first(where: { $0.key == "date" })?.message ?? "")
+                        .foregroundColor(.danger)
+                }
+                Divider()
+                GridRow {
+                    Label("Type", systemImage: "creditcard.fill")
                     if type != nil {
                         Button {
                             Task { await ExpenseTypeSelectionPopup(SetExpenseType: {
@@ -60,18 +110,25 @@ struct AddExpenseView: View {
                                 type = $0
                             }).present() }
                         } label: {
-                            Label("Type", systemImage: "creditcard.fill")
+                            Text("Select expense type")
                         }
                         .foregroundColor(.primary)
                     }
                 }
-                
+                if addExpenseViewModel.validationErrors.contains(where: { $0.key == "type" }) {
+                    Text(addExpenseViewModel.validationErrors.first(where: { $0.key == "type" })?.message ?? "")
+                        .foregroundColor(.danger)
+                }
+                Divider()
             }
-            Divider()
             ScrollView() {
                 VStack(alignment: .leading) {
                     Text("Category?")
                         .font(.system(size: 20, weight: .medium))
+                    if addExpenseViewModel.validationErrors.contains(where: { $0.key == "category" }) {
+                        Text(addExpenseViewModel.validationErrors.first(where: { $0.key == "category" })!.message)
+                            .foregroundColor(.danger)
+                    }
                     switch addExpenseViewModel.categories {
                     case .loading:
                         ProgressView()
@@ -179,6 +236,7 @@ struct DatePickerPopup: BottomPopup {
             DatePicker("Select Date", selection: $date, displayedComponents: [.date])
                 .datePickerStyle(.graphical)
                 .tint(.purple)
+                .padding()
         }
         .padding(.vertical, 20)
         .padding(.leading, 24)
@@ -278,6 +336,7 @@ struct SelectionRow: View {
 #Preview {
     AddExpenseView(amount: 25.8)
         .background(Color.background)
+        .environment(Router())
         .registerPopups() { $0
             .center {
                 $0.backgroundColor(.background)
