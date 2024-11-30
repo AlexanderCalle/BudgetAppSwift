@@ -16,11 +16,17 @@ struct AddCategoryPopup: BottomPopup {
     @State private var description: String = ""
     @State private var amount: Float?
     
+    
     var body: some View {
         VStack(spacing: 20) {
             HStack {
                 Spacer()
-                Button(action: { Task { await dismissLastPopup() }}) { Image(systemName: "xmark").tint(.primary) }
+                Button(action: { Task { await dismissLastPopup() }}) { Image(systemName: "xmark")
+                        .padding(8)
+                        .background(.secondary.opacity(0.2))
+                        .cornerRadius(.infinity)
+                        .tint(.primary)
+                }
             }
             Text("Add new category")
                 .font(.system(size: 22, weight: .bold))

@@ -9,10 +9,10 @@ import SwiftUI
 import MijickPopups
 
 struct AddExpenseView: View {
-    @Environment(Router.self ) var router
+    @Environment(Router.self) var router
     let amount: Float
     
-    @ObservedObject var addExpenseViewModel = AddExpenseViewModel()
+    @StateObject var addExpenseViewModel = AddExpenseViewModel()
     
     @State private var name: String = ""
     @State private var date: Date = Date()
@@ -60,7 +60,7 @@ struct AddExpenseView: View {
                                 type = $0
                             }).present() }
                         } label: {
-                            Label("Type", systemImage: "banknote.fill")
+                            Label("Type", systemImage: "creditcard.fill")
                         }
                         .foregroundColor(.primary)
                     }
@@ -166,7 +166,14 @@ struct DatePickerPopup: BottomPopup {
         VStack(spacing: 20) {
             HStack {
                 Spacer()
-                Button(action: { Task { await dismissLastPopup() }}) { Image(systemName: "xmark").tint(.primary) }
+                Button(action: { Task { await dismissLastPopup() }})
+                {
+                    Image(systemName: "xmark")
+                        .padding(8)
+                        .background(.secondary.opacity(0.2))
+                        .cornerRadius(.infinity)
+                        .tint(.primary)
+                }
 
             }
             DatePicker("Select Date", selection: $date, displayedComponents: [.date])
@@ -183,11 +190,23 @@ struct ExpenseTypeSelectionPopup: BottomPopup {
     let SetExpenseType: (ExpenseType) -> Void
     @State var selectedType: ExpenseType = .card
     
+    func configurePopup(config: BottomPopupConfig) -> BottomPopupConfig {
+        config
+            .ignoreSafeArea(edges: .bottom)
+    }
+    
     var body: some View {
         VStack(spacing: 0) {
             HStack {
                 Spacer()
-                Button(action: { Task { await dismissLastPopup() }}) { Image(systemName: "xmark").tint(.primary) }
+                Button(action: { Task { await dismissLastPopup() }})
+                {
+                    Image(systemName: "xmark")
+                        .padding(8)
+                        .background(.secondary.opacity(0.2))
+                        .cornerRadius(.infinity)
+                        .tint(.primary)
+                }
             }
             Spacer()
             Text("Select Expense Type")

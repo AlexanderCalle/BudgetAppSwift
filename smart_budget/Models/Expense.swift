@@ -10,10 +10,9 @@ import Foundation
 struct Expense: Codable, Identifiable, Equatable, Hashable {
     var id: String
     var name: String
-    var description: String?
     var amount: Float
-    var date: Date?
-    var type: ExpenseType?
+    var date: Date
+    var type: ExpenseType
     
     var category: Categorie?
 }
@@ -26,10 +25,10 @@ enum ExpenseType: String, Codable, CaseIterable {
 
 struct CreateExpense: Codable {
     var name: String
-    var description: String?
     var amount: Float
     var date: Date
     var type: ExpenseType
     
     var categoryId: String
 }
+

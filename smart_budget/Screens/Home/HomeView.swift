@@ -52,6 +52,11 @@ struct HomeView: View {
             }
         }
         .padding()
+        .refreshable {
+            categoriesStore.fetchCategories()
+            categoriesStore.fetchChartOverview()
+            checkInternetConnection()
+        }
         .onAppear {
             categoriesStore.fetchCategories()
             categoriesStore.fetchChartOverview()

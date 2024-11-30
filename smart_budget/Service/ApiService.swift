@@ -16,7 +16,9 @@ protocol APIServiceProtocol {
 
 class UrlComponent {
     var path: String
-    let baseUrl = "https://budget-api-psi.vercel.app/api/"
+   // let baseUrl = "https://budget-api-psi.vercel.app/api/"
+    //let baseUrl = "http://localhost:3000/api/"
+    let baseUrl = "http://192.168.68.127:3000/api/"
     
     var url: URL {
         let urlString = baseUrl.appending(path)
@@ -193,7 +195,7 @@ struct ApiService: APIServiceProtocol {
         var request = URLRequest(url: url)
         request.httpMethod = "DELETE"
         
-        let task = URLSession.shared.dataTask(with: url) { data, response, error in
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
             guard error == nil else {
                 // Network error mapper for error handling
                 completion(GuardResponseError(error!))

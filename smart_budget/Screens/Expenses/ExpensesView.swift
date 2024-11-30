@@ -12,6 +12,7 @@ struct ExpensesView: View {
     var category: Categorie? = nil
     @StateObject var expensesViewModel = ExpensesViewModel()
     
+    
     var body: some View {
         VStack {
             HStack {
@@ -97,6 +98,10 @@ struct ExpensesView: View {
                 }
                 
             }
+            .refreshable {
+                expensesViewModel.fetchExpenses()
+                expensesViewModel.fetchCategories()
+            }
         }
         .padding()
         .onAppear {
@@ -135,31 +140,40 @@ struct ExpensesView: View {
         }
     }
     
+    func performRefresh() {
+        expensesViewModel.fetchExpenses()
+    }
+    
     private func ExpenseRow(expense: Expense) -> some View {
-        HStack {
-            Text(expense.name)
-            Spacer()
-            Group {
-                Text(expense.type?.rawValue ?? "")
+        Button {
+            expensesViewModel.SelectExpense(expense)
+            Task { await ExpenseDetailPopup(onRefresh: {
+                performRefresh()
+            }, expensesStore: expensesViewModel).present() }
+        } label: {
+            HStack {
+                Text(expense.name)
+                Spacer()
+                Group {
+                    Text(expense.type.rawValue)
+                }
+                .padding(.vertical, 3)
+                .padding(.horizontal, 5)
+                .background(Color.accentColor.opacity(0.2))
+                .cornerRadius(8)
+                Spacer()
+                Text("\(expense.amount, specifier: "%.2f") €")
+                    .font(.headline)
+                    
             }
-            .padding(.vertical, 3)
-            .padding(.horizontal, 5)
-            .background(Color.accentColor.opacity(0.2))
-            .cornerRadius(8)
-            Spacer()
-            Text("\(expense.amount, specifier: "%.2f") €")
-                .font(.headline)
+            .padding(.vertical, 8)
+            .padding(.horizontal, 10)
         }
-        .onTapGesture {
-            Task { await ExpenseDetailPopup(expense: expense).present() }
-        }
-        .padding(.vertical, 8)
-        .padding(.horizontal, 10)
+        .foregroundColor(.primary)
     }
 }
 
 #Preview {
-
     ExpensesView()
         .environment(Router())
         .background(Color.background)
