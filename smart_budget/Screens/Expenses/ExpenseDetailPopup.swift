@@ -35,7 +35,7 @@ struct ExpenseDetailPopup: BottomPopup {
             }
             HStack(alignment: .center){
                 Spacer()
-                Text(expensesStore.selectedExpense!.amount, format: .currency(code: "EUR"))
+                Text(-expensesStore.selectedExpense!.amount, format: .currency(code: "EUR"))
                     .font(.system(size: 50, weight: .medium))
                     .foregroundStyle(.danger)
                 Spacer()
@@ -245,30 +245,6 @@ struct EditExpensePopup: BottomPopup {
         .padding(.leading, 24)
         .padding(.trailing, 16)
         .accentColor(.purple)
-    }
-}
-
-
-struct LimitedCurrencyField: View {
-    @Binding private var amount: Float
-    let label: String
-    
-    init(_ label: String, amount: Binding<Float>) {
-        self.label = label
-        self._amount = amount
-    }
-
-    let currencyFormatter: NumberFormatter = {
-        let fmt = NumberFormatter()
-        fmt.numberStyle = .decimal
-        fmt.minimumFractionDigits = 2
-        fmt.maximumFractionDigits = 2
-        return fmt
-    }()
-
-    var body: some View {
-        TextField(label, value: $amount, formatter: currencyFormatter)
-            .keyboardType(.decimalPad)
     }
 }
 

@@ -33,18 +33,17 @@ struct CategoryListView: View {
                 onAddCategory()
             } label: {
                 Label("Add Category", systemImage: "plus")
-                    .padding(.vertical, 3)
-                    .padding(.horizontal, 20)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 15)
                     .tint(.gray)
+                    .cornerRadius(10)
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 10)
+                            .inset(by: 1)
+                            .strokeBorder(style: StrokeStyle(lineWidth: 1, dash: [4, 4]))
+                            .foregroundColor(.gray)
             }
             .tint(.gray)
-            .padding(.vertical, 10)
-            .cornerRadius(10)
-            .overlay {
-                RoundedRectangle(cornerRadius: 10)
-                    .inset(by: 1)
-                    .strokeBorder(style: StrokeStyle(lineWidth: 1, dash: [4, 4]))
-                    .foregroundColor(.gray)
             }
         }
     }
