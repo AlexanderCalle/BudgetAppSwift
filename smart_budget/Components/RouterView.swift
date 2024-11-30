@@ -9,17 +9,19 @@ import Foundation
 import SwiftUI
 
 struct RouterView<Content: View>: View {
-     var router: Router = Router()
+   
     // Our root view content
     private let content: Content
+    var router = Router()
     
     init(@ViewBuilder content: @escaping () -> Content) {
         self.content = content()
     }
     
     var body: some View {
-        @Bindable var router = router
-        NavigationStack(path: $router.path) {
+        
+        @Bindable var routerB = router
+        NavigationStack(path: $routerB.path) {
             ZStack {
                 Color.background
                     .ignoresSafeArea()
@@ -28,7 +30,6 @@ struct RouterView<Content: View>: View {
                         router.view(for: route)
                     }
                     .background(Color.background)
-                    .frame(width: .infinity, height: .infinity)
             }
         }
         .environment(router)

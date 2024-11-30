@@ -33,18 +33,17 @@ struct CategoryListView: View {
                 onAddCategory()
             } label: {
                 Label("Add Category", systemImage: "plus")
-                    .padding(.vertical, 3)
-                    .padding(.horizontal, 20)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 15)
                     .tint(.gray)
+                    .cornerRadius(10)
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 10)
+                            .inset(by: 1)
+                            .strokeBorder(style: StrokeStyle(lineWidth: 1, dash: [4, 4]))
+                            .foregroundColor(.gray)
             }
             .tint(.gray)
-            .padding(.vertical, 10)
-            .cornerRadius(10)
-            .overlay {
-                RoundedRectangle(cornerRadius: 10)
-                    .inset(by: 1)
-                    .strokeBorder(style: StrokeStyle(lineWidth: 1, dash: [4, 4]))
-                    .foregroundColor(.gray)
             }
         }
     }
@@ -145,8 +144,8 @@ struct CategoryDisclosureGroup: View {
 #Preview {
     CategoryListView([
         Categorie(id: "1", name: "Food", max_expense: 100, color: "#d9ab2e", expenses: [
-            Expense(id: "1", name: "Mc Donalds", amount: 10.5),
-            Expense(id: "2", name: "Delhaize", amount: 23.34)
+            Expense(id: "1", name: "Mc Donalds", amount: 10.5, date: Date(), type: .cash),
+            Expense(id: "2", name: "Delhaize", amount: 23.34, date: Date(), type: .card)
         ], totalExpenses: 10.5),
         Categorie(id: "2", name: "Transport", expenses: []),
         Categorie(id: "3", name: "Healthcare", expenses: []),

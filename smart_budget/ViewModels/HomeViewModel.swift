@@ -51,14 +51,12 @@ class HomeViewModel: ObservableObject {
     }
 
     func fetchCategories() {
-        print("Getting items...")
         categoriesState = .loading
         api.Get("categories?expenses=true") { [weak self] (result: Result<[Categorie], Error>) in
             DispatchQueue.main.async {
                 
                 switch result {
                 case .success(let categories):
-                    print("Fetched categories: \(categories.map { $0.totalPercentage })")
                     self?.categoriesState = .success(categories)
                 case .failure(let error):
                     if let netwerkError = error as? NetworkError {
@@ -74,13 +72,11 @@ class HomeViewModel: ObservableObject {
     }
     
     func fetchChartOverview() {
-        print("Getting overview...")
         api.Get("expenses/overview") { [weak self] (result: Result<[DayExpense], Error>) in
             DispatchQueue.main.async {
                 
                 switch result {
                 case .success(let chartOverview):
-                    print("Fetched chart overview: \(chartOverview)")
                     self?.expenseOverview = chartOverview
                 case .failure(let error):
 //                    if let netwerkError = error as? NetworkError {

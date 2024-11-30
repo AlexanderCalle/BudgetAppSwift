@@ -12,8 +12,9 @@ class AddExpenseViewModel: ObservableObject {
     @Environment(Router.self) var router: Router
     
     @Published var categories: ViewState<[Categorie]> = .idle
-    @Published var errors: [String] = []
+    
     @Published var addExpenseState: ViewState<Bool> = .idle
+    @Published var validationErrors: [ValidationError] = []
     
     @Published var shouldNavigate = false
     
@@ -44,18 +45,18 @@ class AddExpenseViewModel: ObservableObject {
     }
     
     func onSubmitExpense(name: String, amount: Float, date: Date, type: ExpenseType?, category: Categorie?) {
-        errors.removeAll()
+        validationErrors.removeAll()
         if name.isEmpty {
-            errors.append("Name is required")
+            validationErrors.append(ValidationError(key: "name", message: "Name is required"))
         }
         if type == nil {
-            errors.append("Type is required")
+            validationErrors.append(ValidationError(key: "type", message: "Type is required"))
         }
         if category == nil {
-            errors.append("Category is required")
+            validationErrors.append(ValidationError(key: "category", message: "Category is required"))
         }
         
-        if !errors.isEmpty {
+        if validationErrors.count > 0 {
             return
         }
         
@@ -69,12 +70,11 @@ class AddExpenseViewModel: ObservableObject {
             DispatchQueue.main.async {
                 switch result {
                 case .success(_):
-                    self?.errors.removeAll()
+                    self?.validationErrors.removeAll()
                     self?.objectWillChange.send()
                     self?.addExpenseState = .success(true)
                     self?.shouldNavigate = true
                 case .failure(let error):
-                    self?.errors.append(error.localizedDescription)
                     self?.addExpenseState = .failure(error)
                 }
             }

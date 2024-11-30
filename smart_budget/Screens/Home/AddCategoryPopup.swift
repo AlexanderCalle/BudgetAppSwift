@@ -14,13 +14,19 @@ struct AddCategoryPopup: BottomPopup {
     
     @State private var name: String = ""
     @State private var description: String = ""
-    @State private var amount: Float?
+    @State private var amount: Float = 0
+    
     
     var body: some View {
         VStack(spacing: 20) {
             HStack {
                 Spacer()
-                Button(action: { Task { await dismissLastPopup() }}) { Image(systemName: "xmark").tint(.primary) }
+                Button(action: { Task { await dismissLastPopup() }}) { Image(systemName: "xmark")
+                        .padding(8)
+                        .background(.secondary.opacity(0.2))
+                        .cornerRadius(.infinity)
+                        .tint(.primary)
+                }
             }
             Text("Add new category")
                 .font(.system(size: 22, weight: .bold))
@@ -50,16 +56,15 @@ struct AddCategoryPopup: BottomPopup {
                         .font(.headline)
                     HStack(spacing: 10) {
                         Text("€")
-                        TextField("Category budget", value: $amount, format: .currency(code: "EUR"))
-                            .keyboardType(.decimalPad)
-                        if(categorieStore.validationErrors.contains(where: { $0.key == "amount" })) {
-                            Text(categorieStore.validationErrors.first(where: { $0.key == "amount" })?.message ?? "")
-                                .foregroundColor(.dangerBackground)
-                        }
+                        LimitedCurrencyField("Max spending for this catergory?", amount: $amount)
                     }
                     .padding()
                     .background(Color.secondary.opacity(0.2))
                     .cornerRadius(10)
+                    if(categorieStore.validationErrors.contains(where: { $0.key == "amount" })) {
+                        Text(categorieStore.validationErrors.first(where: { $0.key == "amount" })?.message ?? "")
+                            .foregroundColor(.dangerBackground)
+                    }
                 }
             }
             

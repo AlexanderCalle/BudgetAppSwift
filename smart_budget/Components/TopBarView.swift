@@ -9,6 +9,7 @@ import SwiftUI
 
 struct TopBarView: View {
     @Environment(Router.self) var router
+    
     var body: some View {
         HStack {
             Text("Dashboard")

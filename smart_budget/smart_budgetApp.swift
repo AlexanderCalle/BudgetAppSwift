@@ -18,6 +18,7 @@ struct smart_budgetApp: App {
                         $0.backgroundColor(.background)
                           .cornerRadius(20)
                           .popupHorizontalPadding(20)
+                          .tapOutsideToDismissPopup(true)
                     }
                     .vertical {
                         $0.backgroundColor(.background)

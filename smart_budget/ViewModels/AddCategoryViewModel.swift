@@ -15,13 +15,13 @@ class AddCategoryViewModel: ObservableObject {
     
     func addNewCategory(name: String, description: String, amount: Float?) {
         print("Adding new category...")
-        createdCatergoryState = .loading
-        if validateForm(name: name, description: description, amount: amount) {
+        guard !validateForm(name: name, description: description, amount: amount) else {
             print("Validation failed.")
             print(validationErrors)
             return
         }
         
+        createdCatergoryState = .loading
         let newCategory = CreateCategorie(name: name, description: description, max_expense: amount!)
         
         api.Post("categories", body: newCategory) { [weak self] (result: Result<CreateCategorie, Error>) in
@@ -45,13 +45,23 @@ class AddCategoryViewModel: ObservableObject {
     }
     
     private func validateForm(name: String, description: String, amount: Float?) -> Bool {
-        validationErrors = []
+        validationErrors.removeAll()
         if(name.isEmpty) {
             validationErrors.append(ValidationError(key: "name", message: "Name is required"))
+        } else {
+            if name.count < 2 {
+                validationErrors.append(ValidationError(key: "name", message: "Name must be at least 2 characters"))
+            }
+            if name.count > 50 {
+                validationErrors.append(ValidationError(key: "name", message: "Name must be less than 50 characters"))
+            }
         }
         if let amount = amount {
             if(amount < 0) {
                 validationErrors.append(ValidationError(key: "amount", message: "Amount must be positive"))
+            }
+            if amount == 0 {
+                validationErrors.append(ValidationError(key: "amount", message: "Cannot be zero"))
             }
         } else {
             validationErrors.append(ValidationError(key: "amount", message: "Amount is required"))
