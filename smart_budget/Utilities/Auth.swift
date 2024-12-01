@@ -18,7 +18,6 @@ class Auth: ObservableObject {
     enum KeychainKey: String {
         case accessToken
         case refreshToken
-        case userId
     }
     
     static let shared = Auth()
@@ -44,14 +43,6 @@ class Auth: ObservableObject {
         loggedIn = true
     }
     
-    func getUserId() -> String? {
-        return keychain.get(KeychainKey.userId.rawValue)
-    }
-    
-    func setUserId(_ userId: String) {
-        keychain.set(userId, forKey: KeychainKey.userId.rawValue)
-    }
-    
     func hasAccesToken() -> Bool {
         return getCredentials().accessToken != nil
     }
@@ -65,8 +56,7 @@ class Auth: ObservableObject {
     }
     
     func logout() {
-        keychain.delete(KeychainKey.accessToken.rawValue)
-        keychain.delete(KeychainKey.accessToken.rawValue)
+        keychain.clear()
         
         loggedIn = false
     }

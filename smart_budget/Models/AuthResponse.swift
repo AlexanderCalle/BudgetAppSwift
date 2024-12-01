@@ -8,13 +8,7 @@
 import Foundation
 
 struct AuthResponse: Decodable {
-    let user: User
     let session: Session
-        
-    struct User: Decodable {
-        let id: String
-    }
-    
     struct Session: Decodable {
         let accessToken: String
         let refreshToken: String

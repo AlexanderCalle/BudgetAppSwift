@@ -10,6 +10,7 @@ import Foundation
 class AuthenticationViewModel: ObservableObject {
     
     @Published var loginState: ViewState<Bool> = .idle
+    @Published var SignupState: ViewState<Bool> = .idle
     @Published var validationErrors: [ValidationError] = []
     
     func errors(forKey key: String) -> [ValidationError] {
@@ -20,13 +21,13 @@ class AuthenticationViewModel: ObservableObject {
     
     func login(email: String, password: String) {
         
-        guard validate(email: email, password: password) else { return }
+        guard validateLogin(email: email, password: password) else { return }
         
         print("Logging in...")
         loginState = .loading
         let signinUser: SigninUser = .init(email: email, password: password)
         
-        api.login("auth/signin", body: signinUser) { [weak self] (result: Result<Bool, Error>) in
+        api.auth("auth/signin", body: signinUser) { [weak self] (result: Result<Bool, Error>) in
             DispatchQueue.main.async {
                 switch result {
                 case .success(_):
@@ -40,10 +41,43 @@ class AuthenticationViewModel: ObservableObject {
         }
     }
     
-    private func validate(email: String, password: String) -> Bool {
+    func signup(email: String, password: String, firstname: String, lastname: String) {
+        guard validateSignup(email: email, password: password, firstname: firstname, lastname: lastname) else { return }
+        
+        SignupState = .loading
+        
+        let signupUser: CreateUser = .init(email: email, password: password, firstname: firstname, lastname: lastname)
+        
+        api.auth("auth/signup", body: signupUser) { [weak self] (result: Result<Bool, Error>) in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(_):
+                    self?.SignupState = .success(true)
+                case .failure(let error):
+                    self?.SignupState = .failure(error)
+                }
+            }
+        }
+    }
+    
+    private func validateSignup(email: String, password: String, firstname: String, lastname: String) -> Bool {
+        validateLogin(email: email, password: lastname)
+        
+        if firstname.isEmpty {
+            validationErrors.append(.init(key: "firstname", message: "First name is required"))
+        }
+        
+        if lastname.isEmpty {
+            validationErrors.append(.init(key: "lastname", message: "Last name is required"))
+        }
+        
+        return validationErrors.count == 0
+    }
+    
+    private func validateLogin(email: String, password: String) -> Bool {
         validationErrors.removeAll()
         if email.isEmpty {
-            validationErrors.append(.init(key: "emaiil", message: "Email is required"))
+            validationErrors.append(.init(key: "email", message: "Email is required"))
         }
         
         if !validateEmail(email) {

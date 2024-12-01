@@ -12,13 +12,13 @@ protocol APIServiceProtocol {
     func post<T: Codable>(_ path: String, body: T, completion: @escaping (Result<T, Error>) -> Void) async
     func put<T: Codable>(_ path: String, body: T, completion: @escaping (Result<T, Error>) -> Void) async
     func delete(_ path: String, completion: @escaping (Result<Bool, Error>) -> Void) async
-    func login<T: Codable>(_ path: String, body: T, completion: @escaping (Result<Bool, Error>) -> Void) async
+    func auth<T: Codable>(_ path: String, body: T, completion: @escaping (Result<Bool, Error>) -> Void) async
 }
 
 class UrlComponent {
     var path: String
-   // let baseUrl = "https://budget-api-psi.vercel.app/api/"
-    let baseUrl = "http://localhost:3000/api/"
+    let baseUrl = "https://budget-api-psi.vercel.app/api/"
+//    let baseUrl = "http://localhost:3000/api/"
 //    let baseUrl = "http://192.168.68.127:3000/api/"
     
     var url: URL {
@@ -97,35 +97,42 @@ struct ApiService: APIServiceProtocol {
         let url = UrlComponent(path: path).url
         var request = URLRequest(url: url)
         request.setAuthorizationHeader(with: Auth.shared.getAccessToken() ?? "")
-            
-        let task = sessionManager.dataTask(with: request) { data, response, error in
-    
-            guard error == nil else {
-                // Network error mapper for error handling
-                completion(GuardResponseError(error!))
-                return
-            }
-                   
-            if let response = response as? HTTPURLResponse {
-                if !(200...299).contains(response.statusCode) {
-                    // Http response code mapper for error handling
-                    completion(HttpErrorResponseMapper(response, data: data))
+        
+        
+        Task.init {
+            do {
+                let (data, response) = try await sessionManager.data(for: request)
+                
+                guard let httpResponse = response as? HTTPURLResponse else {
+                    completion(.failure(NetworkError.interalError))
+                    return
+                }
+                
+                if !(200...299).contains(httpResponse.statusCode) {
+                    if httpResponse.statusCode == 401 && Auth.shared.loggedIn {
+                        try await refreshToken()
+                        try await get(path, completion: completion)
+                    } else {
+                        completion(HttpErrorResponseMapper(httpResponse, data: data))
+                    }
                 } else {
                     do {
                         let decoder = JSONDecoder()
                         let formatter = DateFormatter.iso8601WithMilliseconds
                         decoder.dateDecodingStrategy = .formatted(formatter)
                         
-                        let response = try decoder.decode(T.self, from: data!)
+                        let response = try decoder.decode(T.self, from: data)
                         completion(.success(response))
                     } catch {
                         completion(.failure(error))
                     }
                 }
+                
+                
+            } catch {
+                completion(GuardResponseError(error))
             }
         }
-        
-        task.resume()
     }
     
     func post<T>(_ path: String, body: T, completion: @escaping (Result<T, any Error>) -> Void) where T : Codable {
@@ -141,25 +148,31 @@ struct ApiService: APIServiceProtocol {
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.addValue("application/json", forHTTPHeaderField: "Accept")
         
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-    
-            guard error == nil else {
-                // Network error mapper for error handling
-                completion(GuardResponseError(error!))
-                return
-            }
-                   
-            // TODO: Mapper for errors
-            if let response = response as? HTTPURLResponse {
-                if !(200...299).contains(response.statusCode) {
-                    completion(HttpErrorResponseMapper(response, data: data))
+        Task.init {
+            do{
+                let (data, response) = try await sessionManager.data(for: request)
+                
+                guard let httpResponse = response as? HTTPURLResponse else {
+                    completion(.failure(NetworkError.interalError))
+                    return
+                }
+                
+                if !(200...299).contains(httpResponse.statusCode) {
+                    if httpResponse.statusCode == 401 && Auth.shared.loggedIn {
+                        try await refreshToken()
+                        try await put(path, body: body, completion: completion)
+                    } else {
+                        completion(HttpErrorResponseMapper(httpResponse, data: data))
+                    }
                 } else {
                     completion(.success(body))
                 }
+                
+            } catch {
+                completion(GuardResponseError(error))
             }
+            
         }
-        
-        task.resume()
         
     }
     
@@ -175,25 +188,31 @@ struct ApiService: APIServiceProtocol {
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.addValue("application/json", forHTTPHeaderField: "Accept")
         
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-    
-            guard error == nil else {
-                // Network error mapper for error handling
-                completion(GuardResponseError(error!))
-                return
-            }
-                   
-            // TODO: Mapper for errors
-            if let response = response as? HTTPURLResponse {
-                if !(200...299).contains(response.statusCode) {
-                    completion(HttpErrorResponseMapper(response, data: data))
+        Task.init {
+            do{
+                let (data, response) = try await sessionManager.data(for: request)
+                
+                guard let httpResponse = response as? HTTPURLResponse else {
+                    completion(.failure(NetworkError.interalError))
+                    return
+                }
+                
+                if !(200...299).contains(httpResponse.statusCode) {
+                    if httpResponse.statusCode == 401 && Auth.shared.loggedIn {
+                        try await refreshToken()
+                        try await put(path, body: body, completion: completion)
+                    } else {
+                        completion(HttpErrorResponseMapper(httpResponse, data: data))
+                    }
                 } else {
                     completion(.success(body))
                 }
+                
+            } catch {
+                completion(GuardResponseError(error))
             }
+            
         }
-        
-        task.resume()
     }
     
     func delete(_ path: String, completion: @escaping (Result<Bool, any Error>) -> Void) {
@@ -202,26 +221,34 @@ struct ApiService: APIServiceProtocol {
         request.httpMethod = "DELETE"
         request.setAuthorizationHeader(with: Auth.shared.getAccessToken() ?? "")
         
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            guard error == nil else {
-                // Network error mapper for error handling
-                completion(GuardResponseError(error!))
-                return
-            }
-            
-            if let response = response as? HTTPURLResponse {
-                if !(200...299).contains(response.statusCode) {
-                    // Http response code mapper for error handling
-                    completion(HttpErrorResponseMapper(response, data: data))
+        Task.init {
+            do {
+                let (data, response) = try await sessionManager.data(for: request)
+                
+                guard let httpResponse = response as? HTTPURLResponse else {
+                    completion(.failure(NetworkError.interalError))
+                    return
+                }
+                
+                if !(200...299).contains(httpResponse.statusCode) {
+                    if httpResponse.statusCode == 401 && Auth.shared.loggedIn {
+                        try await refreshToken()
+                        try await delete(path, completion: completion)
+                    } else {
+                        completion(HttpErrorResponseMapper(httpResponse, data: data))
+                    }
                 } else {
                     completion(.success(true))
                 }
+            } catch {
+                completion(GuardResponseError(error))
             }
         }
-        task.resume()
     }
     
-    func login<T>(_ path: String, body: T, completion: @escaping (Result<Bool, any Error>) -> Void) where T : Codable {
+    // MARK: -- Authentication methods
+    
+    func auth<T>(_ path: String, body: T, completion: @escaping (Result<Bool, any Error>) -> Void) where T : Codable {
         let url = UrlComponent(path: path).url
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -245,9 +272,9 @@ struct ApiService: APIServiceProtocol {
                     do {
                         let authResponse = try JSONDecoder().decode(AuthResponse.self, from: data!)
                         Auth.shared.setCredentials(accesToken: authResponse.session.accessToken, refreshToken: authResponse.session.refreshToken)
-                        Auth.shared.setUserId(authResponse.user.id)
                         completion(.success(true))
                     } catch {
+                        print("decoder error: \(error)")
                         completion(.failure(error))
                     }
                 }
@@ -255,6 +282,26 @@ struct ApiService: APIServiceProtocol {
         }
         
         task.resume()
+    }
+    
+    // MARK: -- Refresh token --
+    
+    private func refreshToken() async throws {
+        Task.init {
+            let url = UrlComponent(path: "auth/refresh?refresh_token=\(Auth.shared.getRefreshToken() ?? "")").url
+            let (data, response) = try await URLSession.shared.data(from: url)
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                throw NetworkError.invalidURL
+            }
+            
+            if !(200...299).contains(httpResponse.statusCode) {
+                throw ApiError.unauthorized
+            }
+                
+            let decodedResponse = try JSONDecoder().decode(AuthResponse.self, from: data)
+            Auth.shared.setCredentials(accesToken: decodedResponse.session.accessToken, refreshToken: decodedResponse.session.refreshToken)
+        }
     }
 }
 

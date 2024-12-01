@@ -24,7 +24,7 @@ struct AuthenticateScreen: View {
             Spacer()
             
             Button {
-                
+                Task { await SignupPopup(authenticator: authenticator).present() }
             } label: {
                 Text("Create an account")
                     .font(.system(size: 20, weight: .bold))
@@ -128,7 +128,117 @@ struct LoginPopup: BottomPopup {
         }
         .padding()
     }
+}
+
+struct SignupPopup: BottomPopup {
+    @ObservedObject var authenticator: AuthenticationViewModel
     
+    @State var email: String = ""
+    @State var password: String = ""
+    @State var firstname: String = ""
+    @State var lastname: String = ""
+    
+    func configurePopup(config: BottomPopupConfig) -> BottomPopupConfig {
+        config
+            .heightMode(.large)
+    }
+    
+    var body: some View {
+        VStack {
+            XMarkButton {
+                Task { await dismissLastPopup() }
+            }
+            Spacer()
+            VStack(spacing: 20) {
+                Text("Login")
+                    .font(.title)
+                    .fontWeight(.bold)
+                    .padding(.bottom, 40)
+                
+                VStack(alignment: .leading) {
+                    Text("Email:")
+                    TextField("Email", text: $email)
+                        .textContentType(.emailAddress)
+                        .padding()
+                        .background(Color.secondary.opacity(0.2))
+                        .cornerRadius(10)
+                    if authenticator.errors(forKey: "email").isEmpty == false {
+                        ForEach(authenticator.validationErrors.filter { $0.key == "email" }, id: \.self) { validationError in
+                           Text(validationError.message)
+                               .foregroundStyle(.red)
+                       }
+                   }
+                }
+               
+                VStack(alignment: .leading) {
+                    Text("Password:")
+                    SecureField("Password", text: $password)
+                        .textContentType(.password)
+                        .padding()
+                        .background(Color.secondary.opacity(0.2))
+                        .cornerRadius(10)
+                    if authenticator.errors(forKey: "password").isEmpty == false {
+                        ForEach(authenticator.validationErrors.filter { $0.key == "password" }, id: \.self) { validationError in
+                           Text(validationError.message)
+                               .foregroundStyle(.red)
+                       }
+                   }
+                }
+                
+                VStack(alignment: .leading) {
+                    Text("Firstname:")
+                    TextField("Firstname", text: $firstname)
+                        .padding()
+                        .background(Color.secondary.opacity(0.2))
+                        .cornerRadius(10)
+                    if authenticator.errors(forKey: "firstname").isEmpty == false {
+                        ForEach(authenticator.validationErrors.filter { $0.key == "firstname" }, id: \.self) { validationError in
+                           Text(validationError.message)
+                               .foregroundStyle(.red)
+                       }
+                   }
+                }
+                
+                VStack(alignment: .leading) {
+                    Text("Lastname:")
+                    TextField("Lastname", text: $lastname)
+                        .padding()
+                        .background(Color.secondary.opacity(0.2))
+                        .cornerRadius(10)
+                    if authenticator.errors(forKey: "lastname").isEmpty == false {
+                        ForEach(authenticator.validationErrors.filter { $0.key == "lastname" }, id: \.self) { validationError in
+                           Text(validationError.message)
+                               .foregroundStyle(.red)
+                       }
+                   }
+                }
+                
+                Button{
+                    authenticator.signup(email: email, password: password, firstname: firstname, lastname: lastname)
+                } label: {
+                    if case .loading = authenticator.SignupState {
+                        ProgressView()
+                    } else {
+                        Text("Create account")
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.primary)
+                            .foregroundColor(.background)
+                            .cornerRadius(10)
+                    }
+                }
+            }
+            .onChange(of: authenticator.SignupState) { SignupState in
+                if case .success = SignupState {
+                    Task { await dismissLastPopup() }
+                }
+            }
+            .padding()
+            .cornerRadius(10)
+            Spacer()
+        }
+        .padding()
+    }
 }
 
 #Preview {
