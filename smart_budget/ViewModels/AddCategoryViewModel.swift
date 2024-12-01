@@ -24,7 +24,7 @@ class AddCategoryViewModel: ObservableObject {
         createdCatergoryState = .loading
         let newCategory = CreateCategorie(name: name, description: description, max_expense: amount!)
         
-        api.Post("categories", body: newCategory) { [weak self] (result: Result<CreateCategorie, Error>) in
+        api.post("categories", body: newCategory) { [weak self] (result: Result<CreateCategorie, Error>) in
             DispatchQueue.main.async {
                 switch result {
                 case .success(_):

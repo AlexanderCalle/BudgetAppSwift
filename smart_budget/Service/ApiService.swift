@@ -8,17 +8,18 @@
 import Foundation
 
 protocol APIServiceProtocol {
-    func Get<T: Codable>(_ path: String, completion: @escaping (Result<T, Error>) -> Void)
-    func Post<T: Codable>(_ path: String, body: T, completion: @escaping (Result<T, Error>) -> Void) async
-    func Put<T: Codable>(_ path: String, body: T, completion: @escaping (Result<T, Error>) -> Void) async
-    func Delete(_ path: String, completion: @escaping (Result<Bool, Error>) -> Void) async
+    func get<T: Codable>(_ path: String, completion: @escaping (Result<T, Error>) -> Void)
+    func post<T: Codable>(_ path: String, body: T, completion: @escaping (Result<T, Error>) -> Void) async
+    func put<T: Codable>(_ path: String, body: T, completion: @escaping (Result<T, Error>) -> Void) async
+    func delete(_ path: String, completion: @escaping (Result<Bool, Error>) -> Void) async
+    func login<T: Codable>(_ path: String, body: T, completion: @escaping (Result<Bool, Error>) -> Void) async
 }
 
 class UrlComponent {
     var path: String
    // let baseUrl = "https://budget-api-psi.vercel.app/api/"
-    //let baseUrl = "http://localhost:3000/api/"
-    let baseUrl = "http://192.168.68.127:3000/api/"
+    let baseUrl = "http://localhost:3000/api/"
+//    let baseUrl = "http://192.168.68.127:3000/api/"
     
     var url: URL {
         let urlString = baseUrl.appending(path)
@@ -92,10 +93,12 @@ struct ApiService: APIServiceProtocol {
         }
     }
     
-    func Get<T>(_ path: String, completion: @escaping (Result<T, any Error>) -> Void) where T : Codable {
+    func get<T>(_ path: String, completion: @escaping (Result<T, any Error>) -> Void) where T : Codable {
         let url = UrlComponent(path: path).url
+        var request = URLRequest(url: url)
+        request.setAuthorizationHeader(with: Auth.shared.getAccessToken() ?? "")
             
-        let task = URLSession.shared.dataTask(with: url) { data, response, error in
+        let task = sessionManager.dataTask(with: request) { data, response, error in
     
             guard error == nil else {
                 // Network error mapper for error handling
@@ -125,13 +128,15 @@ struct ApiService: APIServiceProtocol {
         task.resume()
     }
     
-    func Post<T>(_ path: String, body: T, completion: @escaping (Result<T, any Error>) -> Void) where T : Codable {
+    func post<T>(_ path: String, body: T, completion: @escaping (Result<T, any Error>) -> Void) where T : Codable {
         let url = UrlComponent(path: path).url
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
+        request.setAuthorizationHeader(with: Auth.shared.getAccessToken() ?? "")
+        
         request.httpBody = try? encoder.encode(body)
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.addValue("application/json", forHTTPHeaderField: "Accept")
@@ -158,13 +163,14 @@ struct ApiService: APIServiceProtocol {
         
     }
     
-    func Put<T>(_ path: String, body: T, completion: @escaping (Result<T, any Error>) -> Void) where T : Codable {
+    func put<T>(_ path: String, body: T, completion: @escaping (Result<T, any Error>) -> Void) where T : Codable {
         let url = UrlComponent(path: path).url
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
         
         var request = URLRequest(url: url)
         request.httpMethod = "PUT"
+        request.setAuthorizationHeader(with: Auth.shared.getAccessToken() ?? "")
         request.httpBody = try? encoder.encode(body)
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.addValue("application/json", forHTTPHeaderField: "Accept")
@@ -190,10 +196,11 @@ struct ApiService: APIServiceProtocol {
         task.resume()
     }
     
-    func Delete(_ path: String, completion: @escaping (Result<Bool, any Error>) -> Void) {
+    func delete(_ path: String, completion: @escaping (Result<Bool, any Error>) -> Void) {
         let url = UrlComponent(path: path).url
         var request = URLRequest(url: url)
         request.httpMethod = "DELETE"
+        request.setAuthorizationHeader(with: Auth.shared.getAccessToken() ?? "")
         
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             guard error == nil else {
@@ -213,6 +220,42 @@ struct ApiService: APIServiceProtocol {
         }
         task.resume()
     }
+    
+    func login<T>(_ path: String, body: T, completion: @escaping (Result<Bool, any Error>) -> Void) where T : Codable {
+        let url = UrlComponent(path: path).url
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        
+        request.httpBody = try? JSONEncoder().encode(body)
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.addValue("application/json", forHTTPHeaderField: "Accept")
+        
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+    
+            guard error == nil else {
+                // Network error mapper for error handling
+                completion(GuardResponseError(error!))
+                return
+            }
+                   
+            if let response = response as? HTTPURLResponse {
+                if !(200...299).contains(response.statusCode) {
+                    completion(HttpErrorResponseMapper(response, data: data))
+                } else {
+                    do {
+                        let authResponse = try JSONDecoder().decode(AuthResponse.self, from: data!)
+                        Auth.shared.setCredentials(accesToken: authResponse.session.accessToken, refreshToken: authResponse.session.refreshToken)
+                        Auth.shared.setUserId(authResponse.user.id)
+                        completion(.success(true))
+                    } catch {
+                        completion(.failure(error))
+                    }
+                }
+            }
+        }
+        
+        task.resume()
+    }
 }
 
 enum NetworkError: Error {
@@ -230,4 +273,11 @@ enum ApiError: Error {
     case unauthorized
     case internalError
     case unknown(Int?, String?)
+}
+
+
+extension URLRequest {
+    mutating func setAuthorizationHeader(with token: String) {
+        self.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+    }
 }

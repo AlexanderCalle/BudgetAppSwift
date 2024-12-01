@@ -20,18 +20,10 @@ struct ExpenseDetailPopup: BottomPopup {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 40) {
-            HStack {
-                Spacer()
-                Button(action: {
-                    Task { await dismissLastPopup() }
-                }) {
-                    Image(systemName: "xmark")
-                        .padding(8)
-                        .background(.secondary.opacity(0.2))
-                        .cornerRadius(.infinity)
+            XMarkButton {
+                Task {
+                    await dismissLastPopup()
                 }
-                .font(.headline)
-                .foregroundColor(.primary)
             }
             HStack(alignment: .center){
                 Spacer()

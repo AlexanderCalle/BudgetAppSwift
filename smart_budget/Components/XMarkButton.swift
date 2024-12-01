@@ -8,11 +8,31 @@
 import SwiftUI
 
 struct XMarkButton: View {
+    let action: () -> Void
+    
+    init(action: @escaping () -> Void) {
+        self.action = action
+    }
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        HStack {
+            Spacer()
+            Button(action: {
+                action()
+            }) {
+                Image(systemName: "xmark")
+                    .padding(8)
+                    .background(.secondary.opacity(0.2))
+                    .cornerRadius(.infinity)
+            }
+            .font(.headline)
+            .foregroundColor(.primary)
+        }
     }
 }
 
 #Preview {
-    XMarkButton()
+    XMarkButton {
+        
+    }
 }

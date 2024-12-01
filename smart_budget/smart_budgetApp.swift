@@ -12,7 +12,9 @@ import MijickPopups
 struct smart_budgetApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            RootScreen()
+                .environmentObject(Auth.shared)
+                .background(Color.background)
                 .registerPopups() { $0
                     .center {
                         $0.backgroundColor(.background)
