@@ -33,6 +33,7 @@ class AuthenticationViewModel: ObservableObject {
                 case .success(_):
                     self?.validationErrors.removeAll()
                     self?.loginState = .success(true)
+                    Auth.shared.isNewUser = false
                 case .failure(let error):
                     print("Login error: \(error.localizedDescription)")
                     self?.loginState = .failure(error)

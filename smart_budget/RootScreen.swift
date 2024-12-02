@@ -13,8 +13,13 @@ struct RootScreen: View {
     
     var body: some View {
         if auth.loggedIn {
-            ContentView()
-        } else {
+            if auth.isNewUser {
+                OnboardingScreen()
+            } else {
+                ContentView()
+            }
+        }
+        else {
             AuthenticateScreen()
         }
     }

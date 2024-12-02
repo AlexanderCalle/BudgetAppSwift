@@ -11,6 +11,9 @@ class AddCategoryViewModel: ObservableObject {
     @Published var createdCatergoryState: ViewState<Bool> = .idle
     @Published var validationErrors: [ValidationError] = []
     
+    @Published var categoriesState: ViewState<Bool> = .idle
+    @Published var canContinue: Bool = false
+    
     let api = ApiService()
     
     func addNewCategory(name: String, description: String, amount: Float?) {
@@ -42,6 +45,19 @@ class AddCategoryViewModel: ObservableObject {
             }
         }
         
+    }
+    
+    func addMultiCategories(categories: [Categorie]) {
+        canContinue = false
+        categoriesState = .loading
+        categories.forEach { addNewCategory(name: $0.name, description: $0.description ?? "", amount: $0.max_expense) }
+        
+        if validationErrors.count == 0 {
+            categoriesState = .success(true)
+            canContinue = true  
+        } else {
+            categoriesState = .failure(NetworkError.interalError)
+        }
     }
     
     private func validateForm(name: String, description: String, amount: Float?) -> Bool {

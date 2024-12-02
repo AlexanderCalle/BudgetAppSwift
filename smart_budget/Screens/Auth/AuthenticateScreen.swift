@@ -71,12 +71,15 @@ struct LoginPopup: BottomPopup {
                 Text("Login")
                     .font(.title)
                     .fontWeight(.bold)
+                    
+                Text("Welcom back!")
+                    .font(.title2)
                     .padding(.bottom, 40)
                 
                 VStack(alignment: .leading) {
                     Text("Email:")
                     TextField("Email", text: $email)
-                        .textContentType(.emailAddress)
+                        .keyboardType(.emailAddress)
                         .padding()
                         .background(Color.secondary.opacity(0.2))
                         .cornerRadius(10)
@@ -150,7 +153,7 @@ struct SignupPopup: BottomPopup {
             }
             Spacer()
             VStack(spacing: 20) {
-                Text("Login")
+                Text("Signup for Butgety")
                     .font(.title)
                     .fontWeight(.bold)
                     .padding(.bottom, 40)
@@ -158,7 +161,7 @@ struct SignupPopup: BottomPopup {
                 VStack(alignment: .leading) {
                     Text("Email:")
                     TextField("Email", text: $email)
-                        .textContentType(.emailAddress)
+                        .keyboardType(.emailAddress)
                         .padding()
                         .background(Color.secondary.opacity(0.2))
                         .cornerRadius(10)

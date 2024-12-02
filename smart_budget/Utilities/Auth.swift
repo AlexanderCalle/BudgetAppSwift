@@ -24,6 +24,7 @@ class Auth: ObservableObject {
     private let keychain = KeychainSwift()
     
     @Published var loggedIn: Bool = false
+    @Published var isNewUser: Bool = true
     
     private init() {
         loggedIn = hasAccesToken()
@@ -41,6 +42,10 @@ class Auth: ObservableObject {
         keychain.set(refreshToken, forKey: KeychainKey.refreshToken.rawValue)
         
         loggedIn = true
+    }
+    
+    func setNewUser(isNewUser: Bool) {
+        self.isNewUser = isNewUser
     }
     
     func hasAccesToken() -> Bool {
