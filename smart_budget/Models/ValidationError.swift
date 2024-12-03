@@ -7,7 +7,9 @@
 
 import Foundation
 
-struct ValidationError {
+struct ValidationError: Identifiable, Hashable {
+    let id = UUID()  // Conform to `Identifiable`
+
     let key: String
     let message: String
 }

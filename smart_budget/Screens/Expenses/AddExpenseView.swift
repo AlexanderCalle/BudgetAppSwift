@@ -188,6 +188,7 @@ struct AddExpenseView: View {
 struct CategorySelectionRow: View {
     let category: Categorie
     let isSelected: Bool
+    var remove: (() -> Void)? = nil
     let action: () -> Void
     
     var body: some View {
@@ -210,7 +211,13 @@ struct CategorySelectionRow: View {
         .background(isSelected ? Color.gray.opacity(0.2) : Color.clear)
         .cornerRadius(10)
         .onTapGesture {
-            action()
+            if isSelected {
+                if let remove {
+                    remove()
+                }
+            } else {
+                action()
+            }
         }
         .tint(.purple)
     }

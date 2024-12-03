@@ -57,7 +57,7 @@ class ExpensesViewModel: ObservableObject {
             urlString += "?category=\(selectedCategory!.id)"
         }
         
-        api.Get(urlString) { [weak self] (result: Result<[Expense], Error>) in
+        api.get(urlString) { [weak self] (result: Result<[Expense], Error>) in
             DispatchQueue.main.async {
                 switch result {
                 case .success(let expensesResult):
@@ -77,7 +77,7 @@ class ExpensesViewModel: ObservableObject {
     
     func fetchCategories() {
         categories = .loading
-        api.Get("categories") { [weak self] (result: Result<[Categorie], Error>) in
+        api.get("categories") { [weak self] (result: Result<[Categorie], Error>) in
             DispatchQueue.main.async {
                 switch result {
                 case .success(let categoriesResult):
@@ -98,7 +98,7 @@ class ExpensesViewModel: ObservableObject {
     func deleteExpense(_ expense: Expense) {
         deleteState = .loading
         print("deleting expense")
-        api.Delete("expenses/\(expense.id)") { [weak self] (result: Result<Bool, Error>) in
+        api.delete("expenses/\(expense.id)") { [weak self] (result: Result<Bool, Error>) in
             DispatchQueue.main.async {
                 switch result {
                 case .success:
@@ -126,7 +126,7 @@ class ExpensesViewModel: ObservableObject {
         print("Edit Expense")
         editState = .loading
         
-        api.Put("expenses/\(id)", body: expense) { [weak self] result in
+        api.put("expenses/\(id)", body: expense) { [weak self] result in
             DispatchQueue.main.async {
                 switch result {
                 case .success(let newExpense):

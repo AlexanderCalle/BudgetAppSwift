@@ -52,7 +52,7 @@ class HomeViewModel: ObservableObject {
 
     func fetchCategories() {
         categoriesState = .loading
-        api.Get("categories?expenses=true") { [weak self] (result: Result<[Categorie], Error>) in
+        api.get("categories?expenses=true") { [weak self] (result: Result<[Categorie], Error>) in
             DispatchQueue.main.async {
                 
                 switch result {
@@ -72,7 +72,7 @@ class HomeViewModel: ObservableObject {
     }
     
     func fetchChartOverview() {
-        api.Get("expenses/overview") { [weak self] (result: Result<[DayExpense], Error>) in
+        api.get("expenses/overview") { [weak self] (result: Result<[DayExpense], Error>) in
             DispatchQueue.main.async {
                 
                 switch result {

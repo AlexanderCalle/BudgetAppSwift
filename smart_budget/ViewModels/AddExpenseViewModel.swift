@@ -26,7 +26,7 @@ class AddExpenseViewModel: ObservableObject {
     
     func fetchCategories() {
         categories = .loading
-        api.Get("categories") { [weak self] (result: Result<[Categorie], Error>) in
+        api.get("categories") { [weak self] (result: Result<[Categorie], Error>) in
             DispatchQueue.main.async {
                 switch result {
                 case .success(let categoriesResult):
@@ -66,7 +66,7 @@ class AddExpenseViewModel: ObservableObject {
     
     func addExpense(_ expense: CreateExpense) {
         addExpenseState = .loading
-        api.Post("expenses", body: expense) { [weak self] (result: Result<CreateExpense, Error>) in
+        api.post("expenses", body: expense) { [weak self] (result: Result<CreateExpense, Error>) in
             DispatchQueue.main.async {
                 switch result {
                 case .success(_):
