@@ -25,9 +25,6 @@ struct CircularProgressView: View {
     
     var body: some View {
         ZStack {
-            Text(((100*progress).rounded(.up) / 100), format: .percent)
-                .font(.footnote)
-                
             Circle()
                 .stroke(Color.purple.opacity(0.2), lineWidth: 5)
             Circle()

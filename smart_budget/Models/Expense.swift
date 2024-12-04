@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Expense: Codable, Identifiable, Equatable, Hashable {
+struct Expense: Codable, Identifiable, Equatable, Hashable, Dated {
     var id: String
     var name: String
     var amount: Float

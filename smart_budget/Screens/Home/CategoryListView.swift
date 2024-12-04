@@ -83,7 +83,7 @@ struct CategoryDisclosureGroup: View {
                         .padding(.top, 5)
                 }
                 Button {
-                    router.navigate(to: .expenses(category: category))
+                    Task { await CategoryDetailPopup(category: category).present() }
                 } label: {
                     HStack{
                         Text("See more")
