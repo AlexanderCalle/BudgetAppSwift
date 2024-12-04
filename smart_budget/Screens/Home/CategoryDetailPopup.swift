@@ -73,7 +73,7 @@ struct CategoryDetailPopup: BottomPopup {
                 } else {
                     ScrollView {
                         LazyVStack(alignment: .leading, spacing: 0, pinnedViews: [.sectionHeaders]) {
-                            ForEach(category.expenses!.groupedBy(dateComponents: [.day, .month, .year]).sorted(by: { $0.key < $1.key }), id: \.key) {key, value in
+                            ForEach(category.expenses!.groupedBy(dateComponents: [.day, .month, .year]).sorted(by: { $0.key > $1.key }), id: \.key) {key, value in
                                 Section {
                                     ForEach(value) {expense in
                                         ExpenseRow(expense: expense)
