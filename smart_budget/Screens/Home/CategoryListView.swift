@@ -8,17 +8,13 @@
 import SwiftUI
 
 struct CategoryListView: View {
+    @StateObject var categoryStore: HomeViewModel
     var categories: [Categorie]
     var onAddCategory: () -> Void
     @State var isExpanded: Set<String> = []
     
-    init(_ categories: [Categorie], onAddCategory: @escaping () -> Void) {
-        self.categories = categories
-        self.onAddCategory = onAddCategory
-    }
-    
     var body: some View {
-        VStack {
+        VStack(spacing: 12) {
             HStack {
                 Text("Categories")
                     .font(.title)
@@ -27,7 +23,6 @@ struct CategoryListView: View {
             
             ForEach(categories) { category in
                 CategoryRow(category: category)
-                Divider()
             }
             Button {
                 onAddCategory()
@@ -42,115 +37,55 @@ struct CategoryListView: View {
                             .inset(by: 1)
                             .strokeBorder(style: StrokeStyle(lineWidth: 1, dash: [4, 4]))
                             .foregroundColor(.gray)
-            }
-            .tint(.gray)
+                    }
+                    .tint(.gray)
             }
         }
+        .padding(.top, 5)
     }
     
     private func CategoryRow(category: Categorie) -> some View {
-        VStack {
-            CategoryDisclosureGroup(category: category)
+        LazyVGrid(
+            columns: [
+                GridItem(.flexible(), alignment: .leading), // Icon and label column
+                GridItem(.fixed(80), alignment: .trailing), // Gray text column
+                GridItem(.fixed(80), alignment: .trailing)  // Green text column
+            ],
+            spacing: 16 // Row spacing
+        ) {
+            Text(category.name)
+                .font(.title3)
+            Text(category.max_expense ?? 0, format: .currency(code: "EUR"))
+            Text(category.totalExpenses ?? 0, format: .currency(code: "EUR"))
+                .padding(5)
+                .foregroundColor(category.totalPercentage < 0.7 ? .successForeground : category.totalPercentage < 0.9 ? .warningForeground : .dangerForeground
+                )
+                .background(category.totalPercentage < 0.7 ? .successBackground : category.totalPercentage < 0.9 ? .warningBackground : .dangerBackground)
+                .clipShape(.capsule)
         }
-        .padding(.vertical, 8)
-        .padding(.horizontal, 10)
-    }
-    
-    
-}
+        .padding(10)
+        .background(.secondary.opacity(0.1))
+        .cornerRadius(10)
+        .onTapGesture {
+            categoryStore.selectCategory(categery: category)
+            Task { await CategoryDetailPopup(categoryStore: categoryStore).present() }
+        }
 
-struct CategoryDisclosureGroup: View {
-    @Environment(Router.self) var router: Router
-    let category : Categorie
-    @State var isExpanded: Bool = false
-    
-    var body: some View {
-        DisclosureGroup(
-            isExpanded: $isExpanded
-        ){
-            HStack {
-                Text("Latest Expenses:")
-                    .font(.headline)
-                Spacer()
-            }
-            if(category.expenses?.isEmpty ?? true) {
-                Text("No expenses yet")
-                    .fontWeight(.light)
-                    .tint(.gray)
-            } else {
-                ForEach(category.expenses ?? []) { expense in
-                    ExpenseRow(expense: expense)
-                        .padding(.top, 5)
-                }
-                Button {
-                    Task { await CategoryDetailPopup(category: category).present() }
-                } label: {
-                    HStack{
-                        Text("See more")
-                            .fontWeight(.light)
-                            .foregroundColor(.gray)
-                            .padding(.horizontal, 2)
-                        Image(systemName: "arrow.right")
-                            .tint(.gray)
-                    }
-                }
-                .cornerRadius(5)
-            }
-            
-            
-        } label: {
-                HStack(
-                    alignment: .center
-                ){
-                    Text(category.name)
-                        .font(.title3)
-                    Spacer()
-                    Text(category.max_expense ?? 0, format: .currency(code: "EUR"))
-                    Spacer()
-                    Group {
-                        Text(category.totalExpenses ?? 0, format: .currency(code: "EUR"))
-                    }
-                    .padding(.all, 5)
-                    .foregroundColor(category.totalPercentage < 0.7 ? .successForeground : category.totalPercentage < 0.9 ? .warningForeground : .dangerForeground
-                    )
-                    .background(category.totalPercentage < 0.7 ? .successBackground : category.totalPercentage < 0.9 ? .warningBackground : .dangerBackground)
-                    .cornerRadius(10)
-                }
-                .onTapGesture {
-                    ExpandClicked()
-                }
-        }
-        .tint(Color.primary)
     }
     
-    private func ExpandClicked() {
-        withAnimation(.easeInOut(duration: 0.4)) {
-            isExpanded.toggle()
-        }
-    }
     
-    private func ExpenseRow(expense: Expense) -> some View {
-        HStack {
-            Text(expense.name)
-            Spacer()
-            Text("\(expense.amount, specifier: "%.2f") €")
-                .font(.headline)
-        }
-        .padding(.vertical, 8)
-        .padding(.horizontal, 10)
-    }
 }
-
-#Preview {
-    CategoryListView([
-        Categorie(id: "1", name: "Food", max_expense: 100, expenses: [
-            Expense(id: "1", name: "Mc Donalds", amount: 10.5, date: Date(), type: .cash),
-            Expense(id: "2", name: "Delhaize", amount: 23.34, date: Date(), type: .card)
-        ], totalExpenses: 10.5),
-        Categorie(id: "2", name: "Transport", expenses: []),
-        Categorie(id: "3", name: "Healthcare", expenses: []),
-    ]){
-        
-    }.padding()
-        .environment(Router())
-}
+//
+//#Preview {
+//    CategoryListView([
+//        Categorie(id: "1", name: "Food", max_expense: 100, expenses: [
+//            Expense(id: "1", name: "Mc Donalds", amount: 10.5, date: Date(), type: .cash),
+//            Expense(id: "2", name: "Delhaize", amount: 23.34, date: Date(), type: .card)
+//        ], totalExpenses: 10.5),
+//        Categorie(id: "2", name: "Transport", expenses: []),
+//        Categorie(id: "3", name: "Healthcare", expenses: []),
+//    ]){
+//        
+//    }.padding()
+//        .environment(Router())
+//}

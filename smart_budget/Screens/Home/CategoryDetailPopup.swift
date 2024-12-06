@@ -9,12 +9,31 @@ import SwiftUI
 import MijickPopups
 
 struct CategoryDetailPopup: BottomPopup {
-    let category: Categorie
+    @StateObject var categoryStore: HomeViewModel
     
     func configurePopup(config: BottomPopupConfig) -> BottomPopupConfig {
         config
             .heightMode(.large)
     }
+    
+    var body: some View {
+        VStack {
+            switch(categoryStore.selectedCategory){
+            case .loading, .idle:
+                ProgressView()
+            case .success(let category):
+                CategoryDetail(category: category)
+            case .failure(let error):
+                Text("Error occured")
+            }
+        }
+        .padding()
+        .tint(.purple)
+    }
+}
+
+struct CategoryDetail: View {
+    let category: Categorie
     
     var body: some View {
         VStack {
@@ -64,7 +83,7 @@ struct CategoryDetailPopup: BottomPopup {
                     VStack(spacing: 0) {
                         Text("🏜️")
                             .font(.system(size: 70))
-                            
+                        
                         Text("No expenses found")
                     }
                     .foregroundColor(.secondary)
@@ -94,8 +113,6 @@ struct CategoryDetailPopup: BottomPopup {
                 }
             }
         }
-        .padding()
-        .tint(.purple)
     }
     
     private func ExpenseRow(expense: Expense) -> some View {
@@ -115,7 +132,8 @@ struct CategoryDetailPopup: BottomPopup {
     }
 }
 
+
 #Preview {
-    CategoryDetailPopup(category: Categorie(id: "1", name: "Shopping", description: "Category for all shopping expenses", max_expense: 150, expenses: [Expense(id: "1", name: "Hoodie", amount: 39.99, date: Date.now, type: .card)], totalExpenses: 39.99))
+    CategoryDetail(category: Categorie(id: "1", name: "Shopping", description: "Category for all shopping expenses", max_expense: 150, expenses: [Expense(id: "1", name: "Hoodie", amount: 39.99, date: Date.now, type: .card)], totalExpenses: 39.99))
         .background(Color.background)
 }

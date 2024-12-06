@@ -27,15 +27,16 @@ struct HomeView: View {
                     }
                     
                     mainCategoryOverview
-                    Divider()
                     VStack {
                         switch categoriesStore.categoriesState {
                         case .success(let data):
-                            CategoryListView(data) {
-                                Task { await AddCategoryPopup() {
-                                    categoriesStore.fetchCategories()
-                                }.present() }
-                            }
+                            CategoryListView(
+                                categoryStore: categoriesStore, categories: data, onAddCategory: {
+                                    Task { await AddCategoryPopup() {
+                                        categoriesStore.fetchCategories()
+                                    }.present() }
+                                }
+                            )
                         case .loading:
                             ProgressView()
                         case .failure(let error):
@@ -65,35 +66,32 @@ struct HomeView: View {
     }
     
     var mainCategoryOverview: some View {
-            VStack {
-                HStack(alignment: .top) {
-                    VStack(alignment: .leading) {
-                        Text("Monthly")
-                        Text("\(categoriesStore.daysLeftInCurrentMonth()) Days left")
-                            .padding(5)
-                    }
-                    Spacer()
-                    VStack(alignment: .trailing) {
-                        Text("Budgeted")
-                        Text(categoriesStore.total_budgetted, format: .currency(code: "EUR"))
-                            .padding(5)
-                    }
-                    Spacer()
-                    VStack(alignment: .trailing) {
-                        Text("Spent")
-                        Group {
-                            Text(categoriesStore.total_expenses, format: .currency(code: "EUR"))
-                        }
-                        .padding(.all, 5)
-                        .foregroundColor(categoriesStore.total_percentage < 0.7 ? .successForeground : categoriesStore.total_percentage < 0.9 ? .warningForeground : .dangerForeground
-                        )
-                        .background(categoriesStore.total_percentage < 0.7 ? .successBackground : categoriesStore.total_percentage < 0.9 ? .warningBackground : .dangerBackground)
-                        .cornerRadius(10)
-                    }
-                }
-                .padding(5)
+        VStack {
+            LazyVGrid(
+                columns: [
+                    GridItem(.flexible(), alignment: .leading),
+                    GridItem(.fixed(80), alignment: .trailing),
+                    GridItem(.fixed(80), alignment: .trailing)
+                ],
+                spacing: 5 // Row spacing
+            ) {
+                Text("Monthly")
+                Text("Budgeted")
+                Text("Spent")
+                Text("\(categoriesStore.daysLeftInCurrentMonth()) Days left")
+                Text(categoriesStore.total_budgetted, format: .currency(code: "EUR"))
+                Text(categoriesStore.total_expenses, format: .currency(code: "EUR"))
             }
-            .padding(.vertical, 10)
+            .padding(10)
+            .font(.subheadline)
+            .foregroundColor(.primary.opacity(0.7))
+            .overlay {
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(.secondary.opacity(0.1))
+                    .stroke(.secondary.opacity(0.2), lineWidth: 2)
+            }
+        }
+        .padding(.horizontal, 1)
     }
     
     private func OfflineView(networkError: NetworkError?) -> some View {

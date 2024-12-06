@@ -31,9 +31,9 @@ class HomeViewModel: ObservableObject {
     @Published var isCreatingCategorie: Bool = false
     @Published var isSuccessfullyCreated: Bool = false
     @Published var creatingError: Error?
-
     
-            
+    @Published var selectedCategory: ViewState<Categorie> = .idle
+
     let api: ApiService = ApiService()
     
     init() {
@@ -52,7 +52,7 @@ class HomeViewModel: ObservableObject {
 
     func fetchCategories() {
         categoriesState = .loading
-        api.get("categories?expenses=true") { [weak self] (result: Result<[Categorie], Error>) in
+        api.get("categories") { [weak self] (result: Result<[Categorie], Error>) in
             DispatchQueue.main.async {
                 
                 switch result {
@@ -64,6 +64,31 @@ class HomeViewModel: ObservableObject {
                     }
                     if let apiError = error as? ApiError {
                         self?.categoriesState = .failure(apiError)
+                    }
+                    print(error)
+                }
+            }
+        }
+    }
+    
+    func selectCategory(categery: Categorie) {
+        fetchCategory(id: categery.id)
+    }
+    
+    func fetchCategory(id: String) {
+        selectedCategory = .loading
+        api.get("categories/\(id)") { [weak self] (result: Result<Categorie, Error>) in
+            DispatchQueue.main.async {
+                
+                switch result {
+                case .success(let categories):
+                    self?.selectedCategory = .success(categories)
+                case .failure(let error):
+                    if let netwerkError = error as? NetworkError {
+                        self?.selectedCategory = .failure(netwerkError)
+                    }
+                    if let apiError = error as? ApiError {
+                        self?.selectedCategory = .failure(apiError)
                     }
                     print(error)
                 }

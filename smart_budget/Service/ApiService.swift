@@ -17,8 +17,8 @@ protocol APIServiceProtocol {
 
 class UrlComponent {
     var path: String
-    let baseUrl = "https://budget-api-psi.vercel.app/api/"
-//    let baseUrl = "http://localhost:3000/api/"
+//    let baseUrl = "https://budget-api-psi.vercel.app/api/"
+    let baseUrl = "http://localhost:3000/api/"
 //    let baseUrl = "http://192.168.68.127:3000/api/"
     
     var url: URL {
@@ -271,7 +271,7 @@ struct ApiService: APIServiceProtocol {
                 } else {
                     do {
                         let authResponse = try JSONDecoder().decode(AuthResponse.self, from: data!)
-                        Auth.shared.setCredentials(accesToken: authResponse.session.accessToken, refreshToken: authResponse.session.refreshToken)
+                        Auth.shared.setCredentials(accesToken: authResponse.session.accessToken, refreshToken: authResponse.session.refreshToken, isNewUser: path.contains("signup"))
                         completion(.success(true))
                     } catch {
                         print("decoder error: \(error)")
