@@ -81,9 +81,34 @@ struct ExpensesView: View {
             ScrollView {
                 switch expensesViewModel.expenses {
                 case .success(let expenses):
-                   ForEach(expenses) { expense in
-                        ExpenseRow(expense: expense)
-                       Divider()
+                    if expenses.count == 0 {
+                        Spacer()
+                            VStack(spacing: 0) {
+                                Text("🏜️")
+                                    .font(.system(size: 70))
+                                    
+                                Text("No expenses found")
+                            }
+                            .foregroundColor(.secondary)
+                        Spacer()
+                    } else {
+                        LazyVStack(alignment: .leading, spacing: 0, pinnedViews: [.sectionHeaders]) {
+                            ForEach(expenses.groupedBy(dateComponents: [.day, .month, .year]).sorted(by: { $0.key > $1.key }), id: \.key) {key, value in
+                                Section {
+                                    ForEach(value) {expense in
+                                        ExpenseRow(expense: expense)
+                                    }
+                                } header: {
+                                    HStack {
+                                        Text(key.formatted(date: .complete, time: .omitted))
+                                        Spacer()
+                                    }
+                                    .foregroundColor(.secondary)
+                                    .padding(5)
+                                    .background(Color.background)
+                                }
+                            }
+                        }
                     }
                 case .loading:
                     ProgressView()
