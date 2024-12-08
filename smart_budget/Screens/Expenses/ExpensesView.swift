@@ -34,16 +34,17 @@ struct ExpensesView: View {
                     HStack {
                         Text("All expenses")
                             .foregroundColor(
-                                expensesViewModel.selectedCategory == nil ? .white : .purple
+                                expensesViewModel.selectedCategory == nil ? .white : .secondary
                             )
-                            .font(.headline)
+                            .font(.system(size: 14, weight: .bold))
                             .padding(.vertical, 8)
                             .padding(.horizontal, 16)
                             .background(
                                 RoundedRectangle(cornerRadius: 10)
                                     .inset(by: 1)
-                                    .stroke(.purple, lineWidth: 1)
-                                    .fill(expensesViewModel.selectedCategory == nil ? .purple : .purple.opacity(0.2))
+                                    .stroke(
+                                        expensesViewModel.selectedCategory == nil ? .purple : .secondary, lineWidth: 1)
+                                    .fill(expensesViewModel.selectedCategory == nil ? .purple : .secondary.opacity(0.2))
                             )
                             .fixedSize(horizontal: true , vertical: false)
                             .onTapGesture {
@@ -55,17 +56,18 @@ struct ExpensesView: View {
                         ForEach(categories) { category in
                             Text(category.name)
                                 .foregroundColor(
-                                    expensesViewModel.selectedCategory?.id == category.id ? .white : .purple
+                                    expensesViewModel.selectedCategory?.id == category.id ? .white : .secondary
                                 )
-                                .font(.headline)
+                                .font(.system(size: 14, weight: .bold))
                                 .padding(.vertical, 8)
                                 .padding(.horizontal, 16)
                                 .background(
                                     RoundedRectangle(cornerRadius: 10)
                                         .inset(by: 1)
-                                        .stroke(.purple, lineWidth: 1)
+                                        .stroke(
+                                            expensesViewModel.selectedCategory?.id == category.id ? .purple : .secondary, lineWidth: 1)
                                         .fill(
-                                            expensesViewModel.selectedCategory?.id == category.id ? .purple : .purple.opacity(0.2)
+                                            expensesViewModel.selectedCategory?.id == category.id ? .purple : .secondary.opacity(0.2)
                                         )
                                 )
                                 .fixedSize(horizontal: true , vertical: false)
@@ -92,20 +94,26 @@ struct ExpensesView: View {
                             .foregroundColor(.secondary)
                         Spacer()
                     } else {
-                        LazyVStack(alignment: .leading, spacing: 0, pinnedViews: [.sectionHeaders]) {
+                        LazyVStack(alignment: .leading, pinnedViews: [.sectionHeaders]) {
                             ForEach(expenses.groupedBy(dateComponents: [.day, .month, .year]).sorted(by: { $0.key > $1.key }), id: \.key) {key, value in
                                 Section {
                                     ForEach(value) {expense in
                                         ExpenseRow(expense: expense)
+                                            .padding(.horizontal, 8)
+                                        if(value.last != expense) {
+                                            Divider()
+                                        }
                                     }
                                 } header: {
-                                    HStack {
-                                        Text(key.formatted(date: .complete, time: .omitted))
-                                        Spacer()
-                                    }
-                                    .foregroundColor(.secondary)
-                                    .padding(5)
-                                    .background(Color.background)
+                                    Text(key.formatted(date: .complete, time: .omitted))
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .padding( 8)
+                                        .foregroundColor(.secondary)
+                                        .background(.secondary.opacity(0.1))
+                                        .background(Color.background)
+                                        .font(.subheadline)
+                                        .cornerRadius(5)
+                                        
                                 }
                             }
                         }
@@ -176,23 +184,25 @@ struct ExpensesView: View {
                 performRefresh()
             }, expensesStore: expensesViewModel).present() }
         } label: {
-            HStack {
-                Text(expense.name)
-                Spacer()
-                Group {
-                    Text(expense.type.rawValue)
+            LazyVGrid(
+                columns: [
+                    GridItem(.flexible(), alignment: .leading), // Icon and label column
+                    GridItem(.fixed(80), alignment: .trailing)  // Green text column
+                ],
+                spacing: 16 // Row spacing
+            ) {
+                VStack(alignment: .leading) {
+                    Text(expense.name)
+                    Text(expense.category?.name ?? "")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
                 }
-                .padding(.vertical, 3)
-                .padding(.horizontal, 5)
-                .background(Color.accentColor.opacity(0.2))
-                .cornerRadius(8)
-                Spacer()
-                Text("\(expense.amount, specifier: "%.2f") €")
+              
+                Text(expense.amount, format: .currency(code: "EUR"))
                     .font(.headline)
-                    
+                    .foregroundColor(.secondary)
             }
             .padding(.vertical, 8)
-            .padding(.horizontal, 10)
         }
         .foregroundColor(.primary)
     }

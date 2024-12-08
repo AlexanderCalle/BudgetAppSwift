@@ -6,3 +6,14 @@
 //
 
 import Foundation
+
+struct AuthErrorResponse: Decodable {
+    let name: String
+    let status: Int
+    let code: AuthErrorCode
+}
+
+enum AuthErrorCode: String, Codable {
+    case userAlreadyExists = "user_already_exists"
+    case invalidCredentials = "invalid_credentials"
+}

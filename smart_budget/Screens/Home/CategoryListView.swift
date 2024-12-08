@@ -54,7 +54,7 @@ struct CategoryListView: View {
             spacing: 16 // Row spacing
         ) {
             Text(category.name)
-                .font(.title3)
+                .font(.headline)
             Text(category.max_expense ?? 0, format: .currency(code: "EUR"))
             Text(category.totalExpenses ?? 0, format: .currency(code: "EUR"))
                 .padding(5)
@@ -67,7 +67,7 @@ struct CategoryListView: View {
         .background(.secondary.opacity(0.1))
         .cornerRadius(10)
         .onTapGesture {
-            categoryStore.selectCategory(categery: category)
+            categoryStore.selectCategory(category: category)
             Task { await CategoryDetailPopup(categoryStore: categoryStore).present() }
         }
 

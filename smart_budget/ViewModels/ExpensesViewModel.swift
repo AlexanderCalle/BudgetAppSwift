@@ -137,7 +137,19 @@ class ExpensesViewModel: ObservableObject {
                     if let netwerkError = error as? NetworkError {
                         self?.editState = .failure(netwerkError)
                     } else if let apiError = error as? ApiError {
-                        self?.editState = .failure(apiError)
+                        if case .badRequest(let decodedMessage) = apiError {
+                            switch(decodedMessage) {
+                            case .detailed(let details, _, _):
+                                details.forEach { detail in
+                                    self?.validationErrors.append(ValidationError(key: detail.property, message: detail.message))
+                                }
+                                self?.editState = .failure(apiError)
+                            default:
+                                self?.editState = .failure(apiError)
+                            }
+                        } else {
+                            self?.editState = .failure(apiError)
+                        }
                     } else {
                         self?.editState = .failure(error)
                     }

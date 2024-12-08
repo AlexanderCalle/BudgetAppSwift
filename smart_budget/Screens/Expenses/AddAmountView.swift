@@ -25,7 +25,10 @@ struct AddAmountView: View {
                 }) {
                     Image(systemName: "xmark")
                         .font(.system(size: 20))
-                        .foregroundColor(.white)
+                        .padding(8)
+                        .background(.secondary.opacity(0.2))
+                        .foregroundColor(.primary)
+                        .clipShape(.circle)
                 }
                 .padding()
             }
