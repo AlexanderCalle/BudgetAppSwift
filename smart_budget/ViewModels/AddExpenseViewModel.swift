@@ -75,7 +75,23 @@ class AddExpenseViewModel: ObservableObject {
                     self?.addExpenseState = .success(true)
                     self?.shouldNavigate = true
                 case .failure(let error):
-                    self?.addExpenseState = .failure(error)
+                    if let apiError = error as? ApiError {
+                        if case .badRequest(let decodedMessage) = apiError {
+                            switch(decodedMessage) {
+                            case .detailed(let details, _, _):
+                                details.forEach { detail in
+                                    self?.validationErrors.append(ValidationError(key: detail.property, message: detail.message))
+                                }
+                                self?.addExpenseState = .failure(apiError)
+                            default:
+                                self?.addExpenseState = .failure(apiError)
+                            }
+                        } else {
+                            self?.addExpenseState = .failure(apiError)
+                        }
+                    } else {
+                        self?.addExpenseState = .failure(error)
+                    }
                 }
             }
         }

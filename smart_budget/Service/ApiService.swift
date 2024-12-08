@@ -36,10 +36,7 @@ class UrlComponent {
     }
 }
 
-private let sessionManager: URLSession = {
-    let urlSessionConfiguration: URLSessionConfiguration = URLSessionConfiguration.default
-    return URLSession(configuration: urlSessionConfiguration, delegate: nil, delegateQueue: nil)
-}()
+private let sessionManager = SessionManager()
 
 
 struct ApiService: APIServiceProtocol {
@@ -96,25 +93,21 @@ struct ApiService: APIServiceProtocol {
     func get<T>(_ path: String, completion: @escaping (Result<T, any Error>) -> Void) where T : Codable {
         let url = UrlComponent(path: path).url
         var request = URLRequest(url: url)
-        request.setAuthorizationHeader(with: Auth.shared.getAccessToken() ?? "")
-        
         
         Task.init {
             do {
-                let (data, response) = try await sessionManager.data(for: request)
+                let (data, response) = try await sessionManager.request(with: request)
                 
                 guard let httpResponse = response as? HTTPURLResponse else {
-                    completion(.failure(NetworkError.interalError))
-                    return
+                    return completion(.failure(NetworkError.interalError))
+                }
+                
+                guard let data = data else {
+                    return completion(.failure(NetworkError.interalError))
                 }
                 
                 if !(200...299).contains(httpResponse.statusCode) {
-                    if httpResponse.statusCode == 401 && Auth.shared.loggedIn {
-                        try await refreshToken()
-                        try await get(path, completion: completion)
-                    } else {
-                        completion(HttpErrorResponseMapper(httpResponse, data: data))
-                    }
+                    completion(HttpErrorResponseMapper(httpResponse, data: data))
                 } else {
                     do {
                         let decoder = JSONDecoder()
@@ -127,8 +120,6 @@ struct ApiService: APIServiceProtocol {
                         completion(.failure(error))
                     }
                 }
-                
-                
             } catch {
                 completion(GuardResponseError(error))
             }
@@ -142,36 +133,28 @@ struct ApiService: APIServiceProtocol {
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
-        request.setAuthorizationHeader(with: Auth.shared.getAccessToken() ?? "")
         
         request.httpBody = try? encoder.encode(body)
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.addValue("application/json", forHTTPHeaderField: "Accept")
         
         Task.init {
-            do{
-                let (data, response) = try await sessionManager.data(for: request)
-                
+            do {
+                let (data, response) = try await sessionManager.request(with: request)
+                    
                 guard let httpResponse = response as? HTTPURLResponse else {
                     completion(.failure(NetworkError.interalError))
                     return
                 }
                 
                 if !(200...299).contains(httpResponse.statusCode) {
-                    if httpResponse.statusCode == 401 && Auth.shared.loggedIn {
-                        try await refreshToken()
-                        try await put(path, body: body, completion: completion)
-                    } else {
-                        completion(HttpErrorResponseMapper(httpResponse, data: data))
-                    }
+                    completion(HttpErrorResponseMapper(httpResponse, data: data))
                 } else {
                     completion(.success(body))
                 }
-                
             } catch {
                 completion(GuardResponseError(error))
             }
-            
         }
         
     }
@@ -183,14 +166,13 @@ struct ApiService: APIServiceProtocol {
         
         var request = URLRequest(url: url)
         request.httpMethod = "PUT"
-        request.setAuthorizationHeader(with: Auth.shared.getAccessToken() ?? "")
         request.httpBody = try? encoder.encode(body)
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.addValue("application/json", forHTTPHeaderField: "Accept")
         
         Task.init {
-            do{
-                let (data, response) = try await sessionManager.data(for: request)
+            do {
+                let (data, response) = try await sessionManager.request(with: request)
                 
                 guard let httpResponse = response as? HTTPURLResponse else {
                     completion(.failure(NetworkError.interalError))
@@ -198,20 +180,13 @@ struct ApiService: APIServiceProtocol {
                 }
                 
                 if !(200...299).contains(httpResponse.statusCode) {
-                    if httpResponse.statusCode == 401 && Auth.shared.loggedIn {
-                        try await refreshToken()
-                        try await put(path, body: body, completion: completion)
-                    } else {
-                        completion(HttpErrorResponseMapper(httpResponse, data: data))
-                    }
+                    completion(HttpErrorResponseMapper(httpResponse, data: data))
                 } else {
                     completion(.success(body))
                 }
-                
             } catch {
                 completion(GuardResponseError(error))
             }
-            
         }
     }
     
@@ -219,11 +194,10 @@ struct ApiService: APIServiceProtocol {
         let url = UrlComponent(path: path).url
         var request = URLRequest(url: url)
         request.httpMethod = "DELETE"
-        request.setAuthorizationHeader(with: Auth.shared.getAccessToken() ?? "")
         
         Task.init {
             do {
-                let (data, response) = try await sessionManager.data(for: request)
+                let (data, response) = try await sessionManager.request(with: request)
                 
                 guard let httpResponse = response as? HTTPURLResponse else {
                     completion(.failure(NetworkError.interalError))
@@ -231,12 +205,7 @@ struct ApiService: APIServiceProtocol {
                 }
                 
                 if !(200...299).contains(httpResponse.statusCode) {
-                    if httpResponse.statusCode == 401 && Auth.shared.loggedIn {
-                        try await refreshToken()
-                        try await delete(path, completion: completion)
-                    } else {
-                        completion(HttpErrorResponseMapper(httpResponse, data: data))
-                    }
+                    completion(HttpErrorResponseMapper(httpResponse, data: data))
                 } else {
                     completion(.success(true))
                 }
@@ -267,7 +236,24 @@ struct ApiService: APIServiceProtocol {
                    
             if let response = response as? HTTPURLResponse {
                 if !(200...299).contains(response.statusCode) {
-                    completion(HttpErrorResponseMapper(response, data: data))
+                    if (response.statusCode == 400) {
+                        do {
+                            let decoder = JSONDecoder()
+                            if let data = data {
+                                let decoderError = try decoder.decode(AuthErrorResponse.self, from: data)
+                                completion(.failure(ApiError.authError(decoderError)))
+                                print(ApiError.authError(decoderError))
+                            }
+                        } catch {
+                            completion(.failure(NetworkError.interalError))
+                            print(NetworkError.interalError)
+                        }
+                    } else {
+                        completion(HttpErrorResponseMapper(response, data: data))
+                        print(response)
+
+                    }
+                    print()
                 } else {
                     do {
                         let authResponse = try JSONDecoder().decode(AuthResponse.self, from: data!)
@@ -283,26 +269,6 @@ struct ApiService: APIServiceProtocol {
         
         task.resume()
     }
-    
-    // MARK: -- Refresh token --
-    
-    private func refreshToken() async throws {
-        Task.init {
-            let url = UrlComponent(path: "auth/refresh?refresh_token=\(Auth.shared.getRefreshToken() ?? "")").url
-            let (data, response) = try await URLSession.shared.data(from: url)
-            
-            guard let httpResponse = response as? HTTPURLResponse else {
-                throw NetworkError.invalidURL
-            }
-            
-            if !(200...299).contains(httpResponse.statusCode) {
-                throw ApiError.unauthorized
-            }
-                
-            let decodedResponse = try JSONDecoder().decode(AuthResponse.self, from: data)
-            Auth.shared.setCredentials(accesToken: decodedResponse.session.accessToken, refreshToken: decodedResponse.session.refreshToken)
-        }
-    }
 }
 
 enum NetworkError: Error {
@@ -316,6 +282,7 @@ enum NetworkError: Error {
 enum ApiError: Error {
     case notFound(DecodedMessage?)
     case badRequest(DecodedMessage?)
+    case authError(AuthErrorResponse?)
     case forbidden
     case unauthorized
     case internalError

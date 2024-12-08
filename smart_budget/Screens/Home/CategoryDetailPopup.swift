@@ -77,39 +77,41 @@ struct CategoryDetail: View {
                 }
             }
             Divider()
-            VStack(alignment: .leading) {
-                if category.expenses == nil || category.expenses?.count == 0 {
-                    Spacer()
-                    VStack(spacing: 0) {
-                        Text("🏜️")
-                            .font(.system(size: 70))
+            ScrollView {
+                VStack(alignment: .leading) {
+                    if category.expenses == nil || category.expenses?.count == 0 {
+                        Spacer()
+                        VStack(spacing: 0) {
+                            Text("🏜️")
+                                .font(.system(size: 70))
+                            
+                            Text("No expenses found")
+                        }
+                        .foregroundColor(.secondary)
                         
-                        Text("No expenses found")
-                    }
-                    .foregroundColor(.secondary)
-                    
-                    Spacer()
-                } else {
-                    ScrollView {
-                        LazyVStack(alignment: .leading, spacing: 0, pinnedViews: [.sectionHeaders]) {
-                            ForEach(category.expenses!.groupedBy(dateComponents: [.day, .month, .year]).sorted(by: { $0.key > $1.key }), id: \.key) {key, value in
-                                Section {
-                                    ForEach(value) {expense in
-                                        ExpenseRow(expense: expense)
+                        Spacer()
+                    } else {
+                        ScrollView {
+                            LazyVStack(alignment: .leading, spacing: 0, pinnedViews: [.sectionHeaders]) {
+                                ForEach(category.expenses!.groupedBy(dateComponents: [.day, .month, .year]).sorted(by: { $0.key > $1.key }), id: \.key) {key, value in
+                                    Section {
+                                        ForEach(value) {expense in
+                                            ExpenseRow(expense: expense)
+                                        }
+                                    } header: {
+                                        HStack {
+                                            Text(key.formatted(date: .complete, time: .omitted))
+                                            Spacer()
+                                        }
+                                        .foregroundColor(.secondary)
+                                        .padding(5)
+                                        .background(Color.background)
                                     }
-                                } header: {
-                                    HStack {
-                                        Text(key.formatted(date: .complete, time: .omitted))
-                                        Spacer()
-                                    }
-                                    .foregroundColor(.secondary)
-                                    .padding(5)
-                                    .background(Color.background)
                                 }
                             }
                         }
+                        .padding(5)
                     }
-                    .padding(5)
                 }
             }
         }

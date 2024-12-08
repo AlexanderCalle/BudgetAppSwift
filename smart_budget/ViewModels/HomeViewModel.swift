@@ -52,9 +52,8 @@ class HomeViewModel: ObservableObject {
 
     func fetchCategories() {
         categoriesState = .loading
-        api.get("categories") { [weak self] (result: Result<[Categorie], Error>) in
+        api.get("categories?expenses=true") { [weak self] (result: Result<[Categorie], Error>) in
             DispatchQueue.main.async {
-                
                 switch result {
                 case .success(let categories):
                     self?.categoriesState = .success(categories)
@@ -71,30 +70,10 @@ class HomeViewModel: ObservableObject {
         }
     }
     
-    func selectCategory(categery: Categorie) {
-        fetchCategory(id: categery.id)
+    func selectCategory(category: Categorie) {
+        self.selectedCategory = .success(category)
     }
     
-    func fetchCategory(id: String) {
-        selectedCategory = .loading
-        api.get("categories/\(id)") { [weak self] (result: Result<Categorie, Error>) in
-            DispatchQueue.main.async {
-                
-                switch result {
-                case .success(let categories):
-                    self?.selectedCategory = .success(categories)
-                case .failure(let error):
-                    if let netwerkError = error as? NetworkError {
-                        self?.selectedCategory = .failure(netwerkError)
-                    }
-                    if let apiError = error as? ApiError {
-                        self?.selectedCategory = .failure(apiError)
-                    }
-                    print(error)
-                }
-            }
-        }
-    }
     
     func fetchChartOverview() {
         api.get("expenses/overview") { [weak self] (result: Result<[DayExpense], Error>) in

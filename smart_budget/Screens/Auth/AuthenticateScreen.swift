@@ -76,10 +76,35 @@ struct LoginPopup: BottomPopup {
                     .font(.title2)
                     .padding(.bottom, 40)
                 
+                if case .failure(let error) = authenticator.loginState {
+                    HStack {
+                        Spacer()
+                        HStack {
+                            if let apiError = error as? ApiError {
+                                switch(apiError) {
+                                case .authError(let response):
+                                    if case .invalidCredentials = response?.code {
+                                        Text("Email or password is invalid!")
+                                    }
+                                case _:
+                                    Text("Something whent wrong")
+                                }
+                            }
+                        }
+                        .padding(.vertical, 8)
+                        Spacer()
+                    }
+                    .background(.dangerBackground)
+                    .foregroundColor(.dangerForeground)
+                    .cornerRadius(10)
+                }
+               
+                
                 VStack(alignment: .leading) {
                     Text("Email:")
                     TextField("Email", text: $email)
                         .keyboardType(.emailAddress)
+                        .textInputAutocapitalization(.never)
                         .padding()
                         .background(Color.secondary.opacity(0.2))
                         .cornerRadius(10)
@@ -95,6 +120,7 @@ struct LoginPopup: BottomPopup {
                     Text("Password:")
                     SecureField("Password", text: $password)
                         .textContentType(.password)
+                        .textInputAutocapitalization(.never)
                         .padding()
                         .background(Color.secondary.opacity(0.2))
                         .cornerRadius(10)
@@ -157,11 +183,36 @@ struct SignupPopup: BottomPopup {
                     .font(.title)
                     .fontWeight(.bold)
                     .padding(.bottom, 40)
+                if case .failure(let error) = authenticator.SignupState {
+                    HStack {
+                        Spacer()
+                        HStack {
+                            if let apiError = error as? ApiError {
+                                switch(apiError) {
+                                case .authError(let response):
+                                    if case .userAlreadyExists = response?.code {
+                                        Text("Email already exists")
+                                    }
+                                default:
+                                    Text("Something whent wrong")
+                                }
+                            } else {
+                                Text(error.localizedDescription)
+                            }
+                        }
+                        .padding(.vertical, 8)
+                        Spacer()
+                    }
+                    .background(.dangerBackground)
+                    .foregroundColor(.dangerForeground)
+                    .cornerRadius(10)
+                }
                 
                 VStack(alignment: .leading) {
                     Text("Email:")
                     TextField("Email", text: $email)
                         .keyboardType(.emailAddress)
+                        .textInputAutocapitalization(.never)
                         .padding()
                         .background(Color.secondary.opacity(0.2))
                         .cornerRadius(10)
@@ -177,6 +228,7 @@ struct SignupPopup: BottomPopup {
                     Text("Password:")
                     SecureField("Password", text: $password)
                         .textContentType(.password)
+                        .textInputAutocapitalization(.never)
                         .padding()
                         .background(Color.secondary.opacity(0.2))
                         .cornerRadius(10)

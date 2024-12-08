@@ -36,11 +36,22 @@ class AddCategoryViewModel: ObservableObject {
                 case .failure(let error):
                     if let netwerkError = error as? NetworkError {
                         self?.createdCatergoryState = .failure(netwerkError)
-                    }
+                    } 
                     if let apiError = error as? ApiError {
-                        self?.createdCatergoryState = .failure(apiError)
+                        if case .badRequest(let decodedMessage) = apiError {
+                            switch(decodedMessage) {
+                            case .detailed(let details, _, _):
+                                details.forEach { detail in
+                                    self?.validationErrors.append(ValidationError(key: detail.property, message: detail.message))
+                                }
+                                self?.createdCatergoryState = .failure(apiError)
+                            default:
+                                self?.createdCatergoryState = .failure(apiError)
+                            }
+                        } else {
+                            self?.createdCatergoryState = .failure(apiError)
+                        }
                     }
-                    print(error)
                 }
             }
         }

@@ -40,7 +40,7 @@ struct AddCategoryPopup: BottomPopup {
                         .cornerRadius(10)
                     if(categorieStore.validationErrors.contains(where: { $0.key == "name" })) {
                         Text(categorieStore.validationErrors.first(where: { $0.key == "name" })?.message ?? "")
-                            .foregroundColor(.dangerBackground)
+                            .foregroundColor(.danger)
                     }
                 }
                 VStack(alignment: .leading) {
@@ -63,7 +63,7 @@ struct AddCategoryPopup: BottomPopup {
                     .cornerRadius(10)
                     if(categorieStore.validationErrors.contains(where: { $0.key == "amount" })) {
                         Text(categorieStore.validationErrors.first(where: { $0.key == "amount" })?.message ?? "")
-                            .foregroundColor(.dangerBackground)
+                            .foregroundColor(.danger)
                     }
                 }
             }
