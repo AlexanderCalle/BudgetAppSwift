@@ -8,7 +8,7 @@
 import Foundation
 import SwiftUI
 
-class HomeViewModel: ObservableObject {
+class CategoryStore: ObservableObject {
     
     @Published var categoriesState: ViewState<[Categorie]> = .idle
     {

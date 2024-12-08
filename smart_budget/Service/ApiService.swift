@@ -93,6 +93,7 @@ struct ApiService: APIServiceProtocol {
     func get<T>(_ path: String, completion: @escaping (Result<T, any Error>) -> Void) where T : Codable {
         let url = UrlComponent(path: path).url
         var request = URLRequest(url: url)
+        request.cachePolicy = .useProtocolCachePolicy
         
         Task.init {
             do {

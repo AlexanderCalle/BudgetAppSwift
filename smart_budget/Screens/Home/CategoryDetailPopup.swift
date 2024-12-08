@@ -9,7 +9,7 @@ import SwiftUI
 import MijickPopups
 
 struct CategoryDetailPopup: BottomPopup {
-    @StateObject var categoryStore: HomeViewModel
+    @StateObject var categoryStore: CategoryStore
     
     func configurePopup(config: BottomPopupConfig) -> BottomPopupConfig {
         config

@@ -11,7 +11,7 @@ import MijickPopups
 
 struct HomeView: View {
     @Environment(Router.self) var router: Router
-    @StateObject var categoriesStore = HomeViewModel()
+    @StateObject var categoriesStore = CategoryStore()
     @State private var isConnected = true
     
     var body: some View {
