@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "1600"
+   LastUpgradeVersion = "1610"
    version = "1.7">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -50,16 +50,10 @@
             ReferencedContainer = "container:smart_budget.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
-      <CommandLineArguments>
-         <CommandLineArgument
-            argument = ""
-            isEnabled = "NO">
-         </CommandLineArgument>
-      </CommandLineArguments>
       <EnvironmentVariables>
          <EnvironmentVariable
             key = "API_URL"
-            value = "https://budget-api-psi.vercel.app/api/"
+            value = "http://localhost:3000/api/"
             isEnabled = "YES">
          </EnvironmentVariable>
       </EnvironmentVariables>
