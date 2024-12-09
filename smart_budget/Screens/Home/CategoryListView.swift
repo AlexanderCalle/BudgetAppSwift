@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct CategoryListView: View {
-    @StateObject var categoryStore: CategoryStore
+    @ObservedObject var categoryStore: CategoryStore
     var categories: [Categorie]
     var onAddCategory: () -> Void
     @State var isExpanded: Set<String> = []

@@ -37,7 +37,7 @@ struct Categorie: Codable, Identifiable, Equatable, Hashable {
     }
 }
 
-struct CreateCategorie: Codable {
+struct CreateEditCategorie: Codable {
     let name: String
     let description: String?
     let max_expense: Float

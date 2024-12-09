@@ -10,6 +10,7 @@ import SwiftUI
 
 class CategoryStore: ObservableObject {
     
+    // MARK: -- Home states
     @Published var categoriesState: ViewState<[Categorie]> = .idle
     {
         didSet {
@@ -21,18 +22,21 @@ class CategoryStore: ObservableObject {
             
         }
     }
-    
     @Published var expenseOverview: [DayExpense]
     @Published var total_expenses: Float = 0.0 as Float
     @Published var total_budgetted: Float = 0.0 as Float
     @Published var total_percentage: Float = 0.0 as Float
     @Published var validationErrors: [ValidationError] = []
     
+    // MARK: -- Add categories States
     @Published var isCreatingCategorie: Bool = false
     @Published var isSuccessfullyCreated: Bool = false
     @Published var creatingError: Error?
     
-    @Published var selectedCategory: ViewState<Categorie> = .idle
+    // MARK: -- edit/delete states
+    @Published var selectedCategory: Categorie? = nil
+    @Published var deleteCategoryState: ViewState<Bool> = .idle
+    @Published var editCategoryState: ViewState<Bool> = .idle
 
     let api: ApiService = ApiService()
     
@@ -71,9 +75,8 @@ class CategoryStore: ObservableObject {
     }
     
     func selectCategory(category: Categorie) {
-        self.selectedCategory = .success(category)
+        self.selectedCategory = category
     }
-    
     
     func fetchChartOverview() {
         api.get("expenses/overview") { [weak self] (result: Result<[DayExpense], Error>) in
@@ -95,6 +98,74 @@ class CategoryStore: ObservableObject {
         }
     }
     
+    func editCategory() {
+        guard validateForm(
+            name: selectedCategory?.name ?? "",
+            description: selectedCategory?.description ?? "",
+            amount: selectedCategory?.max_expense
+        ) else {
+            return
+        }
+        
+        editCategoryState = .loading
+    
+        let newCategory = CreateEditCategorie(name: selectedCategory!.name, description: selectedCategory!.description, max_expense: selectedCategory!.max_expense!)
+        
+        api.put("categories/\(selectedCategory?.id ?? "")", body: newCategory) { [weak self] result in
+            DispatchQueue.main.async {
+                switch(result) {
+                case .success(_):
+                    self?.editCategoryState = .success(true)
+                    self?.fetchCategories()
+                case .failure(let error):
+                    if let networkError = error as? NetworkError {
+                        self?.editCategoryState = .failure(networkError)
+                    }
+                    if let apiError = error as? ApiError {
+                        if case .badRequest(let decodedMessage) = apiError {
+                            switch(decodedMessage) {
+                            case .detailed(let details, _, _):
+                                details.forEach { detail in
+                                    self?.validationErrors.append(ValidationError(key: detail.property, message: detail.message))
+                                }
+                                self?.editCategoryState = .failure(apiError)
+                            default:
+                                self?.editCategoryState = .failure(apiError)
+                            }
+                        } else {
+                            self?.editCategoryState = .failure(apiError)
+                        }
+                    } else {
+                        self?.editCategoryState = .failure(error)
+                    }
+                }
+            }
+        }
+    }
+    
+    func deleteCategory(categoryId: String) {
+        deleteCategoryState = .loading
+        
+        api.delete("categories/\(categoryId)") { [weak self] result in
+            DispatchQueue.main.async {
+                switch(result) {
+                    case.success(_):
+                        self?.deleteCategoryState = .success(true)
+                        self?.fetchCategories()
+                    case .failure(let error):
+                        if let networkError = error as? NetworkError {
+                            self?.deleteCategoryState = .failure(networkError)
+                        }
+                        if let apiError = error as? ApiError {
+                            self?.deleteCategoryState = .failure(apiError)
+                        } else {
+                            self?.deleteCategoryState = .failure(error)
+                        }
+                }
+            }
+        }
+    }
+    
     func daysLeftInCurrentMonth() -> Int {
         let calendar = Calendar.current
         let today = Date()
@@ -108,6 +179,32 @@ class CategoryStore: ObservableObject {
         let daysLeft = totalDays - currentDay
         
         return daysLeft
+    }
+    
+    private func validateForm(name: String, description: String, amount: Float?) -> Bool {
+        validationErrors.removeAll()
+        if(name.isEmpty) {
+            validationErrors.append(ValidationError(key: "name", message: "Name is required"))
+        } else {
+            if name.count < 2 {
+                validationErrors.append(ValidationError(key: "name", message: "Name must be at least 2 characters"))
+            }
+            if name.count > 50 {
+                validationErrors.append(ValidationError(key: "name", message: "Name must be less than 50 characters"))
+            }
+        }
+        if let amount = amount {
+            if(amount < 0) {
+                validationErrors.append(ValidationError(key: "amount", message: "Amount must be positive"))
+            }
+            if amount == 0 {
+                validationErrors.append(ValidationError(key: "amount", message: "Cannot be zero"))
+            }
+        } else {
+            validationErrors.append(ValidationError(key: "amount", message: "Amount is required"))
+        }
+        
+        return validationErrors.count == 0
     }
 }
 
