@@ -144,8 +144,12 @@ class SessionManager: NSObject, URLSessionDelegate {
             requestLock.unlock()
         }
         
-        let url = UrlComponent(path: "auth/refresh?refresh_token=\(Auth.shared.getRefreshToken() ?? "")").url
-        if let request = try? URLRequest(url: url, method: .get) {
+        let url = UrlComponent(path: "auth/refresh").url
+        let refreshToken = RefreshTokenRequest(refresh_token: Auth.shared.getRefreshToken() ?? "")
+        let body = try? JSONEncoder().encode(refreshToken)
+        if var request = try? URLRequest(url: url, method: .post) {
+            request.httpBody = body
+            request.addValue("application/json", forHTTPHeaderField: "Content-Type")
             let (data, _) = session.synchronousData(with: request)
             if let data = data {
                 let decodedResponse = try? JSONDecoder().decode(AuthResponse.self, from: data)
@@ -160,6 +164,10 @@ class SessionManager: NSObject, URLSessionDelegate {
         }
         return false
     }
+}
+
+struct RefreshTokenRequest: Codable {
+    let refresh_token: String
 }
 
 extension URLSession {
