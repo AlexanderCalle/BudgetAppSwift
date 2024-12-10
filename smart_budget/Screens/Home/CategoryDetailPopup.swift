@@ -9,7 +9,7 @@ import SwiftUI
 import MijickPopups
 
 struct CategoryDetailPopup: BottomPopup {
-    @StateObject var categoryStore: HomeViewModel
+    @ObservedObject var categoryStore: CategoryStore
     
     func configurePopup(config: BottomPopupConfig) -> BottomPopupConfig {
         config
@@ -17,25 +17,7 @@ struct CategoryDetailPopup: BottomPopup {
     }
     
     var body: some View {
-        VStack {
-            switch(categoryStore.selectedCategory){
-            case .loading, .idle:
-                ProgressView()
-            case .success(let category):
-                CategoryDetail(category: category)
-            case .failure(let error):
-                Text("Error occured")
-            }
-        }
-        .padding()
-        .tint(.purple)
-    }
-}
-
-struct CategoryDetail: View {
-    let category: Categorie
-    
-    var body: some View {
+        let category = categoryStore.selectedCategory!
         VStack {
             VStack(spacing: 20) {
                 HStack (alignment: .top) {
@@ -48,7 +30,7 @@ struct CategoryDetail: View {
                     }
                     Spacer()
                     Button {
-                        print("Edit category")
+                        Task { await EditCategoryPopup(categoriesStore: categoryStore).present() }
                     } label: {
                         Image(systemName: "pencil")
                             .padding(8)
@@ -66,6 +48,7 @@ struct CategoryDetail: View {
                             .cornerRadius(.infinity)
                     }
                 }
+                .tint(.primary)
                 HStack {
                     CircularProgressView(value: category.totalExpenses ?? 0, max: category.max_expense ?? 0)
                         .frame(width: 30)
@@ -113,8 +96,11 @@ struct CategoryDetail: View {
                         .padding(5)
                     }
                 }
+                
             }
         }
+        .padding()
+        .tint(.purple)
     }
     
     private func ExpenseRow(expense: Expense) -> some View {
@@ -132,10 +118,4 @@ struct CategoryDetail: View {
         .padding(.vertical, 8)
         .padding(.horizontal, 10)
     }
-}
-
-
-#Preview {
-    CategoryDetail(category: Categorie(id: "1", name: "Shopping", description: "Category for all shopping expenses", max_expense: 150, expenses: [Expense(id: "1", name: "Hoodie", amount: 39.99, date: Date.now, type: .card)], totalExpenses: 39.99))
-        .background(Color.background)
 }

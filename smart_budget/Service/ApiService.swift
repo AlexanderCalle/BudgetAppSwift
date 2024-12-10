@@ -17,9 +17,8 @@ protocol APIServiceProtocol {
 
 class UrlComponent {
     var path: String
-//    let baseUrl = "https://budget-api-psi.vercel.app/api/"
-    let baseUrl = "http://localhost:3000/api/"
-//    let baseUrl = "http://192.168.68.127:3000/api/"
+    let baseUrl = ProcessInfo.processInfo.environment["API_URL"] ?? "http://localhost:3000/api/"
+    
     
     var url: URL {
         let urlString = baseUrl.appending(path)
@@ -93,7 +92,8 @@ struct ApiService: APIServiceProtocol {
     func get<T>(_ path: String, completion: @escaping (Result<T, any Error>) -> Void) where T : Codable {
         let url = UrlComponent(path: path).url
         var request = URLRequest(url: url)
-        
+        request.cachePolicy = .useProtocolCachePolicy
+
         Task.init {
             do {
                 let (data, response) = try await sessionManager.request(with: request)

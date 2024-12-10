@@ -11,7 +11,7 @@ import MijickPopups
 
 struct HomeView: View {
     @Environment(Router.self) var router: Router
-    @StateObject var categoriesStore = HomeViewModel()
+    @ObservedObject var categoriesStore = CategoryStore()
     @State private var isConnected = true
     
     var body: some View {
@@ -32,9 +32,11 @@ struct HomeView: View {
                         case .success(let data):
                             CategoryListView(
                                 categoryStore: categoriesStore, categories: data, onAddCategory: {
-                                    Task { await AddCategoryPopup() {
-                                        categoriesStore.fetchCategories()
-                                    }.present() }
+                                    Task {
+                                        await AddCategoryPopup() {
+                                            categoriesStore.fetchCategories()
+                                        }.present()
+                                    }
                                 }
                             )
                         case .loading:
@@ -58,7 +60,7 @@ struct HomeView: View {
             categoriesStore.fetchChartOverview()
             checkInternetConnection()
         }
-        .onAppear {
+        .task {
             categoriesStore.fetchCategories()
             categoriesStore.fetchChartOverview()
             checkInternetConnection()
