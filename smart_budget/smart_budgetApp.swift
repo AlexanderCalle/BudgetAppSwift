@@ -14,6 +14,7 @@ struct smart_budgetApp: App {
         WindowGroup {
             RootScreen()
                 .environmentObject(Auth.shared)
+                .fontDesign(.rounded)
                 .background(Color.background)
                 .registerPopups() { $0
                     .center {

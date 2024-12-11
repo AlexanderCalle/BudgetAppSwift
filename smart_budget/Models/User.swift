@@ -18,3 +18,14 @@ struct CreateUser: Codable {
     let firstname: String
     let lastname: String
 }
+
+struct User: Codable {
+    var email: String
+    var firstname: String
+    var lastname: String
+}
+
+struct ChangePassword: Codable {
+    let oldPassword: String
+    let password: String
+}

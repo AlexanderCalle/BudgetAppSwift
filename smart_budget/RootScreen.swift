@@ -27,6 +27,7 @@ struct RootScreen: View {
 
 #Preview {
     RootScreen()
+        .fontDesign(.rounded)
         .environmentObject(Auth.shared)
         .background(Color.background)
         .registerPopups() { $0
