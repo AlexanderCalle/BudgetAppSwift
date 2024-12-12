@@ -10,6 +10,7 @@ import MijickPopups
 
 struct AddExpenseView: View {
     @Environment(Router.self) var router
+    @Environment(Settings.self) var settings: Settings
     let amount: Float
     
     @StateObject var addExpenseViewModel = AddExpenseViewModel()
@@ -21,51 +22,6 @@ struct AddExpenseView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-//            if !addExpenseViewModel.validationErrors.isEmpty {
-//                VStack(alignment: .leading, spacing: 10) {
-//                    ForEach(addExpenseViewModel.errors, id: \.self) { error in
-//                        Text(error)
-//                            .foregroundColor(.dangerBackground)
-//                    }
-//                }
-//            }
-//            HStack(alignment: .center, spacing: 50){
-//                VStack(alignment: .leading, spacing: 30){
-//                    Text("For")
-//                    Text("Date")
-//                    Text("Type")
-//                }
-//                .font(.headline)
-//                VStack(alignment: .leading, spacing: 30){
-//                    TextField("Spend on?", text: $name)
-//                    Button{
-//                        Task { await DatePickerPopup(date: $date).present()}
-//                    } label: {
-//                        Label(date.formatted(date: .abbreviated, time: .omitted), systemImage: "calendar")
-//                    }
-//                    .foregroundColor(.primary)
-//                    if type != nil {
-//                        Button {
-//                            Task { await ExpenseTypeSelectionPopup(SetExpenseType: {
-//                                type = $0
-//                            }).present() }
-//                        } label: {
-//                            Text(type!.rawValue)
-//                        }
-//                        .foregroundColor(.primary)
-//                    } else {
-//                        Button {
-//                            Task { await ExpenseTypeSelectionPopup(SetExpenseType: {
-//                                type = $0
-//                            }).present() }
-//                        } label: {
-//                            Label("Type", systemImage: "creditcard.fill")
-//                        }
-//                        .foregroundColor(.primary)
-//                    }
-//                }
-//                
-//            }
             Grid(alignment: .leading, horizontalSpacing: 50, verticalSpacing: 20) {
                 Divider()
                 GridRow {
@@ -177,7 +133,7 @@ struct AddExpenseView: View {
         //.navigationBarTitle(amount.formatted(.currency(code: "EUR")))
         .toolbar {
             ToolbarItem(placement: .principal) {
-                Text(amount, format: .currency(code: "EUR"))
+                Text(amount, format: .defaultCurrency(code: settings.currency.rawValue))
                     .font(.headline)
             }
         }

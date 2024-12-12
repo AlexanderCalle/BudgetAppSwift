@@ -63,12 +63,13 @@ class CategoryStore: ObservableObject {
                     self?.categoriesState = .success(categories)
                 case .failure(let error):
                     if let netwerkError = error as? NetworkError {
+                        print(netwerkError.self)
                         self?.categoriesState = .failure(netwerkError)
                     }
                     if let apiError = error as? ApiError {
                         self?.categoriesState = .failure(apiError)
                     }
-                    print(error)
+                    print(error.localizedDescription)
                 }
             }
         }

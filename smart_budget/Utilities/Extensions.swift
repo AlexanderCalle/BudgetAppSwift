@@ -5,6 +5,7 @@
 //  Created by Alexander Callebaut on 21/11/2024.
 //
 
+import SwiftUI
 import Foundation
 import SwiftUICore
 import UIKit
@@ -84,6 +85,16 @@ extension Date {
         return calendar.date(from: dateComponents) ?? nil
     }
 }
+
+extension FormatStyle where Self == FloatingPointFormatStyle<Float>.Currency {
+    /// gives the narrow currency symbol
+    static func defaultCurrency(code: String) -> FloatingPointFormatStyle<Float>.Currency {
+            return .init(code: code)
+                .locale(Locale(identifier: "en_US"))
+                .presentation(.narrow) // Use "$", "€", etc., without extra text
+        }
+}
+    
 
 //extension Color {
 //    var primary: Color {

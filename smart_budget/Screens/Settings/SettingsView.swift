@@ -7,23 +7,24 @@
 
 import SwiftUI
 
+struct Constants {
+    static let inset: CGFloat = 8
+    static let spacing: CGFloat = 20
+    static let sectionSpacing: CGFloat = 10
+    static let cardInset: CGFloat = 18
+    static let cornerRadius: CGFloat = 10
+    
+    static let secondaryOpacity: CGFloat = 0.1
+    
+    struct FontSize {
+        static let largest: CGFloat = 34
+        static let normal: CGFloat = 18
+    }
+}
+
 struct SettingsView: View {
     @ObservedObject var profileViewModel =  ProfileViewModel()
-    
-    private struct Constants {
-        static let inset: CGFloat = 8
-        static let spacing: CGFloat = 20
-        static let sectionSpacing: CGFloat = 10
-        static let cardInset: CGFloat = 18
-        static let cornerRadius: CGFloat = 10
-        
-        static let secondaryOpacity: CGFloat = 0.1
-        
-        struct FontSize {
-            static let largest: CGFloat = 34
-            static let normal: CGFloat = 18
-        }
-    }
+    @Environment(Settings.self) private var settings: Settings
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -46,18 +47,7 @@ struct SettingsView: View {
                         }
                         
                         accountDetails(user: user)
-                        appSettings
-                        
-                        Button {
-                            Auth.shared.logout()
-                        } label: {
-                            Text("Logout")
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(Color.danger)
-                                .foregroundColor(.white)
-                                .cornerRadius(Constants.cornerRadius)
-                        }
+                        AppSettings(settings: settings)
                     }
                 }
             case .failure(let error):
@@ -73,6 +63,16 @@ struct SettingsView: View {
                     ProgressView()
                     Spacer()
                 }
+            }
+            Button {
+                Auth.shared.logout()
+            } label: {
+                Text("Logout")
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.danger)
+                    .foregroundColor(.white)
+                    .cornerRadius(Constants.cornerRadius)
             }
         }
         .padding()
@@ -130,24 +130,44 @@ struct SettingsView: View {
             }
         }
     }
+}
+
+struct AppSettings: View {
+    @Bindable var settings: Settings
     
-    private var appSettings: some View {
-        Section("App settings (comming soon...)") {
-            HStack {
+    var body: some View {
+        Section("App settings") {
+            Button {
+                Task { await ChangeCurrencyPopup(settings: settings, selectedType: settings.currency).present() }
+            } label: {
                 Text("Currency")
                     .font(.system(size: Constants.FontSize.normal ,weight: .bold))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.primary)
                 Spacer()
-                Text("EUR")
+                Text(settings.currency.rawValue)
                     .font(.system(size: Constants.FontSize.normal))
                     .foregroundColor(.secondary)
             }
             .padding(Constants.cardInset)
             .background(.secondary.opacity(Constants.secondaryOpacity))
             .cornerRadius(Constants.cornerRadius)
+            HStack {
+                Text("Dark mode")
+                    .font(.system(size: Constants.FontSize.normal ,weight: .bold))
+                Spacer()
+                Toggle(isOn: $settings.darKMode, label: {
+                    Text("Dark mode")
+                        .font(.system(size: Constants.FontSize.normal))
+                        .foregroundColor(.secondary)
+                })
+                .toggleStyle(.switch)
+                .labelsHidden()
+            }
+            .padding(Constants.cardInset)
+            .background(.secondary.opacity(Constants.secondaryOpacity))
+            .cornerRadius(Constants.cornerRadius)
         }
     }
-    
 }
 
 #Preview {
