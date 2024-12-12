@@ -17,7 +17,7 @@ protocol APIServiceProtocol {
 
 class UrlComponent {
     var path: String
-    let baseUrl = ProcessInfo.processInfo.environment["API_URL"] ?? "http://localhost:3000/api/"
+    let baseUrl = ProcessInfo.processInfo.environment["API_URL"] ?? "https://budget-api-psi.vercel.app/api/"
     
     
     var url: URL {

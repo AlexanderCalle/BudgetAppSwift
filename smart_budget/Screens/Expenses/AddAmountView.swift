@@ -9,6 +9,8 @@ import SwiftUI
 
 struct AddAmountView: View {
     @Environment(Router.self) var router: Router
+    @Environment(Settings.self) var settings: Settings
+    
     @State private var amount: String = "0" // Initial amount value
     @State private var isAnimating: Bool = false
     
@@ -117,7 +119,7 @@ struct AddAmountView: View {
 
 
         return HStack(spacing: 0) {
-            Text("€\(remainingAmount)")
+            Text("\(settings.currency.getSymbol())\(remainingAmount)")
                 .font(.system(size: 50, weight: .bold))
                 .foregroundColor(.primary)
                 .contentTransition(.interpolate)

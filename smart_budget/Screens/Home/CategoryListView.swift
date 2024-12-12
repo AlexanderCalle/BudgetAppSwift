@@ -9,6 +9,8 @@ import SwiftUI
 
 struct CategoryListView: View {
     @ObservedObject var categoryStore: CategoryStore
+    @Environment(Settings.self) var settings: Settings
+    
     var categories: [Categorie]
     var onAddCategory: () -> Void
     @State var isExpanded: Set<String> = []
@@ -55,8 +57,8 @@ struct CategoryListView: View {
         ) {
             Text(category.name)
                 .font(.headline)
-            Text(category.max_expense ?? 0, format: .currency(code: "EUR"))
-            Text(category.totalExpenses ?? 0, format: .currency(code: "EUR"))
+            Text(category.max_expense ?? 0, format: .defaultCurrency(code: settings.currency.rawValue))
+            Text(category.totalExpenses ?? 0, format: .defaultCurrency(code: settings.currency.rawValue))
                 .padding(5)
                 .foregroundColor(category.totalPercentage < 0.7 ? .successForeground : category.totalPercentage < 0.9 ? .warningForeground : .dangerForeground
                 )

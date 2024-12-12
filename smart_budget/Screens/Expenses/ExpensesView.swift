@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ExpensesView: View {
     @Environment(Router.self) var router: Router
+    @Environment(Settings.self) var settings: Settings
     var category: Categorie? = nil
     @StateObject var expensesViewModel = ExpensesViewModel()
     
@@ -198,7 +199,7 @@ struct ExpensesView: View {
                         .foregroundColor(.secondary)
                 }
               
-                Text(expense.amount, format: .currency(code: "EUR"))
+                Text(expense.amount, format: .defaultCurrency(code: settings.currency.rawValue))
                     .font(.headline)
                     .foregroundColor(.secondary)
             }

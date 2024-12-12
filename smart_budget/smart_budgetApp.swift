@@ -7,6 +7,7 @@
 
 import SwiftUI
 import MijickPopups
+import SwiftData
 
 @main
 struct smart_budgetApp: App {
@@ -14,21 +15,9 @@ struct smart_budgetApp: App {
         WindowGroup {
             RootScreen()
                 .environmentObject(Auth.shared)
+                .fontDesign(.rounded)
                 .background(Color.background)
-                .registerPopups() { $0
-                    .center {
-                        $0.backgroundColor(.background)
-                          .cornerRadius(20)
-                          .popupHorizontalPadding(20)
-                          .tapOutsideToDismissPopup(true)
-                    }
-                    .vertical {
-                        $0.backgroundColor(.background)
-                          .cornerRadius(20)
-                          .enableStacking(true)
-                          .tapOutsideToDismissPopup(true)
-                    }
-                }
         }
+        .modelContainer(for: Settings.self)
     }
 }

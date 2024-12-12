@@ -10,6 +10,7 @@ import MijickPopups
 
 struct CategoryDetailPopup: BottomPopup {
     @ObservedObject var categoryStore: CategoryStore
+    @Environment(Settings.self) var settings: Settings
     
     func configurePopup(config: BottomPopupConfig) -> BottomPopupConfig {
         config
@@ -54,8 +55,16 @@ struct CategoryDetailPopup: BottomPopup {
                         .frame(width: 30)
                     Spacer()
                     VStack(alignment: .trailing) {
-                        Text(category.max_expense ?? 0, format: .currency(code: "EUR"))
-                        Text(category.totalExpenses ?? 0, format: .currency(code: "EUR"))
+                        HStack(spacing: 4) {
+                            Text(category.max_expense ?? 0, format: .defaultCurrency(code: settings.currency.rawValue))
+                            Text("budget")
+                                .foregroundStyle(.secondary)
+                        }
+                        HStack(spacing: 4) {
+                            Text(category.totalExpenses ?? 0, format: .defaultCurrency(code: settings.currency.rawValue))
+                            Text("spent")
+                                .foregroundStyle(.secondary)
+                        }
                     }
                 }
             }
@@ -110,7 +119,7 @@ struct CategoryDetailPopup: BottomPopup {
                 .frame(width: 10)
             Text(expense.name)
             Spacer()
-            Text("\(expense.amount, specifier: "%.2f") €")
+            Text(expense.amount, format: .defaultCurrency(code: settings.currency.rawValue))
                 .font(.headline)
                 .foregroundColor(.secondary)
                 

@@ -11,6 +11,7 @@ import MijickPopups
 struct AddCategoryPopup: BottomPopup {
     let onCloseAction: () -> Void
     @ObservedObject var categorieStore = AddCategoryViewModel()
+    @Environment(Settings.self) var settings: Settings
     
     @State private var name: String = ""
     @State private var description: String = ""
@@ -55,7 +56,7 @@ struct AddCategoryPopup: BottomPopup {
                     Text("Allocated amount")
                         .font(.headline)
                     HStack(spacing: 10) {
-                        Text("€")
+                        Text(settings.currency.getSymbol())
                         LimitedCurrencyField("Max spending for this catergory?", amount: $amount)
                     }
                     .padding()

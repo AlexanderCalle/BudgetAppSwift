@@ -11,6 +11,8 @@ import MijickPopups
 
 struct HomeView: View {
     @Environment(Router.self) var router: Router
+    @Environment(Settings.self) var settings: Settings
+    
     @ObservedObject var categoriesStore = CategoryStore()
     @State private var isConnected = true
     
@@ -81,8 +83,8 @@ struct HomeView: View {
                 Text("Budgeted")
                 Text("Spent")
                 Text("\(categoriesStore.daysLeftInCurrentMonth()) Days left")
-                Text(categoriesStore.total_budgetted, format: .currency(code: "EUR"))
-                Text(categoriesStore.total_expenses, format: .currency(code: "EUR"))
+                Text(categoriesStore.total_budgetted, format: .defaultCurrency(code: settings.currency.rawValue))
+                Text(categoriesStore.total_expenses, format: .defaultCurrency(code: settings.currency.rawValue))
             }
             .padding(10)
             .font(.subheadline)

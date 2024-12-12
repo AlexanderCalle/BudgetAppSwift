@@ -11,6 +11,7 @@ import MijickPopups
 
 struct EditCategoryPopup: BottomPopup {
     @ObservedObject var categoriesStore: CategoryStore
+    @Environment(Settings.self) var settings: Settings
     
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
@@ -68,7 +69,7 @@ struct EditCategoryPopup: BottomPopup {
                     Text("Allocated amount")
                         .font(.headline)
                     HStack(spacing: 10) {
-                        Text("€")
+                        Text(settings.currency.getSymbol())
                         LimitedCurrencyField("Max spending for this catergory?", amount: Binding (
                             get: { categoriesStore.selectedCategory!.max_expense ?? 0.0 },
                             set: { categoriesStore.selectedCategory?.max_expense = $0 }

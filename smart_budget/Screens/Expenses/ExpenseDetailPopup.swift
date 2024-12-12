@@ -11,6 +11,7 @@ import MijickPopups
 struct ExpenseDetailPopup: BottomPopup {
     let onRefresh: () -> Void
     @StateObject var expensesStore: ExpensesViewModel
+    @Environment(Settings.self) var settings: Settings
     
     @State var isConfirmingDelete = false
     
@@ -27,7 +28,7 @@ struct ExpenseDetailPopup: BottomPopup {
             }
             HStack(alignment: .center){
                 Spacer()
-                Text(-expensesStore.selectedExpense!.amount, format: .currency(code: "EUR"))
+                Text(-expensesStore.selectedExpense!.amount, format: .defaultCurrency(code: settings.currency.rawValue))
                     .font(.system(size: 50, weight: .medium))
                     .foregroundStyle(.danger)
                 Spacer()
@@ -123,6 +124,7 @@ struct ExpenseDetailPopup: BottomPopup {
 
 struct EditExpensePopup: BottomPopup {
     @StateObject var expenseStore: ExpensesViewModel
+    @Environment(Settings.self) var settings: Settings
     @State var editExpense: Expense
         
     func configurePopup(config: BottomPopupConfig) -> BottomPopupConfig {
@@ -181,7 +183,7 @@ struct EditExpensePopup: BottomPopup {
                     Text("Spent")
                         .font(.headline)
                     HStack(spacing: 10) {
-                        Text("€")
+                        Text(settings.currency.getSymbol())
                         LimitedCurrencyField("Spent on?", amount: $editExpense.amount)
                         if(expenseStore.validationErrors.contains(where: { $0.key == "amount" })) {
                             Text(expenseStore.validationErrors.first(where: { $0.key == "amount" })?.message ?? "")
