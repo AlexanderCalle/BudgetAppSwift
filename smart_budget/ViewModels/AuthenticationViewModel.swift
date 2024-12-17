@@ -13,6 +13,9 @@ class AuthenticationViewModel: ObservableObject {
     @Published var SignupState: ViewState<Bool> = .idle
     @Published var validationErrors: [ValidationError] = []
     
+    @Published var resetState: ViewState<Bool> = .idle
+    @Published var email: String = ""
+    
     func errors(forKey key: String) -> [ValidationError] {
         validationErrors.filter { $0.key == key }
     }
@@ -56,6 +59,52 @@ class AuthenticationViewModel: ObservableObject {
                     self?.SignupState = .success(true)
                 case .failure(let error):
                     self?.SignupState = .failure(error)
+                }
+            }
+        }
+    }
+    
+    struct RecoveryBody: Codable {
+        let email: String
+    }
+    
+    func resetPassword() {
+        validationErrors.removeAll()
+        
+        guard validateEmail(email) else {
+            validationErrors.append(.init(key: "email", message: "Invalid email format"))
+            return
+        }
+        
+        resetState = .loading
+        let body = RecoveryBody(email: email)
+        
+        api.post("auth/recovery", body: body) { [weak self] (result: Result<RecoveryBody, Error>) in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(_):
+                    self?.resetState = .success(true)
+                case .failure(let error):
+                    if let networkError = error as? NetworkError {
+                        self?.resetState = .failure(networkError)
+                    }
+                    if let apiError = error as? ApiError {
+                        if case .badRequest(let decodedMessage) = apiError {
+                            switch(decodedMessage) {
+                            case .detailed(let details, _, _):
+                                details.forEach { detail in
+                                    self?.validationErrors.append(ValidationError(key: detail.property, message: detail.message))
+                                }
+                                self?.resetState = .failure(apiError)
+                            default:
+                                self?.resetState = .failure(apiError)
+                            }
+                        } else {
+                            self?.resetState = .failure(apiError)
+                        }
+                    } else {
+                        self?.resetState = .failure(error)
+                    }
                 }
             }
         }

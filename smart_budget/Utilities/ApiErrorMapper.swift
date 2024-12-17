@@ -6,3 +6,10 @@
 //
 
 import Foundation
+
+//class ApiErrorMapper {
+//    func mapToString(error: ApiError) -> String {
+//        switch(error)
+//    }
+//}
+

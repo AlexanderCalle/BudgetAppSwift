@@ -211,11 +211,6 @@ struct ExpenseTypeSelectionPopup: BottomPopup {
     let SetExpenseType: (ExpenseType) -> Void
     @State var selectedType: ExpenseType = .card
     
-    func configurePopup(config: BottomPopupConfig) -> BottomPopupConfig {
-        config
-            .ignoreSafeArea(edges: .bottom)
-    }
-    
     var body: some View {
         VStack(spacing: 0) {
             HStack {

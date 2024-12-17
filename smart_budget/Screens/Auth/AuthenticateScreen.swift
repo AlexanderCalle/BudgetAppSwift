@@ -145,6 +145,14 @@ struct LoginPopup: BottomPopup {
                             .cornerRadius(10)
                     }
                 }
+                Button {
+                    Task { await RequestPasswordResetPopup(authViewModel: authenticator).present() }
+                } label: {
+                    Text("Forgot Password?")
+                        .font(.headline)
+                        .foregroundColor(Color.primary)
+                        .underline()
+                }
             }
             .onChange(of: authenticator.loginState) { loginState in
                 if case .success = loginState {

@@ -287,6 +287,26 @@ enum ApiError: Error {
     case unauthorized
     case internalError
     case unknown(Int?, String?)
+    
+    // TODO: get a string message
+    func getErrorMessage() -> String? {
+        switch self {
+        case .notFound(let message):
+            return message?.errorMessage() ?? "Not Found"
+        case .badRequest(let message):
+            return message?.errorMessage() ?? "Bad Request"
+        case .authError(let message):
+            return message?.errorMessage() ?? "Unauthorized"
+        case .forbidden:
+            return "Forbidden"
+        case .unauthorized:
+            return "Unauthorized"
+        case .internalError:
+            return "Internal Error"
+        case .unknown(let code, let message):
+            return message
+        }
+    }
 }
 
 

@@ -37,7 +37,7 @@ enum DecodedMessage: Codable {
             throw DecodingError.dataCorrupted(.init(codingPath: container.codingPath, debugDescription: "Unknown JSON format"))
         }
     }
-
+    
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
@@ -48,6 +48,17 @@ enum DecodedMessage: Codable {
             try container.encode(statusCode, forKey: .statusCode)
         case .simple(let errorMessage):
             try container.encode(errorMessage, forKey: .message)
+        }
+    }
+    
+    /// Returns a user-friendly string representation of the error.
+    func errorMessage() -> String {
+        switch self {
+        case .detailed(let errorDetails, let error, let statusCode):
+            var detailsString = errorDetails.map { "\($0.property): \($0.message)" }.joined(separator: ", ")
+            return "Error \(statusCode): \(error) (\(detailsString))"
+        case .simple(let errorMessage):
+            return errorMessage
         }
     }
 }

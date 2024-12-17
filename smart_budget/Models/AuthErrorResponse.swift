@@ -11,6 +11,10 @@ struct AuthErrorResponse: Decodable {
     let name: String
     let status: Int
     let code: AuthErrorCode
+    
+    func errorMessage() -> String {
+        return "Auth Error: \(code.rawValue), \(name), \(status)"
+    }
 }
 
 enum AuthErrorCode: String, Codable {
