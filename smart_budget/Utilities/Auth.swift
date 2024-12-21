@@ -26,6 +26,7 @@ class Auth: ObservableObject {
     @Published var loggedIn: Bool = false
     @Published var isNewUser: Bool = false
     @Published var isRefreshingToken = false
+    @Published var user: User?
     
     private init() {
         loggedIn = hasAccesToken()
@@ -67,9 +68,13 @@ class Auth: ObservableObject {
         self.isRefreshingToken = isRefreshingToken
     }
     
+    func setUser(_ user: User) {
+        self.user = user
+    }
+    
     func logout() {
         keychain.clear()
-        
+        user = nil
         loggedIn = false
     }
     

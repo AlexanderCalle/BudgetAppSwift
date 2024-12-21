@@ -37,6 +37,7 @@ class AuthenticationViewModel: ObservableObject {
                     self?.validationErrors.removeAll()
                     self?.loginState = .success(true)
                     Auth.shared.isNewUser = false
+                    self?.fetchProfile()
                 case .failure(let error):
                     print("Login error: \(error.localizedDescription)")
                     self?.loginState = .failure(error)
@@ -57,6 +58,7 @@ class AuthenticationViewModel: ObservableObject {
                 switch result {
                 case .success(_):
                     self?.SignupState = .success(true)
+                    Auth.shared.setUser(User(email: email, firstname: firstname, lastname: lastname))
                 case .failure(let error):
                     self?.SignupState = .failure(error)
                 }
@@ -105,6 +107,19 @@ class AuthenticationViewModel: ObservableObject {
                     } else {
                         self?.resetState = .failure(error)
                     }
+                }
+            }
+        }
+    }
+    
+    func fetchProfile() {
+        api.get("auth/me") {(result: Result<User, Error>) in
+            DispatchQueue.main.async {
+                switch(result) {
+                case .success(let profile):
+                    Auth.shared.setUser(profile)
+                case .failure(let error):
+                    print("Profile fetching went wrong: \(error)")
                 }
             }
         }

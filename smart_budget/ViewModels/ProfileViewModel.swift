@@ -9,8 +9,7 @@ import Foundation
 
 class ProfileViewModel: ObservableObject {
     
-    @Published var profileState: ViewState<User> = .idle
-    @Published var profile: User? = nil
+    @Published var profile: User? = Auth.shared.user
     
     // MARK: -- Edit user
     @Published var editState: ViewState<Bool> = .idle
@@ -25,26 +24,6 @@ class ProfileViewModel: ObservableObject {
     
     let api = ApiService()
     
-    init() {
-        fetchProfile()
-    }
-    
-    func fetchProfile() {
-        profileState = .loading
-        
-        api.get("auth/me") { [weak self] (result: Result<User, Error>) in
-            DispatchQueue.main.async {
-                switch(result) {
-                case .success(let profile):
-                    self?.profileState = .success(profile)
-                    self?.profile = profile
-                case .failure(let error):
-                    self?.profileState = .failure(error)
-                }
-            }
-        }
-    }
-    
     func editProfile() {
         guard profile != nil else { return }
         guard validate() else { return }
@@ -56,10 +35,8 @@ class ProfileViewModel: ObservableObject {
                 switch result {
                 case .success(_):
                     self?.editState = .success(true)
-                    if case .success(var user) = self?.profileState {
-                        user = (self?.profile)!
-                        self?.profileState = .success(user)
-                    }
+                    var user = (self?.profile)!
+                    Auth.shared.setUser(user)
                 case .failure(let error):
                     if let networkError = error as? NetworkError {
                         self?.editState = .failure(networkError)

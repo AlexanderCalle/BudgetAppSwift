@@ -11,6 +11,7 @@ import MijickPopups
 struct AuthenticateScreen: View {
     
     @StateObject var authenticator = AuthenticationViewModel()
+    @Environment(Settings.self) private var settings: Settings
     
     var body: some View {
         VStack(alignment: .leading) {

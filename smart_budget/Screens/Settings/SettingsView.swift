@@ -33,38 +33,32 @@ struct SettingsView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: Constants.spacing) {
                     
-                    switch(profileViewModel.profileState) {
-                    case .success(let user):
-                            VStack(alignment: .leading, spacing: Constants.spacing) {
-                                
-                                HStack{
-                                    Spacer()
-                                    Text(user.firstname.first?.uppercased() ?? "?")
-                                        .font(.system(size: 34, weight: .bold))
-                                        .padding(20)
-                                        .foregroundColor(.white)
-                                        .background(.purple)
-                                        .clipShape(.circle)
-                                    Spacer()
-                                }
-                                
-                                accountDetails(user: user)
-                                AppSettings(settings: settings)
+                    if profileViewModel.profile != nil {
+                        VStack(alignment: .leading, spacing: Constants.spacing) {
+                            
+                            HStack{
+                                Spacer()
+                                Text(profileViewModel.profile?.firstname.first?.uppercased() ?? "?")
+                                    .font(.system(size: 34, weight: .bold))
+                                    .padding(20)
+                                    .foregroundColor(.white)
+                                    .background(.purple)
+                                    .clipShape(.circle)
+                                Spacer()
                             }
-                    case .failure(let error):
+                            
+                            accountDetails(user: profileViewModel.profile!)
+                            AppSettings(settings: settings)
+                        }
+                    } else {
                         HStack(alignment: .center) {
                             Image(systemName: "exclamationmark.triangle")
-                            Text(error.localizedDescription)
+                            Text("No user found")
                                 .font(.headline)
                                 .padding()
                         }
-                    default:
-                        VStack(alignment: .center) {
-                            Spacer()
-                            ProgressView()
-                            Spacer()
-                        }
                     }
+                    
                     Button {
                         Auth.shared.logout()
                     } label: {

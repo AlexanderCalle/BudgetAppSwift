@@ -23,32 +23,32 @@ struct ContentView: View {
 
 
     var body: some View {
-            VStack {
-                ZStack {
-                        RouterView {
-                            HomeView()
-                        }
-                        .customTransition(selectedTab: selected,
-                                          thisTab: 0, previousTab: previousTab, direction: direction)
-                    
-                        RouterView {
-                            ExpensesView()
-                        }
-                        .customTransition(selectedTab: selected,
-                                          thisTab: 1, previousTab: previousTab, direction: direction)
-
-                       VStack {
-                           SettingsView()
-                       }
-                        .customTransition(selectedTab: selected,
-                                          thisTab: 2, previousTab: previousTab, direction: direction)
-
-                }
-                .sensoryFeedback(.impact(weight: .light), trigger: selected)
-                .accentColor(.purple)
-                .background(Color.background)
+        VStack {
+            ZStack {
+                    RouterView {
+                        HomeView()
+                    }
+                    .customTransition(selectedTab: selected,
+                                      thisTab: 0, previousTab: previousTab, direction: direction)
                 
-                customBottomBar
+                    RouterView {
+                        ExpensesView()
+                    }
+                    .customTransition(selectedTab: selected,
+                                      thisTab: 1, previousTab: previousTab, direction: direction)
+
+                   VStack {
+                       SettingsView()
+                   }
+                    .customTransition(selectedTab: selected,
+                                      thisTab: 2, previousTab: previousTab, direction: direction)
+
+            }
+            .sensoryFeedback(.impact(weight: .light), trigger: selected)
+            .accentColor(.purple)
+            .background(Color.background)
+            
+            customBottomBar
 
         }
     }
