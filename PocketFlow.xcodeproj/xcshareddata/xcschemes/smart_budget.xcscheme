@@ -16,9 +16,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "6C38CF862CB2D0FB00AED4C1"
-               BuildableName = "SurvivalOfTheInflation.app"
-               BlueprintName = "SurvivalOfTheInflation"
-               ReferencedContainer = "container:SurvivalOfTheInflation.xcodeproj">
+               BuildableName = "PocketFlow.app"
+               BlueprintName = "PocketFlow"
+               ReferencedContainer = "container:PocketFlow.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -45,9 +45,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "6C38CF862CB2D0FB00AED4C1"
-            BuildableName = "SurvivalOfTheInflation.app"
-            BlueprintName = "SurvivalOfTheInflation"
-            ReferencedContainer = "container:SurvivalOfTheInflation.xcodeproj">
+            BuildableName = "PocketFlow.app"
+            BlueprintName = "PocketFlow"
+            ReferencedContainer = "container:PocketFlow.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <CommandLineArguments>
@@ -75,9 +75,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "6C38CF862CB2D0FB00AED4C1"
-            BuildableName = "SurvivalOfTheInflation.app"
-            BlueprintName = "SurvivalOfTheInflation"
-            ReferencedContainer = "container:SurvivalOfTheInflation.xcodeproj">
+            BuildableName = "PocketFlow.app"
+            BlueprintName = "PocketFlow"
+            ReferencedContainer = "container:PocketFlow.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
