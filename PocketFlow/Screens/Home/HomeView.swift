@@ -13,7 +13,7 @@ struct HomeView: View {
     @Environment(Router.self) var router: Router
     @Environment(Settings.self) var settings: Settings
     
-    @ObservedObject var categoriesStore = CategoryStore()
+    @ObservedObject var categoriesStore: CategoryStore
     @State private var isConnected = true
     
     var body: some View {
@@ -31,12 +31,12 @@ struct HomeView: View {
                     mainCategoryOverview
                     VStack {
                         switch categoriesStore.categoriesState {
-                        case .success(let data):
+                        case .success(_):
                             CategoryListView(
-                                categoryStore: categoriesStore, categories: data, onAddCategory: {
+                                categoryStore: categoriesStore, categories: categoriesStore.categories, onAddCategory: {
                                     Task {
                                         await AddCategoryPopup() {
-                                            categoriesStore.fetchCategories()
+                                            categoriesStore.refreshCategories()
                                         }.present()
                                     }
                                 }
@@ -63,10 +63,15 @@ struct HomeView: View {
             categoriesStore.fetchChartOverview()
             checkInternetConnection()
         }
-        .task {
-            categoriesStore.fetchCategories()
-            categoriesStore.fetchChartOverview()
-            checkInternetConnection()
+        .onAppear {
+            NotificationCenter.default.addObserver(
+                forName: .expenseCreated,
+                object: nil,
+                queue: .main
+            ) { _ in
+                categoriesStore.refreshCategories()
+                categoriesStore.fetchChartOverview()
+            }
         }
     }
     
@@ -142,7 +147,8 @@ struct HomeView: View {
 }
 
 #Preview {
-    HomeView()
+    @Previewable var categoryStore: CategoryStore = CategoryStore()
+    HomeView(categoriesStore: categoryStore)
         .environment(Router())
         .registerPopups() { $0
             .center {

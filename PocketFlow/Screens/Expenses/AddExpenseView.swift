@@ -124,11 +124,12 @@ struct AddExpenseView: View {
             }
             .padding(.top, 20)
         }
-        .onChange(of: addExpenseViewModel.shouldNavigate, perform: { _ in
+        .onChange(of: addExpenseViewModel.shouldNavigate) { _ in
             if addExpenseViewModel.shouldNavigate {
+                NotificationCenter.default.post(name: .expenseCreated, object: nil)
                 router.navigateToRoot()
             }
-        })
+        }
         .padding()
         //.navigationBarTitle(amount.formatted(.currency(code: "EUR")))
         .toolbar {
@@ -290,6 +291,10 @@ struct SelectionRow: View {
     }
 }
 
+// Add this extension for the notification name
+extension Notification.Name {
+    static let expenseCreated = Notification.Name("expenseCreated")
+}
 
 #Preview {
     AddExpenseView(amount: 25.8)

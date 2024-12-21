@@ -114,6 +114,11 @@ struct ExpenseDetailPopup: BottomPopup {
                     }
                 }
             }
+            .onChange(of: expensesStore.deleteState, perform: { _ in
+                if case .success(_) = expensesStore.deleteState {
+                    NotificationCenter.default.post(name: .expenseCreated, object: nil)
+                }
+            })
             .font(.system(size: 16, weight: .bold))
         }
         .padding(.vertical, 20)
@@ -232,6 +237,7 @@ struct EditExpensePopup: BottomPopup {
         }
         .onChange(of: expenseStore.editState) { state in
             if case .success = state {
+                NotificationCenter.default.post(name: .expenseCreated, object: nil)
                 Task { await dismissLastPopup() }
             }
         }

@@ -15,6 +15,7 @@ class CategoryStore: ObservableObject {
     {
         didSet {
             if case .success(let data) = categoriesState {
+                self.categories = data
                 self.total_expenses = data.reduce(0.0 as Float) { $0 + ($1.totalExpenses ?? 0) }
                 self.total_budgetted = data.reduce(0.0 as Float) { $0 + ($1.max_expense ?? 0) }
                 self.total_percentage = (self.total_expenses / self.total_budgetted)
@@ -22,6 +23,7 @@ class CategoryStore: ObservableObject {
             
         }
     }
+    @Published var categories: [Categorie] = []
     @Published var expenseOverview: [DayExpense]
     @Published var total_expenses: Float = 0.0 as Float
     @Published var total_budgetted: Float = 0.0 as Float
@@ -75,6 +77,26 @@ class CategoryStore: ObservableObject {
         }
     }
     
+    func refreshCategories() {
+        api.get("categories?expenses=true") { [weak self] (result: Result<[Categorie], Error>) in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let categories):
+                    self?.categoriesState = .success(categories)
+                case .failure(let error):
+                    if let netwerkError = error as? NetworkError {
+                        print(netwerkError.self)
+                        self?.categoriesState = .failure(netwerkError)
+                    }
+                    if let apiError = error as? ApiError {
+                        self?.categoriesState = .failure(apiError)
+                    }
+                    print(error.localizedDescription)
+                }
+            }
+        }
+    }
+    
     func selectCategory(category: Categorie) {
         self.selectedCategory = category
     }
@@ -82,17 +104,11 @@ class CategoryStore: ObservableObject {
     func fetchChartOverview() {
         api.get("expenses/overview") { [weak self] (result: Result<[DayExpense], Error>) in
             DispatchQueue.main.async {
-                
                 switch result {
                 case .success(let chartOverview):
                     self?.expenseOverview = chartOverview
                 case .failure(let error):
-//                    if let netwerkError = error as? NetworkError {
-//
-//                    }
-//                    if let apiError = error as? ApiError {
-//                        self?.expenseOverview = .failure(apiError)
-//                    }
+                    self?.expenseOverview = []
                     print(error)
                 }
             }
@@ -117,7 +133,7 @@ class CategoryStore: ObservableObject {
                 switch(result) {
                 case .success(_):
                     self?.editCategoryState = .success(true)
-                    self?.fetchCategories()
+                    self?.refreshCategories()
                 case .failure(let error):
                     if let networkError = error as? NetworkError {
                         self?.editCategoryState = .failure(networkError)
@@ -152,7 +168,7 @@ class CategoryStore: ObservableObject {
                 switch(result) {
                     case.success(_):
                         self?.deleteCategoryState = .success(true)
-                        self?.fetchCategories()
+                        self?.refreshCategories()
                     case .failure(let error):
                         if let networkError = error as? NetworkError {
                             self?.deleteCategoryState = .failure(networkError)

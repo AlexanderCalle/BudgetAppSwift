@@ -20,13 +20,15 @@ struct ContentView: View {
     @State var selected = 0
     @State private var previousTab = 0
     @State private var direction: TransitionDirection = .none
+    
+    @ObservedObject var categoryStore = CategoryStore()
 
 
     var body: some View {
         VStack {
             ZStack {
                     RouterView {
-                        HomeView()
+                        HomeView(categoriesStore: categoryStore)
                     }
                     .customTransition(selectedTab: selected,
                                       thisTab: 0, previousTab: previousTab, direction: direction)
