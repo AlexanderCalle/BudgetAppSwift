@@ -58,7 +58,7 @@ class AuthenticationViewModel: ObservableObject {
                 switch result {
                 case .success(_):
                     self?.SignupState = .success(true)
-                    Auth.shared.setUser(User(email: email, firstname: firstname, lastname: lastname))
+                    try? Auth.shared.setUser(User(email: email, firstname: firstname, lastname: lastname))
                 case .failure(let error):
                     self?.SignupState = .failure(error)
                 }
@@ -117,7 +117,7 @@ class AuthenticationViewModel: ObservableObject {
             DispatchQueue.main.async {
                 switch(result) {
                 case .success(let profile):
-                    Auth.shared.setUser(profile)
+                    try? Auth.shared.setUser(profile)
                 case .failure(let error):
                     print("Profile fetching went wrong: \(error)")
                 }

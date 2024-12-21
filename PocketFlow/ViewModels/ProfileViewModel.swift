@@ -9,7 +9,7 @@ import Foundation
 
 class ProfileViewModel: ObservableObject {
     
-    @Published var profile: User? = Auth.shared.user
+    @Published var profile: User? = try? Auth.shared.getUser()
     
     // MARK: -- Edit user
     @Published var editState: ViewState<Bool> = .idle
@@ -35,8 +35,8 @@ class ProfileViewModel: ObservableObject {
                 switch result {
                 case .success(_):
                     self?.editState = .success(true)
-                    var user = (self?.profile)!
-                    Auth.shared.setUser(user)
+                    let user = (self?.profile)!
+                    try? Auth.shared.setUser(user)
                 case .failure(let error):
                     if let networkError = error as? NetworkError {
                         self?.editState = .failure(networkError)

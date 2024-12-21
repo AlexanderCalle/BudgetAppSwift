@@ -18,6 +18,7 @@ class Auth: ObservableObject {
     enum KeychainKey: String {
         case accessToken
         case refreshToken
+        case userData
     }
     
     static let shared = Auth()
@@ -26,7 +27,6 @@ class Auth: ObservableObject {
     @Published var loggedIn: Bool = false
     @Published var isNewUser: Bool = false
     @Published var isRefreshingToken = false
-    @Published var user: User?
     
     private init() {
         loggedIn = hasAccesToken()
@@ -68,13 +68,17 @@ class Auth: ObservableObject {
         self.isRefreshingToken = isRefreshingToken
     }
     
-    func setUser(_ user: User) {
-        self.user = user
+    func getUser() throws -> User? {
+        guard let userData = keychain.getData(KeychainKey.userData.rawValue) else { return nil }
+        return try JSONDecoder().decode(User.self, from: userData)
+    }
+    
+    func setUser(_ user: User) throws {
+        keychain.set(try JSONEncoder().encode(user), forKey: KeychainKey.userData.rawValue)
     }
     
     func logout() {
         keychain.clear()
-        user = nil
         loggedIn = false
     }
     
