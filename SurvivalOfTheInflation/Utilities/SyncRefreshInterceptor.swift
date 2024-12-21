@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Alamofire
 
 // MARK: -- Locks and sync variabl
 private let requestLock = NSLock()
@@ -147,21 +146,22 @@ class SessionManager: NSObject, URLSessionDelegate {
         let url = UrlComponent(path: "auth/refresh").url
         let refreshToken = RefreshTokenRequest(refresh_token: Auth.shared.getRefreshToken() ?? "")
         let body = try? JSONEncoder().encode(refreshToken)
-        if var request = try? URLRequest(url: url, method: .post) {
-            request.httpBody = body
-            request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-            let (data, _) = session.synchronousData(with: request)
-            if let data = data {
-                let decodedResponse = try? JSONDecoder().decode(AuthResponse.self, from: data)
-                if let session = decodedResponse?.session {
-                    let refreshToken = session.refreshToken
-                    let accessToken = session.accessToken
-                    
-                    Auth.shared.setCredentials(accesToken: accessToken, refreshToken: refreshToken)
-                    return true
-                }
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.httpBody = body
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        let (data, _) = session.synchronousData(with: request)
+        if let data = data {
+            let decodedResponse = try? JSONDecoder().decode(AuthResponse.self, from: data)
+            if let session = decodedResponse?.session {
+                let refreshToken = session.refreshToken
+                let accessToken = session.accessToken
+                
+                Auth.shared.setCredentials(accesToken: accessToken, refreshToken: refreshToken)
+                return true
             }
         }
+    
         return false
     }
 }

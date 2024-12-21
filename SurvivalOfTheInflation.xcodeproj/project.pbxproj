@@ -29,9 +29,9 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		6C38CF892CB2D0FB00AED4C1 /* smart_budget */ = {
+		6C38CF892CB2D0FB00AED4C1 /* SurvivalOfTheInflation */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = smart_budget;
+			path = SurvivalOfTheInflation;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -52,7 +52,7 @@
 		6C38CF7E2CB2D0FB00AED4C1 = {
 			isa = PBXGroup;
 			children = (
-				6C38CF892CB2D0FB00AED4C1 /* smart_budget */,
+				6C38CF892CB2D0FB00AED4C1 /* SurvivalOfTheInflation */,
 				6C38CF882CB2D0FB00AED4C1 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -82,7 +82,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				6C38CF892CB2D0FB00AED4C1 /* smart_budget */,
+				6C38CF892CB2D0FB00AED4C1 /* SurvivalOfTheInflation */,
 			);
 			name = SurvivalOfTheInflation;
 			packageProductDependencies = (
@@ -280,11 +280,11 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"smart_budget/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"SurvivalOfTheInflation/Preview Content\"";
 				DEVELOPMENT_TEAM = RUDZ8R2ATF;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "Survival of the inflation";
+				INFOPLIST_KEY_CFBundleDisplayName = PocketFlow;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -295,7 +295,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 0.1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "edu.hogent.iosdev.student.smart-budget";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -311,11 +311,11 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"smart_budget/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"SurvivalOfTheInflation/Preview Content\"";
 				DEVELOPMENT_TEAM = RUDZ8R2ATF;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "Survival of the inflation";
+				INFOPLIST_KEY_CFBundleDisplayName = PocketFlow;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -326,7 +326,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 0.1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "edu.hogent.iosdev.student.smart-budget";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
