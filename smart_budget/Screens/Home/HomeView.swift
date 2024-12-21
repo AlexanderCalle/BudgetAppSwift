@@ -56,7 +56,8 @@ struct HomeView: View {
                 }
             }
         }
-        .padding()
+        .padding(.horizontal)
+        .padding(.top)
         .refreshable {
             categoriesStore.fetchCategories()
             categoriesStore.fetchChartOverview()

@@ -19,7 +19,6 @@ struct RouterView<Content: View>: View {
     }
     
     var body: some View {
-        
         @Bindable var routerB = router
         NavigationStack(path: $routerB.path) {
             ZStack {
@@ -32,6 +31,7 @@ struct RouterView<Content: View>: View {
                     .background(Color.background)
             }
         }
+        .navigationViewStyle(StackNavigationViewStyle())
         .environment(router)
     }
 }

@@ -9,6 +9,8 @@ import SwiftUI
 import SwiftData
 import MijickPopups
 
+
+
 struct RootScreen: View {
     
     @EnvironmentObject var auth: Auth
@@ -17,13 +19,33 @@ struct RootScreen: View {
     @Query private var settings: [Settings]
     
     var body: some View {
-       PrimaryScreen()
+       MainView()
             .onAppear(perform: {
                 if settings.isEmpty {
                     context.insert(Settings(darKMode: colorScheme == .dark))
                 }
             })
             .environment(settings.first ?? Settings())
+    }
+}
+
+struct MainView: View {
+    var body: some View {
+        PrimaryScreen()
+            .registerPopups() { $0
+                .center {
+                    $0.backgroundColor(.background)
+                      .cornerRadius(20)
+                      .popupHorizontalPadding(20)
+                      .tapOutsideToDismissPopup(true)
+                }
+                .vertical {
+                    $0.backgroundColor(.background)
+                      .cornerRadius(20)
+                      .enableStacking(true)
+                      .tapOutsideToDismissPopup(true)
+                }
+            }
     }
 }
 
@@ -36,56 +58,14 @@ struct PrimaryScreen: View {
             if auth.isNewUser {
                 OnboardingScreen()
                     .preferredColorScheme(settings.darKMode ? .dark : .light)
-                    .registerPopups() { $0
-                        .center {
-                            $0.backgroundColor(.background)
-                              .cornerRadius(20)
-                              .popupHorizontalPadding(20)
-                              .tapOutsideToDismissPopup(true)
-                        }
-                        .vertical {
-                            $0.backgroundColor(.background)
-                              .cornerRadius(20)
-                              .enableStacking(true)
-                              .tapOutsideToDismissPopup(true)
-                        }
-                    }
             } else {
                 ContentView()
                     .preferredColorScheme(settings.darKMode ? .dark : .light)
-                    .registerPopups() { $0
-                        .center {
-                            $0.backgroundColor(.background)
-                              .cornerRadius(20)
-                              .popupHorizontalPadding(20)
-                              .tapOutsideToDismissPopup(true)
-                        }
-                        .vertical {
-                            $0.backgroundColor(.background)
-                              .cornerRadius(20)
-                              .enableStacking(true)
-                              .tapOutsideToDismissPopup(true)
-                        }
-                    }
             }
         }
         else {
             AuthenticateScreen()
                 .preferredColorScheme(settings.darKMode ? .dark : .light)
-                .registerPopups() { $0
-                    .center {
-                        $0.backgroundColor(.background)
-                          .cornerRadius(20)
-                          .popupHorizontalPadding(20)
-                          .tapOutsideToDismissPopup(true)
-                    }
-                    .vertical {
-                        $0.backgroundColor(.background)
-                          .cornerRadius(20)
-                          .enableStacking(true)
-                          .tapOutsideToDismissPopup(true)
-                    }
-                }
         }
     }
 }

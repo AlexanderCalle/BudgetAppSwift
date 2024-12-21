@@ -137,7 +137,8 @@ struct ExpensesView: View {
                 expensesViewModel.fetchCategories()
             }
         }
-        .padding()
+        .padding(.horizontal)
+        .padding(.top)
         .onAppear {
             expensesViewModel.SelectCategory(category)
         }

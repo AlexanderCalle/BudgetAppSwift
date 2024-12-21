@@ -27,55 +27,60 @@ struct SettingsView: View {
     @Environment(Settings.self) private var settings: Settings
     
     var body: some View {
-        VStack(alignment: .leading) {
+        VStack(alignment: .leading, spacing: Constants.spacing) {
             Text("Settings")
                 .font(.title)
-            switch(profileViewModel.profileState) {
-            case .success(let user):
-                ScrollView {
-                    VStack(alignment: .leading, spacing: Constants.spacing) {
-                        
-                        HStack{
+            ScrollView {
+                VStack(alignment: .leading, spacing: Constants.spacing) {
+                    
+                    switch(profileViewModel.profileState) {
+                    case .success(let user):
+                            VStack(alignment: .leading, spacing: Constants.spacing) {
+                                
+                                HStack{
+                                    Spacer()
+                                    Text(user.firstname.first?.uppercased() ?? "?")
+                                        .font(.system(size: 34, weight: .bold))
+                                        .padding(20)
+                                        .foregroundColor(.white)
+                                        .background(.purple)
+                                        .clipShape(.circle)
+                                    Spacer()
+                                }
+                                
+                                accountDetails(user: user)
+                                AppSettings(settings: settings)
+                            }
+                    case .failure(let error):
+                        HStack(alignment: .center) {
+                            Image(systemName: "exclamationmark.triangle")
+                            Text(error.localizedDescription)
+                                .font(.headline)
+                                .padding()
+                        }
+                    default:
+                        VStack(alignment: .center) {
                             Spacer()
-                            Text(user.firstname.first?.uppercased() ?? "?")
-                                .font(.system(size: 34, weight: .bold))
-                                .padding(20)
-                                .foregroundColor(.white)
-                                .background(.purple)
-                                .clipShape(.circle)
+                            ProgressView()
                             Spacer()
                         }
-                        
-                        accountDetails(user: user)
-                        AppSettings(settings: settings)
                     }
+                    Button {
+                        Auth.shared.logout()
+                    } label: {
+                        Text("Logout")
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.danger)
+                            .foregroundColor(.white)
+                            .cornerRadius(Constants.cornerRadius)
+                    }
+                    .padding(.top, 20)
                 }
-            case .failure(let error):
-                HStack(alignment: .center) {
-                    Image(systemName: "exclamationmark.triangle")
-                    Text(error.localizedDescription)
-                        .font(.headline)
-                        .padding()
-                }
-            default:
-                VStack(alignment: .center) {
-                    Spacer()
-                    ProgressView()
-                    Spacer()
-                }
-            }
-            Button {
-                Auth.shared.logout()
-            } label: {
-                Text("Logout")
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.danger)
-                    .foregroundColor(.white)
-                    .cornerRadius(Constants.cornerRadius)
             }
         }
-        .padding()
+        .padding(.horizontal)
+        .padding(.top)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
     
