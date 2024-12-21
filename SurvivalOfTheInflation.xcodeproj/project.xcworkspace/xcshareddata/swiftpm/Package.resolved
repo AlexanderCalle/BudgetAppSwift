@@ -1,15 +1,6 @@
 {
-  "originHash" : "c086e6f88a7a92815195eac75cea9a660c7a9debad534339a7d5679899215eb5",
+  "originHash" : "63ded67d3283b27409b7e4383a66e71a13e4e3e2ac631e31152155de53a3b18c",
   "pins" : [
-    {
-      "identity" : "alamofire",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/Alamofire/Alamofire.git",
-      "state" : {
-        "revision" : "513364f870f6bfc468f9d2ff0a95caccc10044c5",
-        "version" : "5.10.2"
-      }
-    },
     {
       "identity" : "keychain-swift",
       "kind" : "remoteSourceControl",
