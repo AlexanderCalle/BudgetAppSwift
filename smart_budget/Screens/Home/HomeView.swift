@@ -76,16 +76,16 @@ struct HomeView: View {
                 columns: [
                     GridItem(.flexible(), alignment: .leading),
                     GridItem(.fixed(80), alignment: .trailing),
-                    GridItem(.fixed(80), alignment: .trailing)
+                    GridItem(.fixed(90), alignment: .trailing)
                 ],
                 spacing: 5 // Row spacing
             ) {
                 Text("Monthly")
                 Text("Budgeted")
-                Text("Spent")
+                Text("Left")
                 Text("\(categoriesStore.daysLeftInCurrentMonth()) Days left")
                 Text(categoriesStore.total_budgetted, format: .defaultCurrency(code: settings.currency.rawValue))
-                Text(categoriesStore.total_expenses, format: .defaultCurrency(code: settings.currency.rawValue))
+                Text((categoriesStore.total_budgetted - categoriesStore.total_expenses), format: .defaultCurrency(code: settings.currency.rawValue))
             }
             .padding(10)
             .font(.subheadline)

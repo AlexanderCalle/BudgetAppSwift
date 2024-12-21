@@ -51,14 +51,16 @@ struct CategoryListView: View {
             columns: [
                 GridItem(.flexible(), alignment: .leading), // Icon and label column
                 GridItem(.fixed(80), alignment: .trailing), // Gray text column
-                GridItem(.fixed(80), alignment: .trailing)  // Green text column
+                GridItem(.fixed(90), alignment: .trailing)  // Green text column
             ],
             spacing: 16 // Row spacing
         ) {
             Text(category.name)
                 .font(.headline)
             Text(category.max_expense ?? 0, format: .defaultCurrency(code: settings.currency.rawValue))
-            Text(category.totalExpenses ?? 0, format: .defaultCurrency(code: settings.currency.rawValue))
+                .font(.system(size: 14))
+            Text(((category.max_expense ?? 0 ) - (category.totalExpenses ?? 0)), format: .defaultCurrency(code: settings.currency.rawValue))
+                .font(.system(size: 14))
                 .padding(5)
                 .foregroundColor(category.totalPercentage < 0.7 ? .successForeground : category.totalPercentage < 0.9 ? .warningForeground : .dangerForeground
                 )
