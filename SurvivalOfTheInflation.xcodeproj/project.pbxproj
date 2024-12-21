@@ -25,7 +25,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		6C38CF872CB2D0FB00AED4C1 /* smart_budget.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = smart_budget.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		6C38CF872CB2D0FB00AED4C1 /* SurvivalOfTheInflation.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SurvivalOfTheInflation.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -60,7 +60,7 @@
 		6C38CF882CB2D0FB00AED4C1 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				6C38CF872CB2D0FB00AED4C1 /* smart_budget.app */,
+				6C38CF872CB2D0FB00AED4C1 /* SurvivalOfTheInflation.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -68,9 +68,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		6C38CF862CB2D0FB00AED4C1 /* smart_budget */ = {
+		6C38CF862CB2D0FB00AED4C1 /* SurvivalOfTheInflation */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 6C38CF952CB2D0FC00AED4C1 /* Build configuration list for PBXNativeTarget "smart_budget" */;
+			buildConfigurationList = 6C38CF952CB2D0FC00AED4C1 /* Build configuration list for PBXNativeTarget "SurvivalOfTheInflation" */;
 			buildPhases = (
 				6C38CF832CB2D0FB00AED4C1 /* Sources */,
 				6C38CF842CB2D0FB00AED4C1 /* Frameworks */,
@@ -84,13 +84,13 @@
 			fileSystemSynchronizedGroups = (
 				6C38CF892CB2D0FB00AED4C1 /* smart_budget */,
 			);
-			name = smart_budget;
+			name = SurvivalOfTheInflation;
 			packageProductDependencies = (
 				6CF6D8332CF5D3C0001F86E6 /* MijickPopups */,
 				6CED64FF2CFCCE64004D21F5 /* KeychainSwift */,
 			);
 			productName = smart_budget;
-			productReference = 6C38CF872CB2D0FB00AED4C1 /* smart_budget.app */;
+			productReference = 6C38CF872CB2D0FB00AED4C1 /* SurvivalOfTheInflation.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -108,7 +108,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 6C38CF822CB2D0FB00AED4C1 /* Build configuration list for PBXProject "smart_budget" */;
+			buildConfigurationList = 6C38CF822CB2D0FB00AED4C1 /* Build configuration list for PBXProject "SurvivalOfTheInflation" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -126,7 +126,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				6C38CF862CB2D0FB00AED4C1 /* smart_budget */,
+				6C38CF862CB2D0FB00AED4C1 /* SurvivalOfTheInflation */,
 			);
 		};
 /* End PBXProject section */
@@ -338,7 +338,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		6C38CF822CB2D0FB00AED4C1 /* Build configuration list for PBXProject "smart_budget" */ = {
+		6C38CF822CB2D0FB00AED4C1 /* Build configuration list for PBXProject "SurvivalOfTheInflation" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				6C38CF932CB2D0FC00AED4C1 /* Debug */,
@@ -347,7 +347,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		6C38CF952CB2D0FC00AED4C1 /* Build configuration list for PBXNativeTarget "smart_budget" */ = {
+		6C38CF952CB2D0FC00AED4C1 /* Build configuration list for PBXNativeTarget "SurvivalOfTheInflation" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				6C38CF962CB2D0FC00AED4C1 /* Debug */,

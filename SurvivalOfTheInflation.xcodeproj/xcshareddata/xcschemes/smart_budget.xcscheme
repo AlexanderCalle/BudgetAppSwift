@@ -16,9 +16,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "6C38CF862CB2D0FB00AED4C1"
-               BuildableName = "smart_budget.app"
-               BlueprintName = "smart_budget"
-               ReferencedContainer = "container:smart_budget.xcodeproj">
+               BuildableName = "SurvivalOfTheInflation.app"
+               BlueprintName = "SurvivalOfTheInflation"
+               ReferencedContainer = "container:SurvivalOfTheInflation.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -45,9 +45,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "6C38CF862CB2D0FB00AED4C1"
-            BuildableName = "smart_budget.app"
-            BlueprintName = "smart_budget"
-            ReferencedContainer = "container:smart_budget.xcodeproj">
+            BuildableName = "SurvivalOfTheInflation.app"
+            BlueprintName = "SurvivalOfTheInflation"
+            ReferencedContainer = "container:SurvivalOfTheInflation.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <CommandLineArguments>
@@ -75,9 +75,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "6C38CF862CB2D0FB00AED4C1"
-            BuildableName = "smart_budget.app"
-            BlueprintName = "smart_budget"
-            ReferencedContainer = "container:smart_budget.xcodeproj">
+            BuildableName = "SurvivalOfTheInflation.app"
+            BlueprintName = "SurvivalOfTheInflation"
+            ReferencedContainer = "container:SurvivalOfTheInflation.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
