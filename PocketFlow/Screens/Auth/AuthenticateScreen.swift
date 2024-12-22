@@ -16,10 +16,10 @@ struct AuthenticateScreen: View {
     var body: some View {
         VStack(alignment: .leading) {
             
-            Text("👋 Welcom to Budgety!")
+            Text("👋 Welcom to PocketFlow!")
                 .font(.system(size: 30, weight: .bold))
                 .padding(.vertical, 50)
-            Text("This is a budget app designed to help you keep track of your finances.")
+            Text("This is a budget app designed to control the flow of your finances.")
                 .font(.system(size: 24, weight: .regular))
             
             Spacer()
@@ -53,6 +53,12 @@ struct AuthenticateScreen: View {
 
 struct LoginPopup: BottomPopup {
     @ObservedObject var authenticator: AuthenticationViewModel
+    @FocusState private var focusedField: Field?
+    
+    enum Field: Int, Hashable {
+        case email
+        case password
+    }
     
     @State var email: String = ""
     @State var password: String = ""
@@ -68,91 +74,105 @@ struct LoginPopup: BottomPopup {
                 Task { await dismissLastPopup() }
             }
             Spacer()
-            VStack(spacing: 20) {
-                Text("Login")
-                    .font(.title)
-                    .fontWeight(.bold)
+            ScrollView {
+                VStack(spacing: 20) {
+                    Text("Login")
+                        .font(.title)
+                        .fontWeight(.bold)
+                        
+                    Text("Welcom back!")
+                        .font(.title2)
+                        .padding(.bottom, 40)
                     
-                Text("Welcom back!")
-                    .font(.title2)
-                    .padding(.bottom, 40)
-                
-                if case .failure(let error) = authenticator.loginState {
-                    HStack {
-                        Spacer()
+                    if case .failure(let error) = authenticator.loginState {
                         HStack {
-                            if let apiError = error as? ApiError {
-                                switch(apiError) {
-                                case .authError(let response):
-                                    if case .invalidCredentials = response?.code {
-                                        Text("Email or password is invalid!")
+                            Spacer()
+                            HStack {
+                                if let apiError = error as? ApiError {
+                                    switch(apiError) {
+                                    case .authError(let response):
+                                        if case .invalidCredentials = response?.code {
+                                            Text("Email or password is invalid!")
+                                        }
+                                    case _:
+                                        Text("Something whent wrong")
                                     }
-                                case _:
-                                    Text("Something whent wrong")
                                 }
                             }
+                            .padding(.vertical, 8)
+                            Spacer()
                         }
-                        .padding(.vertical, 8)
-                        Spacer()
+                        .background(.dangerBackground)
+                        .foregroundColor(.dangerForeground)
+                        .cornerRadius(10)
                     }
-                    .background(.dangerBackground)
-                    .foregroundColor(.dangerForeground)
-                    .cornerRadius(10)
-                }
-               
-                
-                VStack(alignment: .leading) {
-                    Text("Email:")
-                    TextField("Email", text: $email)
-                        .keyboardType(.emailAddress)
-                        .textInputAutocapitalization(.never)
-                        .padding()
-                        .background(Color.secondary.opacity(0.2))
-                        .cornerRadius(10)
-                    if authenticator.errors(forKey: "email").isEmpty == false {
-                        ForEach(authenticator.validationErrors.filter { $0.key == "email" }, id: \.self) { validationError in
-                           Text(validationError.message)
-                               .foregroundStyle(.red)
-                       }
-                   }
-                }
-               
-                VStack(alignment: .leading) {
-                    Text("Password:")
-                    SecureField("Password", text: $password)
-                        .textContentType(.password)
-                        .textInputAutocapitalization(.never)
-                        .padding()
-                        .background(Color.secondary.opacity(0.2))
-                        .cornerRadius(10)
-                    if authenticator.errors(forKey: "password").isEmpty == false {
-                        ForEach(authenticator.validationErrors.filter { $0.key == "password" }, id: \.self) { validationError in
-                           Text(validationError.message)
-                               .foregroundStyle(.red)
-                       }
-                   }
-                }
-                Button{
-                    authenticator.login(email: email, password: password)
-                } label: {
-                    if case .loading = authenticator.loginState {
-                        ProgressView()
-                    } else {
-                        Text("Login")
-                            .frame(maxWidth: .infinity)
+                   
+                    
+                    VStack(alignment: .leading) {
+                        Text("Email:")
+                        TextField("Email", text: $email)
+                            .focused($focusedField, equals: .email)
+                            .onSubmit {
+                                self.focusNextField($focusedField)
+                            }
+                            .submitLabel(.next)
+                            .keyboardType(.emailAddress)
+                            .textInputAutocapitalization(.never)
                             .padding()
-                            .background(Color.primary)
-                            .foregroundColor(.background)
+                            .background(Color.secondary.opacity(0.2))
                             .cornerRadius(10)
+                        if authenticator.errors(forKey: "email").isEmpty == false {
+                            ForEach(authenticator.validationErrors.filter { $0.key == "email" }, id: \.self) { validationError in
+                               Text(validationError.message)
+                                   .foregroundStyle(.red)
+                           }
+                       }
                     }
-                }
-                Button {
-                    Task { await RequestPasswordResetPopup(authViewModel: authenticator).present() }
-                } label: {
-                    Text("Forgot Password?")
-                        .font(.headline)
-                        .foregroundColor(Color.primary)
-                        .underline()
+                   
+                    VStack(alignment: .leading) {
+                        Text("Password:")
+                        SecureField("Password", text: $password)
+                            .focused($focusedField, equals: .password)
+                            .onSubmit {
+                                authenticator.login(email: email, password: password)
+                            }
+                            .submitLabel(.go)
+                            .textContentType(.password)
+                            .textInputAutocapitalization(.never)
+                            .padding()
+                            .background(Color.secondary.opacity(0.2))
+                            .cornerRadius(10)
+                        
+                        if authenticator.errors(forKey: "password").isEmpty == false {
+                            ForEach(authenticator.validationErrors.filter { $0.key == "password" }, id: \.self) { validationError in
+                               Text(validationError.message)
+                                   .foregroundStyle(.red)
+                           }
+                       }
+                    }
+                    
+                    Button{
+                        authenticator.login(email: email, password: password)
+                    } label: {
+                        if case .loading = authenticator.loginState {
+                            ProgressView()
+                        } else {
+                            Text("Login")
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.primary)
+                                .foregroundColor(.background)
+                                .cornerRadius(10)
+                        }
+                    }
+                    Button {
+                        Task { await RequestPasswordResetPopup(authViewModel: authenticator).present() }
+                    } label: {
+                        Text("Forgot Password?")
+                            .font(.headline)
+                            .foregroundColor(Color.primary)
+                            .underline()
+                    }
                 }
             }
             .onChange(of: authenticator.loginState) { loginState in
@@ -160,16 +180,28 @@ struct LoginPopup: BottomPopup {
                     Task { await dismissLastPopup() }
                 }
             }
-            .padding()
+            .padding(.horizontal)
             .cornerRadius(10)
             Spacer()
         }
         .padding()
+        .onAppear {
+            authenticator.validationErrors.removeAll()
+        }
     }
+       
 }
 
 struct SignupPopup: BottomPopup {
     @ObservedObject var authenticator: AuthenticationViewModel
+    @FocusState var focusedField: Field?
+    
+    enum Field: Int, Hashable {
+        case email
+        case password
+        case firstname
+        case lastname
+    }
     
     @State var email: String = ""
     @State var password: String = ""
@@ -187,108 +219,122 @@ struct SignupPopup: BottomPopup {
                 Task { await dismissLastPopup() }
             }
             Spacer()
-            VStack(spacing: 20) {
-                Text("Signup for Butgety")
-                    .font(.title)
-                    .fontWeight(.bold)
-                    .padding(.bottom, 40)
-                if case .failure(let error) = authenticator.SignupState {
-                    HStack {
-                        Spacer()
+            ScrollView {
+                VStack(spacing: 20) {
+                    Text("Signup for PocketFlow")
+                        .font(.title)
+                        .fontWeight(.bold)
+                        .padding(.bottom, 40)
+                    if case .failure(let error) = authenticator.SignupState {
                         HStack {
-                            if let apiError = error as? ApiError {
-                                switch(apiError) {
-                                case .authError(let response):
-                                    if case .userAlreadyExists = response?.code {
-                                        Text("Email already exists")
+                            Spacer()
+                            HStack {
+                                if let apiError = error as? ApiError {
+                                    switch(apiError) {
+                                    case .authError(let response):
+                                        if case .userAlreadyExists = response?.code {
+                                            Text("Email already exists")
+                                        }
+                                    default:
+                                        Text("Something whent wrong")
                                     }
-                                default:
-                                    Text("Something whent wrong")
+                                } else {
+                                    Text(error.localizedDescription)
                                 }
-                            } else {
-                                Text(error.localizedDescription)
                             }
+                            .padding(.vertical, 8)
+                            Spacer()
                         }
-                        .padding(.vertical, 8)
-                        Spacer()
+                        .background(.dangerBackground)
+                        .foregroundColor(.dangerForeground)
+                        .cornerRadius(10)
                     }
-                    .background(.dangerBackground)
-                    .foregroundColor(.dangerForeground)
-                    .cornerRadius(10)
-                }
-                
-                VStack(alignment: .leading) {
-                    Text("Email:")
-                    TextField("Email", text: $email)
-                        .keyboardType(.emailAddress)
-                        .textInputAutocapitalization(.never)
-                        .padding()
-                        .background(Color.secondary.opacity(0.2))
-                        .cornerRadius(10)
-                    if authenticator.errors(forKey: "email").isEmpty == false {
-                        ForEach(authenticator.validationErrors.filter { $0.key == "email" }, id: \.self) { validationError in
-                           Text(validationError.message)
-                               .foregroundStyle(.red)
-                       }
-                   }
-                }
-               
-                VStack(alignment: .leading) {
-                    Text("Password:")
-                    SecureField("Password", text: $password)
-                        .textContentType(.password)
-                        .textInputAutocapitalization(.never)
-                        .padding()
-                        .background(Color.secondary.opacity(0.2))
-                        .cornerRadius(10)
-                    if authenticator.errors(forKey: "password").isEmpty == false {
-                        ForEach(authenticator.validationErrors.filter { $0.key == "password" }, id: \.self) { validationError in
-                           Text(validationError.message)
-                               .foregroundStyle(.red)
-                       }
-                   }
-                }
-                
-                VStack(alignment: .leading) {
-                    Text("Firstname:")
-                    TextField("Firstname", text: $firstname)
-                        .padding()
-                        .background(Color.secondary.opacity(0.2))
-                        .cornerRadius(10)
-                    if authenticator.errors(forKey: "firstname").isEmpty == false {
-                        ForEach(authenticator.validationErrors.filter { $0.key == "firstname" }, id: \.self) { validationError in
-                           Text(validationError.message)
-                               .foregroundStyle(.red)
-                       }
-                   }
-                }
-                
-                VStack(alignment: .leading) {
-                    Text("Lastname:")
-                    TextField("Lastname", text: $lastname)
-                        .padding()
-                        .background(Color.secondary.opacity(0.2))
-                        .cornerRadius(10)
-                    if authenticator.errors(forKey: "lastname").isEmpty == false {
-                        ForEach(authenticator.validationErrors.filter { $0.key == "lastname" }, id: \.self) { validationError in
-                           Text(validationError.message)
-                               .foregroundStyle(.red)
-                       }
-                   }
-                }
-                
-                Button{
-                    authenticator.signup(email: email, password: password, firstname: firstname, lastname: lastname)
-                } label: {
-                    if case .loading = authenticator.SignupState {
-                        ProgressView()
-                    } else {
-                        Text("Create account")
-                            .frame(maxWidth: .infinity)
+                    
+                    VStack(alignment: .leading) {
+                        Text("Email:")
+                        TextField("Email", text: $email)
+                            .focused($focusedField, equals: .email)
+                            .onSubmit { self.focusNextField($focusedField) }
+                            .submitLabel(.next)
+                            .keyboardType(.emailAddress)
+                            .textInputAutocapitalization(.never)
                             .padding()
-                            .background(Color.primary)
-                            .foregroundColor(.background)
+                            .background(Color.secondary.opacity(0.2))
                             .cornerRadius(10)
+                        if authenticator.errors(forKey: "email").isEmpty == false {
+                            ForEach(authenticator.validationErrors.filter { $0.key == "email" }, id: \.self) { validationError in
+                               Text(validationError.message)
+                                   .foregroundStyle(.red)
+                           }
+                       }
+                    }
+                   
+                    VStack(alignment: .leading) {
+                        Text("Password:")
+                        SecureField("Password", text: $password)
+                            .focused($focusedField, equals: .password)
+                            .onSubmit { self.focusNextField($focusedField) }
+                            .submitLabel(.next)
+                            .textContentType(.password)
+                            .textInputAutocapitalization(.never)
+                            .padding()
+                            .background(Color.secondary.opacity(0.2))
+                            .cornerRadius(10)
+                        if authenticator.errors(forKey: "password").isEmpty == false {
+                            ForEach(authenticator.validationErrors.filter { $0.key == "password" }, id: \.self) { validationError in
+                               Text(validationError.message)
+                                   .foregroundStyle(.red)
+                           }
+                       }
+                    }
+                    
+                    VStack(alignment: .leading) {
+                        Text("Firstname:")
+                        TextField("Firstname", text: $firstname)
+                            .focused($focusedField, equals: .firstname)
+                            .onSubmit { self.focusNextField($focusedField) }
+                            .submitLabel(.next)
+                            .padding()
+                            .background(Color.secondary.opacity(0.2))
+                            .cornerRadius(10)
+                        if authenticator.errors(forKey: "firstname").isEmpty == false {
+                            ForEach(authenticator.validationErrors.filter { $0.key == "firstname" }, id: \.self) { validationError in
+                               Text(validationError.message)
+                                   .foregroundStyle(.red)
+                           }
+                       }
+                    }
+                    
+                    VStack(alignment: .leading) {
+                        Text("Lastname:")
+                        TextField("Lastname", text: $lastname)
+                            .focused($focusedField, equals: .lastname)
+                            .onSubmit { authenticator.signup(email: email, password: password, firstname: firstname, lastname: lastname) }
+                            .submitLabel(.go)
+                            .padding()
+                            .background(Color.secondary.opacity(0.2))
+                            .cornerRadius(10)
+                        if authenticator.errors(forKey: "lastname").isEmpty == false {
+                            ForEach(authenticator.validationErrors.filter { $0.key == "lastname" }, id: \.self) { validationError in
+                               Text(validationError.message)
+                                   .foregroundStyle(.red)
+                           }
+                       }
+                    }
+                    
+                    Button{
+                        authenticator.signup(email: email, password: password, firstname: firstname, lastname: lastname)
+                    } label: {
+                        if case .loading = authenticator.SignupState {
+                            ProgressView()
+                        } else {
+                            Text("Create account")
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.primary)
+                                .foregroundColor(.background)
+                                .cornerRadius(10)
+                        }
                     }
                 }
             }
@@ -297,11 +343,13 @@ struct SignupPopup: BottomPopup {
                     Task { await dismissLastPopup() }
                 }
             }
-            .padding()
-            .cornerRadius(10)
+            .padding(.horizontal)
             Spacer()
         }
         .padding()
+        .onAppear {
+            authenticator.validationErrors.removeAll()
+        }
     }
 }
 

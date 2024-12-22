@@ -75,7 +75,7 @@ struct WelcomTabView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            Text("Welcome to Smart Budget!")
+            Text("Welcome to PocketFlow!")
                 .font(.system(size: 30, weight: .bold))
                 .padding(.vertical)
             Text("Your account is now set up. You can start adding your expenses and budgets now.")
@@ -103,9 +103,9 @@ struct FirstCategoryTabView: View {
             Text("First category!")
                 .font(.system(size: 25, weight: .bold))
             
-            Text("Now that your account is set up, you can start by adding recommended categories.")
+            Text("Now that your account is set up, you can start by adding some recommended categories.")
                 .font(.title3)
-            Text("Choose a category to get started or not.")
+            Text("Choose a category to get started or skip this step and add your own.")
                 .font(.title3)
             Text("(You can always add more categories later or edit them.)")
                 .font(.subheadline)
@@ -142,7 +142,7 @@ struct FinishedTabView: View {
             Text("You're all set up!")
                 .font(.title3)
                 .padding()
-            Text("Let's get started, press the button below to start your journey!")
+            Text("Let's get started, press the button below to start your flow!")
                 .font(.headline)
                 .padding()
                 .multilineTextAlignment(.center)
