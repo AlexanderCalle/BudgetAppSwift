@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct AddAmountView: View {
+    @EnvironmentObject var appState: AppState
     @Environment(Router.self) var router: Router
     @Environment(Settings.self) var settings: Settings
     
@@ -23,7 +24,8 @@ struct AddAmountView: View {
             HStack {
                 Spacer()
                 Button(action: {
-                    router.navigateBack()
+//                    router.navigateBack()
+                    appState.showAddExpense = false
                 }) {
                     Image(systemName: "xmark")
                         .font(.system(size: 20))

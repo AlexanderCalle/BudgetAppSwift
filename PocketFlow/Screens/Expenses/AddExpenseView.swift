@@ -11,6 +11,7 @@ import MijickPopups
 struct AddExpenseView: View {
     @Environment(Router.self) var router
     @Environment(Settings.self) var settings: Settings
+    @EnvironmentObject var appState: AppState
     let amount: Float
     
     @StateObject var addExpenseViewModel = AddExpenseViewModel()
@@ -127,7 +128,8 @@ struct AddExpenseView: View {
         .onChange(of: addExpenseViewModel.shouldNavigate) { _ in
             if addExpenseViewModel.shouldNavigate {
                 NotificationCenter.default.post(name: .expenseCreated, object: nil)
-                router.navigateToRoot()
+                appState.showAddExpense = false
+//                router.navigateToRoot()
             }
         }
         .padding()

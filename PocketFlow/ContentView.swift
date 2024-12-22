@@ -17,6 +17,8 @@ enum TransitionDirection {
 
 
 struct ContentView: View {
+    @EnvironmentObject var appState: AppState
+    
     @State var selected = 0
     @State private var previousTab = 0
     @State private var direction: TransitionDirection = .none
@@ -25,34 +27,57 @@ struct ContentView: View {
 
 
     var body: some View {
-        VStack {
+        VStack(spacing: 0) {
             ZStack {
-                    RouterView {
-                        HomeView(categoriesStore: categoryStore)
-                    }
-                    .customTransition(selectedTab: selected,
-                                      thisTab: 0, previousTab: previousTab, direction: direction)
+                    HomeView(categoriesStore: categoryStore)
+                        .customTransition(
+                            selectedTab: selected,
+                            thisTab: 0,
+                            previousTab: previousTab,
+                            direction: direction
+                        )
                 
-                    RouterView {
-                        ExpensesView()
-                    }
-                    .customTransition(selectedTab: selected,
-                                      thisTab: 1, previousTab: previousTab, direction: direction)
+                    ExpensesView()
+                        .customTransition(
+                            selectedTab: selected,
+                            thisTab: 1,
+                            previousTab: previousTab,
+                            direction: direction
+                        )
 
-                   VStack {
-                       SettingsView()
-                   }
-                    .customTransition(selectedTab: selected,
-                                      thisTab: 2, previousTab: previousTab, direction: direction)
+                   SettingsView()
+                        .customTransition(
+                            selectedTab: selected,
+                            thisTab: 2,
+                            previousTab: previousTab,
+                            direction: direction
+                        )
 
             }
-            .sensoryFeedback(.impact(weight: .light), trigger: selected)
-            .accentColor(.purple)
             .background(Color.background)
             
             customBottomBar
-
         }
+        .fullScreenCover(isPresented: $appState.showAddExpense) {
+            RouterView {
+                AddAmountView()
+            }
+            .registerPopups() { $0
+                .center {
+                    $0.backgroundColor(.background)
+                      .cornerRadius(20)
+                      .popupHorizontalPadding(20)
+                      .tapOutsideToDismissPopup(true)
+                }
+                .vertical {
+                    $0.backgroundColor(.background)
+                      .cornerRadius(20)
+                      .enableStacking(true)
+                      .tapOutsideToDismissPopup(true)
+                }
+            }
+        }
+        .accentColor(.purple)
     }
     
     
@@ -176,6 +201,8 @@ enum TabbedItems: Int, CaseIterable{
 
 #Preview {
     ContentView()
+        .environmentObject(AppState())
+        .environment(Settings())
         .registerPopups() { $0
             .center {
                 $0.backgroundColor(.background)

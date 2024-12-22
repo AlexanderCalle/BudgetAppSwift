@@ -10,7 +10,6 @@ import Network
 import MijickPopups
 
 struct HomeView: View {
-    @Environment(Router.self) var router: Router
     @Environment(Settings.self) var settings: Settings
     
     @ObservedObject var categoriesStore: CategoryStore
@@ -149,7 +148,6 @@ struct HomeView: View {
 #Preview {
     @Previewable var categoryStore: CategoryStore = CategoryStore()
     HomeView(categoriesStore: categoryStore)
-        .environment(Router())
         .registerPopups() { $0
             .center {
                 $0.backgroundColor(.background)

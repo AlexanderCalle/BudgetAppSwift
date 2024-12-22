@@ -74,6 +74,7 @@ struct PrimaryScreen: View {
     RootScreen()
         .fontDesign(.rounded)
         .environmentObject(Auth.shared)
+        .environmentObject(AppState())
         .background(Color.background)
         .registerPopups() { $0
             .center {

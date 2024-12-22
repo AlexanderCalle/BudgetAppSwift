@@ -8,8 +8,8 @@
 import SwiftUI
 
 struct ExpensesView: View {
-    @Environment(Router.self) var router: Router
     @Environment(Settings.self) var settings: Settings
+    @EnvironmentObject var appState: AppState
     var category: Categorie? = nil
     @StateObject var expensesViewModel = ExpensesViewModel()
     
@@ -21,7 +21,8 @@ struct ExpensesView: View {
                     .font(.title)
                 Spacer()
                 Button(action: {
-                    router.navigate(to: .addAmount)
+                    appState.showAddExpense = true
+//                    router.navigate(to: .addAmount)
                 }) {
                     Image(systemName: "plus.circle.fill")
                         .resizable()
@@ -212,6 +213,5 @@ struct ExpensesView: View {
 
 #Preview {
     ExpensesView()
-        .environment(Router())
         .background(Color.background)
 }

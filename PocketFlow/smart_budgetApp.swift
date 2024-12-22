@@ -11,10 +11,14 @@ import SwiftData
 
 @main
 struct smart_budgetApp: App {
+    @StateObject private var appState = AppState()
+
+    
     var body: some Scene {
         WindowGroup {
             RootScreen()
                 .environmentObject(Auth.shared)
+                .environmentObject(appState)
                 .fontDesign(.rounded)
                 .background(Color.background)
         }

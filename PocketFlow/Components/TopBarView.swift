@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct TopBarView: View {
-    @Environment(Router.self) var router
+    @EnvironmentObject var appState: AppState
     
     var body: some View {
         HStack {
@@ -16,7 +16,7 @@ struct TopBarView: View {
                 .font(.title)
             Spacer()
             Button(action: {
-                router.navigate(to: .addAmount)
+                appState.showAddExpense = true
             }) {
                 Image(systemName: "plus.circle.fill")
                     .resizable()
