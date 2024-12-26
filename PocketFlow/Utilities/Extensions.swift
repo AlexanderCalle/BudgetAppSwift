@@ -51,6 +51,16 @@ extension Array where Element: Dated {
         return groupedByDateComponents
     }
 }
+
+extension Array where Element: Identifiable {
+    func group<Key: Hashable>(by keySelector: (Element) -> Key) -> [Key: [Element]] {
+        reduce(into: [Key: [Element]]()) { acc, element in
+            let key = keySelector(element)
+            acc[key, default: []].append(element)
+        }
+    }
+}
+
 extension Color {
     init(hex: String) {
         let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)

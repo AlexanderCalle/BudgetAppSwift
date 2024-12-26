@@ -12,6 +12,7 @@ struct Categorie: Codable, Identifiable, Equatable, Hashable {
     var name: String
     var description: String?
     var max_expense: Float?
+    var type: CategoryType
     var totalExpenses: Float?
     var expenses: [Expense]?
     var totalPercentage: Float {
@@ -22,11 +23,12 @@ struct Categorie: Codable, Identifiable, Equatable, Hashable {
         self = try JSONDecoder().decode(Categorie.self, from: data)
     }
     
-    init(id: String, name: String, description: String? = nil, max_expense: Float? = nil, expenses: [Expense]? = nil, totalExpenses: Float? = nil, totalPercentage: Float? = nil) {
+    init(id: String, name: String, description: String? = nil, max_expense: Float? = nil, type: CategoryType = .expenses, expenses: [Expense]? = nil, totalExpenses: Float? = nil, totalPercentage: Float? = nil) {
         self.id = id
         self.name = name
         self.description = description
         self.max_expense = max_expense
+        self.type = type
         self.expenses = expenses
         self.totalExpenses = totalExpenses
         self.totalExpenses = totalExpenses
@@ -41,4 +43,9 @@ struct CreateEditCategorie: Codable {
     let name: String
     let description: String?
     let max_expense: Float
+}
+
+enum CategoryType: String, Codable, CaseIterable, Hashable {
+    case expenses = "EXPENSES"
+    case savings = "SAVINGS"
 }

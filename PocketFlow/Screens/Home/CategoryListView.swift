@@ -22,10 +22,9 @@ struct CategoryListView: View {
                     .font(.title)
                 Spacer()
             }
+           
+            categorieSections
             
-            ForEach(categories) { category in
-                CategoryRow(category: category)
-            }
             Button {
                 onAddCategory()
             } label: {
@@ -44,6 +43,22 @@ struct CategoryListView: View {
             }
         }
         .padding(.top, 5)
+    }
+    
+    private var categorieSections: some View {
+        ForEach(categories.group(by: { $0.type }).sorted(by: { $0.key.rawValue < $1.key.rawValue }), id: \.key) { key, values in
+            Section(header:
+                Text(key.rawValue)
+            ) {
+                categoriesView(values)
+            }
+        }
+    }
+    
+    private func categoriesView(_ categoriesList: [Categorie]) -> some View {
+        ForEach(categoriesList, id: \.id) { category in
+            CategoryRow(category: category)
+        }
     }
     
     private func CategoryRow(category: Categorie) -> some View {
