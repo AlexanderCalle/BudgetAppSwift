@@ -83,6 +83,19 @@ struct EditCategoryPopup: BottomPopup {
                             .foregroundColor(.danger)
                     }
                 }
+                VStack(alignment: .leading) {
+                    Text("Category type")
+                        .font(.headline)
+                    Picker("Select category type", selection: Binding(
+                        get: { categoriesStore.selectedCategory!.type },
+                        set: { categoriesStore.selectedCategory?.type = $0 }
+                    )) {
+                        ForEach(CategoryType.allCases, id: \.self) { categoryType in
+                            Text(categoryType.rawValue)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                }
             }
             
             Button(action: {
@@ -105,12 +118,12 @@ struct EditCategoryPopup: BottomPopup {
         }
         .onChange(of: categoriesStore.editCategoryState) { state in
             if case .success(_) = state {
-                Task { await dismissLastPopup() }
+                Task { await dismissAllPopups() }
             }
         }
         .onChange(of: categoriesStore.deleteCategoryState) { state in
             if case .success(_) = state {
-                Task { await dismissAllPopups()}
+                Task { await dismissAllPopups() }
             }
         }
         .padding()

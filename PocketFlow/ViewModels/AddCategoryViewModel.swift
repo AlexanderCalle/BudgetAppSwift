@@ -16,7 +16,7 @@ class AddCategoryViewModel: ObservableObject {
     
     let api = ApiService()
     
-    func addNewCategory(name: String, description: String, amount: Float?) {
+    func addNewCategory(name: String, description: String, amount: Float?, type: CategoryType = .expenses) {
         print("Adding new category...")
         guard !validateForm(name: name, description: description, amount: amount) else {
             print("Validation failed.")
@@ -25,7 +25,7 @@ class AddCategoryViewModel: ObservableObject {
         }
         
         createdCatergoryState = .loading
-        let newCategory = CreateEditCategorie(name: name, description: description, max_expense: amount!)
+        let newCategory = CreateEditCategorie(name: name, description: description, max_expense: amount!, type: type)
         
         api.post("categories", body: newCategory) { [weak self] (result: Result<CreateEditCategorie, Error>) in
             DispatchQueue.main.async {

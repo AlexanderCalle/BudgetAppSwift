@@ -43,6 +43,7 @@ struct CreateEditCategorie: Codable {
     let name: String
     let description: String?
     let max_expense: Float
+    let type: CategoryType
 }
 
 enum CategoryType: String, Codable, CaseIterable, Hashable {

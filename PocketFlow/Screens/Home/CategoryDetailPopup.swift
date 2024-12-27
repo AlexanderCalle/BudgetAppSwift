@@ -57,12 +57,12 @@ struct CategoryDetailPopup: BottomPopup {
                     VStack(alignment: .trailing) {
                         HStack(spacing: 4) {
                             Text(category.max_expense ?? 0, format: .defaultCurrency(code: settings.currency.rawValue))
-                            Text("budget")
+                            Text(category.type == .savings ? "Target" : "Budget")
                                 .foregroundStyle(.secondary)
                         }
                         HStack(spacing: 4) {
                             Text(category.totalExpenses ?? 0, format: .defaultCurrency(code: settings.currency.rawValue))
-                            Text("spent")
+                            Text(category.type == .savings ? "Funded" : "Spent")
                                 .foregroundStyle(.secondary)
                         }
                     }

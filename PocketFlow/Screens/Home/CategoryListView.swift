@@ -16,13 +16,7 @@ struct CategoryListView: View {
     @State var isExpanded: Set<String> = []
     
     var body: some View {
-        VStack(spacing: 12) {
-            HStack {
-                Text("Categories")
-                    .font(.title)
-                Spacer()
-            }
-           
+        VStack(spacing: 20) {
             categorieSections
             
             Button {
@@ -41,23 +35,62 @@ struct CategoryListView: View {
                     }
                     .tint(.gray)
             }
+            .padding(.bottom, 15)
         }
         .padding(.top, 5)
     }
     
     private var categorieSections: some View {
-        ForEach(categories.group(by: { $0.type }).sorted(by: { $0.key.rawValue < $1.key.rawValue }), id: \.key) { key, values in
-            Section(header:
-                Text(key.rawValue)
-            ) {
-                categoriesView(values)
+        VStack(spacing: 40) {
+            ForEach(categories.group(by: { $0.type }).sorted(by: { $0.key.rawValue < $1.key.rawValue }), id: \.key) { key, values in
+                VStack(spacing: 12) {
+                    categoryTypeOverview(categories: values, type: key)
+                    categoriesView(values)
+                }
             }
         }
     }
     
+    private func categoryTypeOverview(categories: [Categorie], type: CategoryType) -> some View {
+        let budgetted = categories.reduce(into: 0) { acc, curr in
+                acc += curr.max_expense ?? 0
+        }
+        let amount = categories.reduce(into: 0) { acc, curr in
+            acc += curr.totalExpenses ?? 0
+        }
+        return VStack {
+            LazyVGrid(
+                columns: [
+                    GridItem(.flexible(), alignment: .leading),
+                    GridItem(.fixed(80), alignment: .trailing),
+                    GridItem(.fixed(90), alignment: .trailing)
+                ],
+                spacing: 5 // Row spacing
+            ) {
+                Text(type == .savings ? "Savings" : "Monthly")
+                Text(type == .savings ? "Target" : "Budgeted")
+                Text(type == .savings ? "Funded" :"Left")
+                Text("\(categoryStore.daysLeftInCurrentMonth()) Days left")
+                Text(budgetted, format: .defaultCurrency(code: settings.currency.rawValue))
+                Text(type == .savings ? amount : (budgetted - amount), format: .defaultCurrency(code: settings.currency.rawValue))
+            }
+            .padding(10)
+            .font(.footnote)
+            .foregroundColor(.primary.opacity(0.7))
+            .overlay {
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(.secondary.opacity(0.1))
+                    .stroke(.secondary.opacity(0.2), lineWidth: 2)
+            }
+        }
+        .padding(.horizontal, 1)
+    }
+    
     private func categoriesView(_ categoriesList: [Categorie]) -> some View {
-        ForEach(categoriesList, id: \.id) { category in
-            CategoryRow(category: category)
+        VStack(spacing: 12) {
+            ForEach(categoriesList, id: \.id) { category in
+                CategoryRow(category: category)
+            }
         }
     }
     

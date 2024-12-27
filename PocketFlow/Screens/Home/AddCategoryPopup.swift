@@ -16,7 +16,7 @@ struct AddCategoryPopup: BottomPopup {
     @State private var name: String = ""
     @State private var description: String = ""
     @State private var amount: Float = 0
-    
+    @State private var categoryType = CategoryType.expenses
     
     var body: some View {
         VStack(spacing: 20) {
@@ -67,10 +67,20 @@ struct AddCategoryPopup: BottomPopup {
                             .foregroundColor(.danger)
                     }
                 }
+                VStack(alignment: .leading) {
+                    Text("Category type")
+                        .font(.headline)
+                    Picker("Select category type", selection: $categoryType) {
+                        ForEach(CategoryType.allCases, id: \.self) { categoryType in
+                            Text(categoryType.rawValue)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                }
             }
             
             Button(action: {
-                categorieStore.addNewCategory(name: name, description: description, amount: amount)
+                categorieStore.addNewCategory(name: name, description: description, amount: amount, type: categoryType)
             }){
                 Group {
                     if case .loading = categorieStore.createdCatergoryState {

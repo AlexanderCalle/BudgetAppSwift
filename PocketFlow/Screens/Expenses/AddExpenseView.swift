@@ -90,13 +90,7 @@ struct AddExpenseView: View {
                     case .loading:
                         ProgressView()
                     case .success(let categories):
-                        VStack(alignment: .leading, spacing: 10) {
-                            ForEach(categories) { category in
-                                CategorySelectionRow(category: category, isSelected: selectedCategory == category) {
-                                    selectedCategory = category
-                                }
-                            }
-                        }
+                        categoriesList(categories: categories)
                     case .failure:
                         Text("Error")
                     case .idle:
@@ -138,6 +132,22 @@ struct AddExpenseView: View {
             ToolbarItem(placement: .principal) {
                 Text(amount, format: .defaultCurrency(code: settings.currency.rawValue))
                     .font(.headline)
+            }
+        }
+    }
+    
+    private func categoriesList(categories: [Categorie]) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            ForEach(categories.group(by: { $0.type }).sorted(by: { $0.key.rawValue < $1.key.rawValue }), id: \.key) {key, value in
+                Text(key.rawValue)
+                    .padding(.top, 15)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                ForEach(value) { category in
+                    CategorySelectionRow(category: category, isSelected: selectedCategory == category) {
+                        selectedCategory = category
+                    }
+                }
             }
         }
     }

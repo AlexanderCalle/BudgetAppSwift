@@ -126,7 +126,7 @@ class CategoryStore: ObservableObject {
         
         editCategoryState = .loading
     
-        let newCategory = CreateEditCategorie(name: selectedCategory!.name, description: selectedCategory!.description, max_expense: selectedCategory!.max_expense!)
+        let newCategory = CreateEditCategorie(name: selectedCategory!.name, description: selectedCategory!.description, max_expense: selectedCategory!.max_expense!, type: selectedCategory!.type)
         
         api.put("categories/\(selectedCategory?.id ?? "")", body: newCategory) { [weak self] result in
             DispatchQueue.main.async {

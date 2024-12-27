@@ -26,8 +26,6 @@ struct HomeView: View {
                         SevenDaysChartView(categoriesStore.expenseOverview)
                             .frame(height: 200)
                     }
-                    
-                    mainCategoryOverview
                     VStack {
                         switch categoriesStore.categoriesState {
                         case .success(_):
