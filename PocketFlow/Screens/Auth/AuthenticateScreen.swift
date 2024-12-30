@@ -101,7 +101,7 @@ struct LoginPopup: BottomPopup {
         }
         .padding()
         .onAppear {
-            authenticator.validationErrors.removeAll()
+            authenticator.resetForm()
         }
     }
     
@@ -112,7 +112,7 @@ struct LoginPopup: BottomPopup {
                 validationErrors: $authenticator.validationErrors,
                 validationKey: "email"
             ) {
-                TextField("Email", text: $email)
+                TextField("Email", text: $authenticator.email)
                     .focused($focusedField, equals: .email)
                     .onSubmit {
                         self.focusNextField($focusedField)
@@ -128,10 +128,10 @@ struct LoginPopup: BottomPopup {
                 validationErrors: $authenticator.validationErrors,
                 validationKey: "password"
             ) {
-                SecureField("Password", text: $password)
+                SecureField("Password", text: $authenticator.password)
                     .focused($focusedField, equals: .password)
                     .onSubmit {
-                        authenticator.login(email: email, password: password)
+                        authenticator.login()
                     }
                     .submitLabel(.go)
                     .textContentType(.password)
@@ -143,7 +143,7 @@ struct LoginPopup: BottomPopup {
                 get: { authenticator.loginState == .loading },
                 set: { _ in }
             )) {
-                authenticator.login(email: email, password: password)
+                authenticator.login()
             }
     
             Button {
@@ -203,7 +203,7 @@ struct SignupPopup: BottomPopup {
                         validationErrors: $authenticator.validationErrors,
                         validationKey: "email"
                     ) {
-                        TextField("Email", text: $email)
+                        TextField("Email", text: $authenticator.email)
                             .focused($focusedField, equals: .email)
                             .onSubmit { self.focusNextField($focusedField) }
                             .submitLabel(.next)
@@ -216,7 +216,7 @@ struct SignupPopup: BottomPopup {
                         validationErrors: $authenticator.validationErrors,
                         validationKey: "password"
                     ) {
-                        SecureField("Password", text: $password)
+                        SecureField("Password", text: $authenticator.password)
                             .focused($focusedField, equals: .password)
                             .onSubmit { self.focusNextField($focusedField) }
                             .submitLabel(.next)
@@ -229,7 +229,7 @@ struct SignupPopup: BottomPopup {
                         validationErrors: $authenticator.validationErrors,
                         validationKey: "firstname"
                     ) {
-                        TextField("Firstname", text: $firstname)
+                        TextField("Firstname", text: $authenticator.firstname)
                             .focused($focusedField, equals: .firstname)
                             .onSubmit { self.focusNextField($focusedField) }
                             .submitLabel(.next)
@@ -240,9 +240,9 @@ struct SignupPopup: BottomPopup {
                         validationErrors: $authenticator.validationErrors,
                         validationKey: "lastname"
                     ) {
-                        TextField("Lastname", text: $lastname)
+                        TextField("Lastname", text: $authenticator.lastname)
                             .focused($focusedField, equals: .lastname)
-                            .onSubmit { authenticator.signup(email: email, password: password, firstname: firstname, lastname: lastname) }
+                            .onSubmit { authenticator.signup() }
                             .submitLabel(.go)
                     }
                     
@@ -254,7 +254,7 @@ struct SignupPopup: BottomPopup {
                             set: { _ = $0 }
                         )
                     ) {
-                        authenticator.signup(email: email, password: password, firstname: firstname, lastname: lastname)
+                        authenticator.signup()
                     }
                 }
             }
@@ -268,7 +268,7 @@ struct SignupPopup: BottomPopup {
         }
         .padding()
         .onAppear {
-            authenticator.validationErrors.removeAll()
+            authenticator.resetForm()
         }
     }
 }

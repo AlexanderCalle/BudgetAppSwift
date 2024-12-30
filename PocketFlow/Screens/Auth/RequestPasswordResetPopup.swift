@@ -30,7 +30,7 @@ struct RequestPasswordResetPopup: BottomPopup {
                 validationErrors: $authViewModel.validationErrors,
                 validationKey: "email"
             ) {
-                TextField("Email", text: $authViewModel.email)
+                TextField("Email", text: $authViewModel.resetEmail)
                     .keyboardType(.emailAddress)
                     .textInputAutocapitalization(.never)
             }

@@ -9,12 +9,19 @@ import Foundation
 
 class AuthenticationViewModel: ObservableObject {
     
+    // MARK: - FORM STATE
     @Published var loginState: ViewState<Bool> = .idle
     @Published var SignupState: ViewState<Bool> = .idle
     @Published var validationErrors: [ValidationError] = []
     
-    @Published var resetState: ViewState<Bool> = .idle
     @Published var email: String = ""
+    @Published var password: String = ""
+    @Published var firstname: String = ""
+    @Published var lastname: String = ""
+    
+    // MARK: - RESET STATE
+    @Published var resetState: ViewState<Bool> = .idle
+    @Published var resetEmail: String = ""
     
     func errors(forKey key: String) -> [ValidationError] {
         validationErrors.filter { $0.key == key }
@@ -22,9 +29,8 @@ class AuthenticationViewModel: ObservableObject {
     
     let api = ApiService()
     
-    func login(email: String, password: String) {
-        
-        guard validateLogin(email: email, password: password) else { return }
+    func login() {
+        guard validateLogin() else { return }
         
         print("Logging in...")
         loginState = .loading
@@ -46,8 +52,8 @@ class AuthenticationViewModel: ObservableObject {
         }
     }
     
-    func signup(email: String, password: String, firstname: String, lastname: String) {
-        guard validateSignup(email: email, password: password, firstname: firstname, lastname: lastname) else { return }
+    func signup() {
+        guard validateSignup() else { return }
         
         SignupState = .loading
         
@@ -58,7 +64,7 @@ class AuthenticationViewModel: ObservableObject {
                 switch result {
                 case .success(_):
                     self?.SignupState = .success(true)
-                    try? Auth.shared.setUser(User(email: email, firstname: firstname, lastname: lastname))
+                    try? Auth.shared.setUser(User(email: self?.email ?? "", firstname: self?.firstname ?? "", lastname: self?.lastname ?? ""))
                 case .failure(let error):
                     self?.SignupState = .failure(error)
                 }
@@ -125,8 +131,17 @@ class AuthenticationViewModel: ObservableObject {
         }
     }
     
-    private func validateSignup(email: String, password: String, firstname: String, lastname: String) -> Bool {
-        validateLogin(email: email, password: lastname)
+    func resetForm() {
+        email = ""
+        password = ""
+        firstname = ""
+        lastname = ""
+        validationErrors.removeAll()
+    }
+    
+    // MARK: - Validation functions
+    private func validateSignup() -> Bool {
+        _ = validateLogin()
         
         if firstname.isEmpty {
             validationErrors.append(.init(key: "firstname", message: "First name is required"))
@@ -139,7 +154,7 @@ class AuthenticationViewModel: ObservableObject {
         return validationErrors.count == 0
     }
     
-    private func validateLogin(email: String, password: String) -> Bool {
+    private func validateLogin() -> Bool {
         validationErrors.removeAll()
         if email.isEmpty {
             validationErrors.append(.init(key: "email", message: "Email is required"))
