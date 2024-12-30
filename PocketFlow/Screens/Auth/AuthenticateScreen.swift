@@ -59,9 +59,6 @@ struct LoginPopup: BottomPopup {
         case password
     }
     
-    @State var email: String = ""
-    @State var password: String = ""
-    
     func configurePopup(config: BottomPopupConfig) -> BottomPopupConfig {
         config
             .heightMode(.large)
@@ -169,12 +166,6 @@ struct SignupPopup: BottomPopup {
         case firstname
         case lastname
     }
-    
-    // TODO: Refactor - Move states to ViewModel
-    @State var email: String = ""
-    @State var password: String = ""
-    @State var firstname: String = ""
-    @State var lastname: String = ""
     
     func configurePopup(config: BottomPopupConfig) -> BottomPopupConfig {
         config
