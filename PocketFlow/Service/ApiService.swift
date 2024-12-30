@@ -288,7 +288,6 @@ enum ApiError: Error {
     case internalError
     case unknown(Int?, String?)
     
-    // TODO: get a string message
     func getErrorMessage() -> String? {
         switch self {
         case .notFound(let message):

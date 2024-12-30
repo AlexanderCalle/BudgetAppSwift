@@ -13,7 +13,12 @@ struct AuthErrorResponse: Decodable {
     let code: AuthErrorCode
     
     func errorMessage() -> String {
-        return "Auth Error: \(code.rawValue), \(name), \(status)"
+        switch self.code {
+            case .userAlreadyExists:
+            return "User already exists"
+        case .invalidCredentials:
+            return "Invalid credentials"
+        }
     }
 }
 
