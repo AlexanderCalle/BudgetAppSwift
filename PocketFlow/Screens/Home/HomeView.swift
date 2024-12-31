@@ -20,7 +20,7 @@ struct HomeView: View {
             if (!isConnected) {
                 OfflineView(message: "Offline mode")
             } else {
-                TopBarView()
+                TopBarView("Dashboard")
                 ScrollView {
                     if !categoriesStore.expenseOverview.isEmpty {
                         SevenDaysChartView(categoriesStore.expenseOverview)

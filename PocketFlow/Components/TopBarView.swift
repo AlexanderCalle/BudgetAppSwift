@@ -9,10 +9,15 @@ import SwiftUI
 
 struct TopBarView: View {
     @EnvironmentObject var appState: AppState
+    let title: String
+    
+    init(_ title: String) {
+        self.title = title
+    }
     
     var body: some View {
         HStack {
-            Text("Dashboard")
+            Text(title)
                 .font(.title)
             Spacer()
             Button(action: {
@@ -28,5 +33,5 @@ struct TopBarView: View {
 }
 
 #Preview {
-    TopBarView()
+    TopBarView("Dashboard")
 }

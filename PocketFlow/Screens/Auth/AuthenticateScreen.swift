@@ -24,10 +24,10 @@ struct AuthenticateScreen: View {
             
             Spacer()
             
-            FullScreenButton("Create an account", theme: .purple) {
+            LargeButton("Create an account", theme: .purple, font: .system(size: ContentStyle.FontSize.button, weight: .bold)) {
                 Task { await SignupPopup(authenticator: authenticator).present() }
             }
-            FullScreenButton("Login", theme: .secondary) {
+            LargeButton("Login", theme: .secondary, font: .system(size: ContentStyle.FontSize.button, weight: .bold)) {
                 Task{ await LoginPopup(authenticator: authenticator).present() }
             }
         }
@@ -66,7 +66,7 @@ struct LoginPopup: BottomPopup {
     
     var body: some View {
         VStack {
-            XMarkButton {
+            CloseButton {
                 Task { await dismissLastPopup() }
             }
             Spacer()
@@ -136,12 +136,17 @@ struct LoginPopup: BottomPopup {
             }
                 
             
-            FullScreenButton("Login", theme: .primary, loading: Binding(
-                get: { authenticator.loginState == .loading },
-                set: { _ in }
-            )) {
+            LargeButton(
+                "Login",
+                theme: .primary,
+                loading: Binding(
+                    get: { authenticator.loginState == .loading },
+                    set: { _ in }
+                )
+            ) {
                 authenticator.login()
             }
+            .padding(.top, 20)
     
             Button {
                 Task { await RequestPasswordResetPopup(authViewModel: authenticator).present() }
@@ -174,7 +179,7 @@ struct SignupPopup: BottomPopup {
     
     var body: some View {
         VStack {
-            XMarkButton {
+            CloseButton {
                 Task { await dismissLastPopup() }
             }
             Spacer()
@@ -237,8 +242,8 @@ struct SignupPopup: BottomPopup {
                             .submitLabel(.go)
                     }
                     
-                    FullScreenButton(
-                        "Login",
+                    LargeButton(
+                        "Signup",
                         theme: .primary,
                         loading: Binding<Bool?>(
                             get: { authenticator.SignupState == .loading },
@@ -247,6 +252,8 @@ struct SignupPopup: BottomPopup {
                     ) {
                         authenticator.signup()
                     }
+                    .padding(.top, 20)
+
                 }
             }
             .onChange(of: authenticator.SignupState) { SignupState in

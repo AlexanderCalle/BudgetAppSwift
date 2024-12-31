@@ -20,22 +20,12 @@ struct AddAmountView: View {
     ]
     
     var body: some View {
-        VStack(spacing: 20) {
-            HStack {
-                Spacer()
-                Button(action: {
-//                    router.navigateBack()
-                    appState.showAddExpense = false
-                }) {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 20))
-                        .padding(8)
-                        .background(.secondary.opacity(0.2))
-                        .foregroundColor(.primary)
-                        .clipShape(.circle)
-                }
-                .padding()
+        VStack(spacing: ContentStyle.Spacing.Large) {
+            CloseButton {
+                appState.showAddExpense = false
             }
+            .padding(.horizontal, ContentStyle.Padding.Default)
+           
             Spacer()
             // Display amount
             amountDisplay
@@ -43,22 +33,17 @@ struct AddAmountView: View {
             // Custom keypad
             NumPad(columns: columns, handleKeyPress: handleKeyPress, handleDelete: handleDelete)
             // Continue button
-            Button(action: {
+            LargeButton(
+                "Continue",
+                theme: .purple
+            ) {
                 if let parsedAmount = Float(amount) {
                     print("Parsed amount: \(parsedAmount)")
                     router.navigate(to: .newExpense(amount: parsedAmount))
                 } else {
                     print("Invalid amount: \(amount)")
-                    // Handle invalid input (optional)
+                    // TODO: Refactor - handle invalid input
                 }
-            }) {
-                Text("Continue")
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.purple)
-                    .cornerRadius(10)
             }
             .padding()
         }
@@ -69,7 +54,7 @@ struct AddAmountView: View {
     
     // Handle button press logic
     private func handleKeyPress(_ key: String) {
-        withAnimation(.easeOut(duration: 0.1)) {
+        withAnimation(.easeOut(duration: ContentStyle.Duration.Typing)) {
             if key == "." {
                 if !amount.contains(".") {
                     amount += "."
@@ -97,7 +82,7 @@ struct AddAmountView: View {
             isAnimating = true
         }
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + ContentStyle.Duration.Animation) {
             isAnimating = false
         }
     }
@@ -115,28 +100,61 @@ struct AddAmountView: View {
         let lastDigit = amount.last.map(String.init) ?? ""
         let remainingAmount = String(amount.dropLast())
         
-        let maxWidth: CGFloat = UIScreen.main.bounds.width - 40 // Adjust for padding
-        let textWidth = CGFloat(amount.count) * 50 // Approximate width per character (tweak as needed)
+        let maxWidth: CGFloat = UIScreen.main.bounds.width - ContentStyle.Padding.NumPad // Adjust for padding
+        let textWidth = CGFloat(amount.count) * ContentStyle.FontSize.Amount
         let scale = min(1.0, maxWidth / textWidth) // Scale down if it exceeds maxWidth
 
-
-        return HStack(spacing: 0) {
+        return HStack(spacing: ContentStyle.Spacing.None) {
             Text("\(settings.currency.getSymbol())\(remainingAmount)")
-                .font(.system(size: 50, weight: .bold))
+                .font(.system(size: ContentStyle.FontSize.Amount, weight: .bold))
                 .foregroundColor(.primary)
                 .contentTransition(.interpolate)
 
             Text(lastDigit)
-                .font(.system(size: 50, weight: .bold))
+                .font(.system(size: ContentStyle.FontSize.Amount, weight: .bold))
                 .foregroundColor(.primary)
                 .contentTransition(.interpolate)
-                .scaleEffect(isAnimating ? 1.1 : 1.0) // Animate last digit
-                .animation(.easeOut(duration: 0.1), value: isAnimating)
+                .scaleEffect(isAnimating ? ContentStyle.Scale.Up : ContentStyle.Scale.None) // Animate last digit
+                .animation(.easeOut(duration: ContentStyle.Duration.Typing), value: isAnimating)
         }
         .scaleEffect(scale)
         .lineLimit(1)
         .frame(maxWidth: .infinity, alignment: .center)
-        .padding(.horizontal, 16)
+        .padding(.horizontal, ContentStyle.Padding.DisplayAmount)
+    }
+    
+    struct ContentStyle {
+        static let GridContent: GridItem = GridItem(.flexible())
+        
+        struct Spacing {
+            static let None: CGFloat = 0
+            static let Medium: CGFloat = 10
+            static let Large: CGFloat = 20
+        }
+        
+        struct FontSize {
+            static let Amount: CGFloat = 50
+        }
+        
+        struct Padding {
+            static let NumPad: CGFloat = 40
+            static let DisplayAmount: CGFloat = 16
+            static let Default: CGFloat = 10
+        }
+        
+        struct Width {
+            static let NumberButton: CGFloat = 50
+        }
+        
+        struct Scale {
+            static let Up: CGFloat = 1.1
+            static let None: CGFloat = 1
+        }
+        
+        struct Duration {
+            static let Animation: TimeInterval = 0.3
+            static let Typing: TimeInterval = 0.1
+        }
     }
 }
 
@@ -146,27 +164,30 @@ struct NumPad: View {
     let handleDelete: () -> Void
 
     var body: some View {
-        LazyVGrid(columns: columns, spacing: 10) {
+        LazyVGrid(columns: columns, spacing: ContentStyle.Spacing) {
             ForEach(["1", "2", "3", "4", "5", "6", "7", "8", "9"], id: \.self) { key in
                 Button(action: {
                     handleKeyPress(key)
                 }) {
-                    Text(key)
-                        .font(.system(size: 25, weight: .bold))
-                        .foregroundColor(.primary)
-                        .frame(width: 70, height: 70)
+                    NumPadButton(key: key, action: handleKeyPress)
                 }
             }
             NumPadButton(key: ".", action: handleKeyPress)
             NumPadButton(key: "0", action: handleKeyPress)
             Button(action: handleDelete) {
                 Image(systemName: "delete.left")
-                    .font(.system(size: 25))
+                    .font(.system(size: ContentStyle.FontSize))
                     .foregroundColor(.primary)
-                    .frame(width: 70, height: 70)
+                    .frame(width: ContentStyle.Size, height: ContentStyle.Size)
             }
         }
         .padding(.horizontal)
+    }
+    
+    struct ContentStyle {
+        static let Spacing: CGFloat = 10
+        static let FontSize: CGFloat = 25
+        static let Size: CGFloat = 70
     }
 }
 

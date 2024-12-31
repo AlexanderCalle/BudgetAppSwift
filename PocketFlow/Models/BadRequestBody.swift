@@ -12,7 +12,7 @@ struct ErrorDetail: Codable {
     let message: String
 }
 
-// Enum to handle different message formats
+/// Enum to handle different message formats
 enum DecodedMessage: Codable {
     case detailed([ErrorDetail], String, Int) // For the detailed error format
     case simple(String)                      // For the simple error format
@@ -55,7 +55,7 @@ enum DecodedMessage: Codable {
     func errorMessage() -> String {
         switch self {
         case .detailed(let errorDetails, let error, let statusCode):
-            var detailsString = errorDetails.map { "\($0.property): \($0.message)" }.joined(separator: ", ")
+            let detailsString = errorDetails.map { "\($0.property): \($0.message)" }.joined(separator: ", ")
             return "Error \(statusCode): \(error) (\(detailsString))"
         case .simple(let errorMessage):
             return errorMessage

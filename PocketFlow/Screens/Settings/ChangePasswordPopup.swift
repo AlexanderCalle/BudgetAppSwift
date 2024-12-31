@@ -14,7 +14,7 @@ struct ChangePasswordPopup: BottomPopup {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            XMarkButton {
+            CloseButton {
                 Task { await dismissLastPopup() }
             }
             

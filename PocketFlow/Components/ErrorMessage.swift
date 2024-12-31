@@ -19,6 +19,12 @@ struct ErrorMessage: View {
             if let apiError = error as? ApiError, let message = apiError.getErrorMessage(){
                 Text(message)
             }
+            if let networkError = error as? NetworkError {
+                OfflineMessage(networkError: networkError)
+            }
+            else {
+                Text("Something went wrong, please try again later")
+            }
             Spacer()
         }
         .padding()

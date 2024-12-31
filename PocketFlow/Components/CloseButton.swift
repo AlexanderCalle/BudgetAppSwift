@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct XMarkButton: View {
+struct CloseButton: View {
     let action: () -> Void
     
     init(action: @escaping () -> Void) {
@@ -32,7 +32,7 @@ struct XMarkButton: View {
 }
 
 #Preview {
-    XMarkButton {
+    CloseButton {
         
     }
 }

@@ -14,7 +14,7 @@ struct RequestPasswordResetPopup: BottomPopup {
     
     var body: some View {
         VStack(spacing: 20) {
-            XMarkButton { Task { await dismissLastPopup() } }
+            CloseButton { Task { await dismissLastPopup() } }
             Text("Reset Password")
                 .font(.title)
                 .padding()

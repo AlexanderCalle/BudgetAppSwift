@@ -16,118 +16,32 @@ struct AddExpenseView: View {
     
     @StateObject var addExpenseViewModel = AddExpenseViewModel()
     
-    @State private var name: String = ""
-    @State private var date: Date = Date()
-    @State private var type: ExpenseType? = nil
-    @State private var selectedCategory: Categorie? = nil
-    
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            Grid(alignment: .leading, horizontalSpacing: 50, verticalSpacing: 20) {
-                Divider()
-                GridRow {
-                    Text("For")
-                        .font(.headline)
-                    TextField("amount spent on?", text: $name)
-                }
-                if addExpenseViewModel.validationErrors.contains(where: { $0.key == "name" }) {
-                    Text(addExpenseViewModel.validationErrors.first(where: { $0.key == "name" })?.message ?? "")
-                        .foregroundColor(.danger)
-                }
-                Divider()
-                GridRow {
-                    Label("Date", systemImage: "calendar")
-                        .font(.headline)
-                    Button{
-                        Task { await DatePickerPopup(date: $date).present()}
-                    } label: {
-                        Text(date.formatted(date: .abbreviated, time: .omitted))
-                    }
-                    .foregroundColor(.primary)
-                }
-                if addExpenseViewModel.validationErrors.contains(where: { $0.key == "date" }) {
-                    Text(addExpenseViewModel.validationErrors.first(where: { $0.key == "date" })?.message ?? "")
-                        .foregroundColor(.danger)
-                }
-                Divider()
-                GridRow {
-                    Label("Type", systemImage: "creditcard.fill")
-                    if type != nil {
-                        Button {
-                            Task { await ExpenseTypeSelectionPopup(SetExpenseType: {
-                                type = $0
-                            }).present() }
-                        } label: {
-                            Text(type!.rawValue)
-                        }
-                        .foregroundColor(.primary)
-                    } else {
-                        Button {
-                            Task { await ExpenseTypeSelectionPopup(SetExpenseType: {
-                                type = $0
-                            }).present() }
-                        } label: {
-                            Text("Select expense type")
-                        }
-                        .foregroundColor(.primary)
-                    }
-                }
-                if addExpenseViewModel.validationErrors.contains(where: { $0.key == "type" }) {
-                    Text(addExpenseViewModel.validationErrors.first(where: { $0.key == "type" })?.message ?? "")
-                        .foregroundColor(.danger)
-                }
-                Divider()
+        VStack(alignment: .leading, spacing: ContentStyle.Spacing.Medium) {
+            expenseForm
+            
+            selectCategory
+            
+            LargeButton(
+                "Save Expense",
+                theme: .purple,
+                loading: Binding<Bool?>(
+                    get: { addExpenseViewModel.addExpenseState == .loading },
+                    set: { _ = $0 }
+                )
+            ) {
+                addExpenseViewModel.addExpense(amount: amount)
             }
-            ScrollView() {
-                VStack(alignment: .leading) {
-                    Text("Category?")
-                        .font(.system(size: 20, weight: .medium))
-                    if addExpenseViewModel.validationErrors.contains(where: { $0.key == "category" }) {
-                        Text(addExpenseViewModel.validationErrors.first(where: { $0.key == "category" })!.message)
-                            .foregroundColor(.danger)
-                    }
-                    switch addExpenseViewModel.categories {
-                    case .loading:
-                        ProgressView()
-                    case .success(let categories):
-                        categoriesList(categories: categories)
-                    case .failure:
-                        Text("Error")
-                    case .idle:
-                        Text("")
-                    }
-                }
-            }
-            Button(action: {
-                addExpenseViewModel.onSubmitExpense(
-                    name: name, amount: amount, date: date, type: type, category: selectedCategory)
-            }){
-                Group {
-                
-                    if case .loading = addExpenseViewModel.addExpenseState {
-                        ProgressView()
-                    } else {
-                        Text("Save Expense")
-                        
-                    }
-                }
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(Color.purple)
-                .foregroundColor(.white)
-                .cornerRadius(10)
-            }
-            .padding(.top, 20)
+            .padding(.top, ContentStyle.Spacing.Medium)
         }
-        .onChange(of: addExpenseViewModel.shouldNavigate) { _ in
-            if addExpenseViewModel.shouldNavigate {
+        .onChange(of: addExpenseViewModel.shouldNavigate) { _, value in
+            if value {
+                // Sends message to notify a fetch request
                 NotificationCenter.default.post(name: .expenseCreated, object: nil)
                 appState.showAddExpense = false
-//                router.navigateToRoot()
             }
         }
         .padding()
-        //.navigationBarTitle(amount.formatted(.currency(code: "EUR")))
         .toolbar {
             ToolbarItem(placement: .principal) {
                 Text(amount, format: .defaultCurrency(code: settings.currency.rawValue))
@@ -136,19 +50,92 @@ struct AddExpenseView: View {
         }
     }
     
+    private var expenseForm: some View {
+        Grid(alignment: .leading, horizontalSpacing: ContentStyle.Spacing.Large, verticalSpacing: ContentStyle.Spacing.Medium) {
+            Divider()
+            GridRow {
+                Text("For")
+                    .font(.headline)
+                TextField("amount spent on?", text: $addExpenseViewModel.name)
+            }
+            ValidationMessage(validationErrors: $addExpenseViewModel.validationErrors, validationKey: "name")
+            Divider()
+            GridRow {
+                Label("Date", systemImage: "calendar")
+                    .font(.headline)
+                Button{
+                    Task { await DatePickerPopup(date: $addExpenseViewModel.date).present()}
+                } label: {
+                    Text(addExpenseViewModel.date.formatted(date: .abbreviated, time: .omitted))
+                }
+                .foregroundColor(.primary)
+            }
+            ValidationMessage(validationErrors: $addExpenseViewModel.validationErrors, validationKey: "date")
+
+            Divider()
+            GridRow {
+                Label("Type", systemImage: "creditcard.fill")
+                Button {
+                    Task { await ExpenseTypeSelectionPopup(SetExpenseType: { addExpenseViewModel.type = $0 }).present() }
+                } label: {
+                    Text(addExpenseViewModel.type != nil ? addExpenseViewModel.type!.rawValue : "Select expense type")
+                }
+                .foregroundColor(.primary)
+            }
+            ValidationMessage(validationErrors: $addExpenseViewModel.validationErrors, validationKey: "type")
+            Divider()
+        }
+    }
+    
+    private var selectCategory: some View {
+        ScrollView() {
+            VStack(alignment: .leading) {
+                Text("Category?")
+                    .font(.system(size: ContentStyle.FontSize, weight: .medium))
+                ValidationMessage(validationErrors: $addExpenseViewModel.validationErrors, validationKey: "category")
+        
+                switch addExpenseViewModel.categories {
+                case .loading:
+                    ProgressView()
+                case .success(let categories):
+                    categoriesList(categories: categories)
+                case .failure(let error):
+                    ErrorMessage(error: error)
+                case .idle:
+                    Text("")
+                }
+            }
+        }
+    }
+    
     private func categoriesList(categories: [Categorie]) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: ContentStyle.Spacing.Small) {
             ForEach(categories.group(by: { $0.type }).sorted(by: { $0.key.rawValue < $1.key.rawValue }), id: \.key) {key, value in
                 Text(key.rawValue)
-                    .padding(.top, 15)
+                    .padding(.top, ContentStyle.Spacing.Small)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                 ForEach(value) { category in
-                    CategorySelectionRow(category: category, isSelected: selectedCategory == category) {
-                        selectedCategory = category
+                    CategorySelectionRow(category: category, isSelected: addExpenseViewModel.selectedCategory == category) {
+                        addExpenseViewModel.selectedCategory = category
                     }
                 }
             }
+        }
+    }
+    
+    struct ContentStyle {
+        struct Spacing {
+            static let Small: CGFloat = 10
+            static let Medium: CGFloat = 20
+            static let Large: CGFloat = 50
+        }
+        
+        static let FontSize: CGFloat = 20
+        
+        struct Padding {
+            static let Small: CGFloat = 15
+            static let Medium: CGFloat = 20
         }
     }
         
@@ -161,34 +148,29 @@ struct CategorySelectionRow: View {
     let action: () -> Void
     
     var body: some View {
-        HStack(spacing: 50) {
-            if isSelected {
-                Image(systemName: "checkmark.circle.fill")
+        Button{
+            !isSelected ? action() : remove != nil ? remove!() : ()
+        }label: {
+            HStack(spacing: ContentStyle.Spacing) {
+                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                     .resizable()
-                    .foregroundColor(.purple)
-                    .frame(width: 20, height: 20)
-            } else {
-                Image(systemName: "circle")
-                    .resizable()
-                    .foregroundColor(.gray)
-                    .frame(width: 20, height: 20)
+                    .foregroundColor(isSelected ? .purple : .gray)
+                    .frame(width: ContentStyle.Size, height: ContentStyle.Size)
+                Text(category.name)
+                Spacer()
             }
-            Text(category.name)
-            Spacer()
         }
+        .tint(.primary)
         .padding()
-        .background(isSelected ? Color.gray.opacity(0.2) : Color.clear)
-        .cornerRadius(10)
-        .onTapGesture {
-            if isSelected {
-                if let remove {
-                    remove()
-                }
-            } else {
-                action()
-            }
-        }
-        .tint(.purple)
+        .background(isSelected ? Color.gray.opacity(ContentStyle.Opacity) : Color.clear)
+        .cornerRadius(ContentStyle.CornerRadius)
+    }
+    
+    struct ContentStyle {
+        static let Spacing: CGFloat = 50
+        static let Size: CGFloat = 20
+        static let Opacity: Double = 0.2
+        static let CornerRadius: CGFloat = 10
     }
 }
 
@@ -196,27 +178,28 @@ struct DatePickerPopup: BottomPopup {
     @Binding var date: Date
     
     var body: some View {
-        VStack(spacing: 20) {
-            HStack {
-                Spacer()
-                Button(action: { Task { await dismissLastPopup() }})
-                {
-                    Image(systemName: "xmark")
-                        .padding(8)
-                        .background(.secondary.opacity(0.2))
-                        .cornerRadius(.infinity)
-                        .tint(.primary)
-                }
-
+        VStack(spacing: ContentStyle.Spacing) {
+            CloseButton {
+                Task { await dismissLastPopup() }
             }
+            
             DatePicker("Select Date", selection: $date, displayedComponents: [.date])
                 .datePickerStyle(.graphical)
                 .tint(.purple)
                 .padding()
         }
-        .padding(.vertical, 20)
-        .padding(.leading, 24)
-        .padding(.trailing, 16)
+        .padding(.vertical, ContentStyle.Padding.Vertical)
+        .padding(.leading, ContentStyle.Padding.Leading)
+        .padding(.trailing, ContentStyle.Padding.Trailing)
+    }
+    
+    struct ContentStyle {
+        static let Spacing: CGFloat = 20
+        struct Padding {
+            static let Leading: CGFloat = 24
+            static let Trailing: CGFloat = 16
+            static let Vertical: CGFloat = 20
+        }
     }
 }
 
@@ -225,22 +208,15 @@ struct ExpenseTypeSelectionPopup: BottomPopup {
     @State var selectedType: ExpenseType = .card
     
     var body: some View {
-        VStack(spacing: 0) {
-            HStack {
-                Spacer()
-                Button(action: { Task { await dismissLastPopup() }})
-                {
-                    Image(systemName: "xmark")
-                        .padding(8)
-                        .background(.secondary.opacity(0.2))
-                        .cornerRadius(.infinity)
-                        .tint(.primary)
-                }
+        VStack(spacing: ContentStyle.Spacing.None) {
+            CloseButton {
+                Task { await dismissLastPopup() }
             }
+            
             Spacer()
             Text("Select Expense Type")
                 .font(.headline)
-            VStack(spacing: 16) {
+            VStack(spacing: ContentStyle.Spacing.Default) {
                 ForEach(ExpenseType.allCases, id: \.self) { type in
                     SelectionRow(
                         title: type.rawValue,
@@ -251,23 +227,31 @@ struct ExpenseTypeSelectionPopup: BottomPopup {
                 }
             }
             .padding()
-
-            Button(action: {
+            
+            LargeButton(
+                "Save and Close",
+                theme: .primary
+            ) {
                 SetExpenseType(selectedType)
                 Task { await dismissLastPopup() }
-            }) {
-                Text("Save and close")
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.primary)
-                    .foregroundColor(.background)
-                    .cornerRadius(10)
             }
-            .padding(.top, 20)
+            .padding(.top, ContentStyle.Padding.Vertical)
         }
-        .padding(.vertical, 20)
-        .padding(.leading, 24)
-        .padding(.trailing, 16)
+        .padding(.vertical, ContentStyle.Padding.Vertical)
+        .padding(.leading, ContentStyle.Padding.Leading)
+        .padding(.trailing, ContentStyle.Padding.Trailing)
+    }
+    
+    struct ContentStyle {
+        struct Spacing {
+            static let None: CGFloat = 0
+            static let Default: CGFloat = 20
+        }
+        struct Padding {
+            static let Leading: CGFloat = 24
+            static let Trailing: CGFloat = 16
+            static let Vertical: CGFloat = 20
+        }
     }
 }
 
@@ -277,33 +261,31 @@ struct SelectionRow: View {
     let onTap: () -> Void
 
     var body: some View {
-        HStack {
+        Button{
+            onTap()
+        } label: {
             Text(title)
                 .foregroundColor(.primary)
             Spacer()
-            if isSelected {
-                Image(systemName: "checkmark.circle.fill")
-                    .resizable()
-                    .foregroundColor(.purple)
-                    .frame(width: 20, height: 20)
-            } else {
-                Image(systemName: "circle")
-                    .resizable()
-                    .foregroundColor(.gray)
-                    .frame(width: 20, height: 20)
-            }
+            Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                .resizable()
+                .foregroundColor(isSelected ? .purple : .gray)
+                .frame(width: ContentStyle.Size, height: ContentStyle.Size)
         }
         .padding()
-        .background(isSelected ? Color.gray.opacity(0.2) : Color.clear)
-        .cornerRadius(10)
-        .onTapGesture {
-            onTap()
-        }
+        .background(isSelected ? Color.gray.opacity(ContentStyle.Opacity) : Color.clear)
+        .cornerRadius(ContentStyle.CornerRadius)
         .tint(.purple)
+    }
+    
+    struct ContentStyle {
+        static let Size: CGFloat = 20
+        static let CornerRadius: CGFloat = 10
+        static let Opacity: Double = 0.2
     }
 }
 
-// Add this extension for the notification name
+// Extension for the notification name of created expense type
 extension Notification.Name {
     static let expenseCreated = Notification.Name("expenseCreated")
 }

@@ -28,12 +28,7 @@ struct TextFieldValidationView<Content: View>: View  {
                 .padding()
                 .background(Color.secondary.opacity(0.2))
                 .cornerRadius(10)
-            if validationErrors.contains(where: { $0.key == validationKey }) {
-                ForEach(validationErrors.filter { $0.key == validationKey }, id: \.self) { validationError in
-                   Text(validationError.message)
-                       .foregroundStyle(.red)
-               }
-           }
+            ValidationMessage(validationErrors: $validationErrors, validationKey: validationKey)
         }
     }
 }

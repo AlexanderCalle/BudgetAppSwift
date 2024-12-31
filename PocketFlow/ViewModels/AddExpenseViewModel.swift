@@ -18,6 +18,12 @@ class AddExpenseViewModel: ObservableObject {
     
     @Published var shouldNavigate = false
     
+    // MARK: - Form states
+    @Published var name: String = ""
+    @Published var date: Date = Date()
+    @Published var type: ExpenseType? = nil
+    @Published var selectedCategory: Categorie? = nil
+    
     let api = ApiService()
     
     init() {
@@ -44,36 +50,19 @@ class AddExpenseViewModel: ObservableObject {
         }
     }
     
-    func onSubmitExpense(name: String, amount: Float, date: Date, type: ExpenseType?, category: Categorie?) {
-        validationErrors.removeAll()
-        if name.isEmpty {
-            validationErrors.append(ValidationError(key: "name", message: "Name is required"))
-        }
-        if type == nil {
-            validationErrors.append(ValidationError(key: "type", message: "Type is required"))
-        }
-        if category == nil {
-            validationErrors.append(ValidationError(key: "category", message: "Category is required"))
-        }
-        
-        if validationErrors.count > 0 {
-            return
-        }
-        
-        let expense = CreateExpense(name: name, amount: amount, date: date, type: type!, categoryId: category!.id)
-        addExpense(expense)
-    }
-    
-    func addExpense(_ expense: CreateExpense) {
+    func addExpense(amount: Float) {
+        guard validate() else { return }
         addExpenseState = .loading
+        
+        let expense = CreateExpense(name: name, amount: amount, date: date, type: type!, categoryId: selectedCategory!.id)
         api.post("expenses", body: expense) { [weak self] (result: Result<CreateExpense, Error>) in
             DispatchQueue.main.async {
                 switch result {
                 case .success(_):
                     self?.validationErrors.removeAll()
-                    self?.objectWillChange.send()
                     self?.addExpenseState = .success(true)
                     self?.shouldNavigate = true
+                    self?.objectWillChange.send()
                 case .failure(let error):
                     if let apiError = error as? ApiError {
                         if case .badRequest(let decodedMessage) = apiError {
@@ -97,4 +86,19 @@ class AddExpenseViewModel: ObservableObject {
         }
     }
     
+    // MARK: - Validation functions
+    private func validate() -> Bool {
+        validationErrors.removeAll()
+        if name.isEmpty {
+            validationErrors.append(ValidationError(key: "name", message: "Name is required"))
+        }
+        if type == nil {
+            validationErrors.append(ValidationError(key: "type", message: "Type is required"))
+        }
+        if selectedCategory == nil {
+            validationErrors.append(ValidationError(key: "category", message: "Category is required"))
+        }
+        
+        return validationErrors.count == 0
+    }
 }
