@@ -20,89 +20,17 @@ struct CategoryDetailPopup: BottomPopup {
     var body: some View {
         let category = categoryStore.selectedCategory!
         VStack {
-            VStack(spacing: 20) {
-                HStack (alignment: .top) {
-                    VStack(alignment: .leading) {
-                        Text(category.name)
-                            .font(.system(size: 20, weight: .bold))
-                        Text(category.description ?? "")
-                            .font(.system(size: 16))
-                            .foregroundColor(.gray)
-                    }
-                    Spacer()
-                    Button {
-                        Task { await EditCategoryPopup(categoriesStore: categoryStore).present() }
-                    } label: {
-                        Image(systemName: "pencil")
-                            .padding(8)
-                            .foregroundColor(.primary)
-                            .background(.secondary.opacity(0.2))
-                            .cornerRadius(.infinity)
-                    }
-                    Button {
-                        Task { await dismissLastPopup() }
-                    } label: {
-                        Image(systemName: "xmark")
-                            .padding(8)
-                            .foregroundColor(.primary)
-                            .background(.secondary.opacity(0.2))
-                            .cornerRadius(.infinity)
-                    }
-                }
-                .tint(.primary)
-                HStack {
-                    CircularProgressView(value: category.totalExpenses ?? 0, max: category.max_expense ?? 0)
-                        .frame(width: 30)
-                    Spacer()
-                    VStack(alignment: .trailing) {
-                        HStack(spacing: 4) {
-                            Text(category.max_expense ?? 0, format: .defaultCurrency(code: settings.currency.rawValue))
-                            Text(category.type == .savings ? "Target" : "Budget")
-                                .foregroundStyle(.secondary)
-                        }
-                        HStack(spacing: 4) {
-                            Text(category.totalExpenses ?? 0, format: .defaultCurrency(code: settings.currency.rawValue))
-                            Text(category.type == .savings ? "Funded" : "Spent")
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                }
+            VStack(spacing: ContentStyle.Spacing.Large) {
+                ActionBar(category)
+                DetailBar(category)
             }
             Divider()
             ScrollView {
                 VStack(alignment: .leading) {
                     if category.expenses == nil || category.expenses?.count == 0 {
-                        Spacer()
-                        VStack(spacing: 0) {
-                            Text("🏜️")
-                                .font(.system(size: 70))
-                            
-                            Text("No expenses found")
-                        }
-                        .foregroundColor(.secondary)
-                        
-                        Spacer()
+                        emptyExpensesList
                     } else {
-                        ScrollView {
-                            LazyVStack(alignment: .leading, spacing: 0, pinnedViews: [.sectionHeaders]) {
-                                ForEach(category.expenses!.groupedBy(dateComponents: [.day, .month, .year]).sorted(by: { $0.key > $1.key }), id: \.key) {key, value in
-                                    Section {
-                                        ForEach(value) {expense in
-                                            ExpenseRow(expense: expense)
-                                        }
-                                    } header: {
-                                        HStack {
-                                            Text(key.formatted(date: .complete, time: .omitted))
-                                            Spacer()
-                                        }
-                                        .foregroundColor(.secondary)
-                                        .padding(5)
-                                        .background(Color.background)
-                                    }
-                                }
-                            }
-                        }
-                        .padding(5)
+                        ExpensesList(category.expenses!)
                     }
                 }
                 
@@ -112,11 +40,99 @@ struct CategoryDetailPopup: BottomPopup {
         .tint(.purple)
     }
     
+    private func ActionBar(_ category: Categorie) -> some View {
+        HStack (alignment: .top) {
+            VStack(alignment: .leading) {
+                Text(category.name)
+                    .font(.system(size: ContentStyle.FontSize.Title, weight: .bold))
+                Text(category.description ?? "")
+                    .font(.system(size: ContentStyle.FontSize.Description))
+                    .foregroundColor(.gray)
+            }
+            Spacer()
+            Button {
+                Task { await EditCategoryPopup(categoriesStore: categoryStore).present() }
+            } label: {
+                Image(systemName: "pencil")
+                    .padding(ContentStyle.Padding.Medium)
+                    .foregroundColor(.primary)
+                    .background(.secondary.opacity(ContentStyle.Opacity))
+                    .cornerRadius(.infinity)
+            }
+            Button {
+                Task { await dismissLastPopup() }
+            } label: {
+                Image(systemName: "xmark")
+                    .padding(ContentStyle.Padding.Medium)
+                    .foregroundColor(.primary)
+                    .background(.secondary.opacity(ContentStyle.Opacity))
+                    .cornerRadius(.infinity)
+            }
+        }
+        .tint(.primary)
+    }
+    
+    private func DetailBar(_ category: Categorie) -> some View {
+        HStack {
+            CircularProgressView(value: category.totalExpenses ?? 0, max: category.max_expense ?? 0)
+                .frame(width: ContentStyle.ProgressWidth)
+            Spacer()
+            VStack(alignment: .trailing) {
+                HStack(spacing: ContentStyle.Spacing.Small) {
+                    Text(category.max_expense ?? 0, format: .defaultCurrency(code: settings.currency.rawValue))
+                    Text(category.type == .savings ? "Target" : "Budget")
+                        .foregroundStyle(.secondary)
+                }
+                HStack(spacing: ContentStyle.Spacing.Small) {
+                    Text(category.totalExpenses ?? 0, format: .defaultCurrency(code: settings.currency.rawValue))
+                    Text(category.type == .savings ? "Funded" : "Spent")
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+    }
+    
+    private var emptyExpensesList: some View {
+        VStack {
+            Spacer()
+            VStack {
+                Text("🏜️")
+                    .font(.system(size: ContentStyle.FontSize.EmptyExpense))
+                Text("No expenses found")
+            }
+            .foregroundColor(.secondary)
+            Spacer()
+        }
+    }
+    
+    private func ExpensesList(_ expenses: [Expense]) -> some View {
+        ScrollView {
+            LazyVStack(alignment: .leading, pinnedViews: [.sectionHeaders]) {
+                ForEach(expenses.groupedBy(dateComponents: [.day, .month, .year]).sorted(by: { $0.key > $1.key }), id: \.key) {key, value in
+                    Section {
+                        ForEach(value) {expense in
+                            ExpenseRow(expense: expense)
+                        }
+                    } header: {
+                        HStack {
+                            Text(key.formatted(date: .complete, time: .omitted))
+                            Spacer()
+                        }
+                        .foregroundColor(.secondary)
+                        .padding(ContentStyle.Padding.Small)
+                        .background(Color.background)
+                    }
+                }
+            }
+        }
+        .padding(ContentStyle.Padding.Small)
+    }
+    
     private func ExpenseRow(expense: Expense) -> some View {
         HStack {
             Circle()
                 .foregroundColor(.purple)
-                .frame(width: 10)
+                .frame(width: ContentStyle.CircleWidth)
             Text(expense.name)
             Spacer()
             Text(expense.amount, format: .defaultCurrency(code: settings.currency.rawValue))
@@ -124,7 +140,35 @@ struct CategoryDetailPopup: BottomPopup {
                 .foregroundColor(.secondary)
                 
         }
-        .padding(.vertical, 8)
-        .padding(.horizontal, 10)
+        .padding(.vertical, ContentStyle.Padding.ExpenseVertical)
+        .padding(.horizontal, ContentStyle.Padding.ExpenseHorizontal)
+    }
+    
+    struct ContentStyle {
+        
+        static let CircleWidth: CGFloat = 10
+        static let ProgressWidth: CGFloat = 30
+        
+        static let Opacity: Double = 0.2
+        
+        struct Padding {
+            static let ExpenseVertical: CGFloat = 8
+            static let ExpenseHorizontal: CGFloat = 10
+            
+            static let Small: CGFloat = 5
+            static let Medium: CGFloat = 8
+        }
+        
+        struct FontSize {
+            static let EmptyExpense: CGFloat = 70
+            
+            static let Title: CGFloat = 20
+            static let Description: CGFloat = 16
+        }
+        
+        struct Spacing {
+            static let Small: CGFloat = 4
+            static let Large: CGFloat = 20
+        }
     }
 }

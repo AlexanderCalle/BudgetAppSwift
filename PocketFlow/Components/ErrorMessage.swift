@@ -7,24 +7,25 @@
 
 import SwiftUI
 
-/// Checks the message type and give the corresponding message in a messase box
-/// - Parameters:
-///   - error: The desired year
 struct ErrorMessage: View {
     let error: Error
     
     var body: some View {
+        if let apiError = error as? ApiError, let message = apiError.getErrorMessage(){
+            Message(message)
+        }
+        if let networkError = error as? NetworkError {
+            OfflineMessage(networkError: networkError)
+        }
+        else {
+            Message("Something went wrong, please try again later")
+        }
+    }
+    
+    private func Message(_ message: String) -> some View {
         HStack {
             Image(systemName: "exclamationmark.triangle")
-            if let apiError = error as? ApiError, let message = apiError.getErrorMessage(){
-                Text(message)
-            }
-            if let networkError = error as? NetworkError {
-                OfflineMessage(networkError: networkError)
-            }
-            else {
-                Text("Something went wrong, please try again later")
-            }
+            Text(message)
             Spacer()
         }
         .padding()

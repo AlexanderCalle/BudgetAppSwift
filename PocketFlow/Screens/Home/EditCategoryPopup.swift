@@ -14,154 +14,140 @@ struct EditCategoryPopup: BottomPopup {
     @Environment(Settings.self) var settings: Settings
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            HStack {
-                Spacer()
-                Button {
-                    Task {
-                        await ConfirmDeleteCategoryPopup{
-                            categoriesStore.deleteCategory(categoryId: categoriesStore.selectedCategory?.id ?? "")
-                        }.present()
-                    }
-                } label: {
-                    Image(systemName: "trash")
-                        .padding(8)
-                        .foregroundColor(.danger)
-                }
-                Button {
-                    Task { await dismissLastPopup() }
-                } label: {
-                    Image(systemName: "xmark")
-                        .padding(8)
-                        .foregroundColor(.primary)
-                        .background(.gray.opacity(0.2))
-                        .clipShape(.circle)
-                }
-            }
-            VStack(alignment: .leading, spacing: 20) {
-                VStack(alignment: .leading) {
-                    Text("Category name")
-                        .font(.headline)
-                    TextField("Enter category name", text: Binding(
-                        get: { categoriesStore.selectedCategory!.name },
-                        set: { categoriesStore.selectedCategory?.name = $0 }
-                    ))
-                        .padding()
-                        .background(Color.secondary.opacity(0.2))
-                        .cornerRadius(10)
-                    if(categoriesStore.validationErrors.contains(where: { $0.key == "name" })) {
-                        Text(categoriesStore.validationErrors.first(where: { $0.key == "name" })?.message ?? "")
-                            .foregroundColor(.danger)
-                    }
-                }
-                VStack(alignment: .leading) {
-                    Text("Description")
-                        .font(.headline)
-                    TextField("Enter category description", text: Binding(
-                        get: { categoriesStore.selectedCategory!.description ?? "" },
-                        set: { categoriesStore.selectedCategory?.description = $0 }
-                    ))
-                        .padding()
-                        .background(Color.secondary.opacity(0.2))
-                        .cornerRadius(10)
-                }
-                VStack(alignment: .leading) {
-                    Text("Allocated amount")
-                        .font(.headline)
-                    HStack(spacing: 10) {
-                        Text(settings.currency.getSymbol())
-                        LimitedCurrencyField("Max spending for this catergory?", amount: Binding (
-                            get: { categoriesStore.selectedCategory!.max_expense ?? 0.0 },
-                            set: { categoriesStore.selectedCategory?.max_expense = $0 }
-                        ))
-                    }
-                    .padding()
-                    .background(Color.secondary.opacity(0.2))
-                    .cornerRadius(10)
-                    if(categoriesStore.validationErrors.contains(where: { $0.key == "amount" })) {
-                        Text(categoriesStore.validationErrors.first(where: { $0.key == "amount" })?.message ?? "")
-                            .foregroundColor(.danger)
-                    }
-                }
-                VStack(alignment: .leading) {
-                    Text("Category type")
-                        .font(.headline)
-                    Picker("Select category type", selection: Binding(
-                        get: { categoriesStore.selectedCategory!.type },
-                        set: { categoriesStore.selectedCategory?.type = $0 }
-                    )) {
-                        ForEach(CategoryType.allCases, id: \.self) { categoryType in
-                            Text(categoryType.rawValue)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-                }
-            }
+        VStack(alignment: .leading, spacing: ContentStyle.Spacing) {
+            topActionBar
             
-            Button(action: {
+            editCategoryForm
+            
+            LargeButton(
+                "Save  Category",
+                theme: .primary,
+                loading: Binding<Bool?>(
+                    get: { categoriesStore.editCategoryState == .loading },
+                    set: { _ = $0 }
+                )
+            ){
                 categoriesStore.editCategory()
-            }){
-                Group {
-                    if case .loading = categoriesStore.editCategoryState {
-                        ProgressView()
-                    } else {
-                        Text("Save Category")
-                    }
-                }
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(Color.primary)
-                .foregroundColor(.background)
-                .cornerRadius(10)
             }
-            .padding(.top, 20)
+            .padding(.top, ContentStyle.Padding.SaveButtonTop)
         }
-        .onChange(of: categoriesStore.editCategoryState) { state in
+        .onChange(of: categoriesStore.editCategoryState) { _, state in
             if case .success(_) = state {
                 Task { await dismissAllPopups() }
             }
         }
-        .onChange(of: categoriesStore.deleteCategoryState) { state in
+        .onChange(of: categoriesStore.deleteCategoryState) { _, state in
             if case .success(_) = state {
                 Task { await dismissAllPopups() }
             }
         }
         .padding()
     }
+    
+    private var topActionBar: some View {
+        HStack {
+            Spacer()
+            Button {
+                Task {
+                    await ConfirmDeleteCategoryPopup{
+                        categoriesStore.deleteCategory(categoryId: categoriesStore.selectedCategory?.id ?? "")
+                    }.present()
+                }
+            } label: {
+                Image(systemName: "trash")
+                    .padding(ContentStyle.Padding.Icon)
+                    .foregroundColor(.danger)
+            }
+            Button {
+                Task { await dismissLastPopup() }
+            } label: {
+                Image(systemName: "xmark")
+                    .padding(ContentStyle.Padding.Icon)
+                    .foregroundColor(.primary)
+                    .background(.secondary.opacity(ContentStyle.Opacity))
+                    .clipShape(.circle)
+            }
+        }
+    }
+    
+    private var editCategoryForm: some View {
+        VStack(alignment: .leading, spacing: ContentStyle.Spacing) {
+            TextFieldValidationView(
+                label: "Category name",
+                validationErrors: $categoriesStore.validationErrors,
+                validationKey: "name"
+            ) {
+                TextField("Enter category name", text: Binding(
+                    get: { categoriesStore.selectedCategory!.name },
+                    set: { categoriesStore.selectedCategory?.name = $0 }
+                ))
+            }
+            
+            TextFieldValidationView(label: "Description", validationErrors: $categoriesStore.validationErrors, validationKey: "description") {
+                TextField("Enter category description", text: Binding(
+                    get: { categoriesStore.selectedCategory!.description ?? "" },
+                    set: { categoriesStore.selectedCategory?.description = $0 }
+                ))
+            }
+            
+            TextFieldValidationView(label: "Allocated amount", validationErrors: $categoriesStore.validationErrors, validationKey: "amount") {
+                LimitedCurrencyField("Max spending for this catergory?", amount: Binding (
+                    get: { categoriesStore.selectedCategory!.max_expense ?? 0.0 },
+                    set: { categoriesStore.selectedCategory?.max_expense = $0 }
+                ))
+            }
+            
+            VStack(alignment: .leading) {
+                Text("Category type")
+                    .font(.headline)
+                Picker("Select category type", selection: Binding(
+                    get: { categoriesStore.selectedCategory!.type },
+                    set: { categoriesStore.selectedCategory?.type = $0 }
+                )) {
+                    ForEach(CategoryType.allCases, id: \.self) { categoryType in
+                        Text(categoryType.rawValue)
+                    }
+                }
+                .pickerStyle(.segmented)
+            }
+        }
+    }
+    
+    struct ContentStyle {
+        static let Spacing: CGFloat = 20
+        static let Opacity: Double = 0.2
+        
+        struct Padding {
+            static let Icon: CGFloat = 8
+            static let SaveButtonTop: CGFloat = 20
+        }
+    }
 }
 
 struct ConfirmDeleteCategoryPopup: CenterPopup {
-    
     let onConfirmDelete: () -> Void
     
     var body: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: ContentStyle.Spacing) {
             Text("Are you sure you want to delete this category?")
                 .multilineTextAlignment(.center)
             HStack {
-                Button {
+                
+                LargeButton("Cancel", theme: .secondary){
                     Task { await dismissLastPopup() }
-                }label: {
-                    Text("Cancel")
-                        .padding(12)
-                        .frame(maxWidth: .infinity)
-                        .background(.secondary.opacity(0.3))
-                        .foregroundColor(.primary)
-                        .cornerRadius(10)
                 }
-                Button {
+                
+                LargeButton("Delete", theme: .warning) {
                     onConfirmDelete()
-                }label: {
-                    Text("Delete")
-                        .padding(12)
-                        .frame(maxWidth: .infinity)
-                        .background(.danger)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
                 }
             }
         }
-        .padding(30)
+        .padding(ContentStyle.Padding)
+    }
+    
+    struct ContentStyle {
+        static let Spacing: CGFloat = 20
+        static let Padding: CGFloat = 30
     }
 }
 

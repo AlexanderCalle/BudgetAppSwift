@@ -9,9 +9,6 @@ import SwiftUI
 import Charts
 
 struct SevenDaysChartView: View {
-    
-    // TODO: Switch between week and month overview
-    
     let data: [DayExpense]
     let xScale: ClosedRange<Date>
 
@@ -21,8 +18,7 @@ struct SevenDaysChartView: View {
         if let firstDate = data.first?.date, let lastDate = data.last?.date {
             xScale = firstDate...lastDate
         } else {
-            // Fallback to a default range if data is empty or invalid
-            xScale = Date()...(Date() + 86400) // Today to tomorrow
+            xScale = Date()...(Date() + 86400)
         }
     }
 
@@ -39,29 +35,37 @@ struct SevenDaysChartView: View {
                         width: .automatic
                     )
                     .foregroundStyle(.purple)
-                    .clipShape(RoundedRectangle(cornerRadius: 2))
+                    .clipShape(RoundedRectangle(cornerRadius: ContentStyle.CornerRadius))
                 }
             }
             .chartXAxis {
                 AxisMarks(values: .stride(by: .day)) { value in
                     AxisValueLabel(format: .dateTime.weekday(.abbreviated))
-                        .offset(x: 10, y: 5)
+                        .offset(x: ContentStyle.Offset.X, y: ContentStyle.Offset.Y)
                 }
             }
             .chartYAxis {
                 AxisMarks(preset: .aligned, position: .leading) { _ in
-                    AxisValueLabel(horizontalSpacing: 8)
+                    AxisValueLabel(horizontalSpacing: ContentStyle.HorizontalSpacing)
                         .font(.footnote)
-                    
-                    AxisGridLine(centered: true, stroke: StrokeStyle(lineWidth: 0.5)).foregroundStyle(.gray)
-
+                    AxisGridLine(centered: true, stroke: StrokeStyle(lineWidth: ContentStyle.LineWidth)).foregroundStyle(.gray)
                 }
             }
             .animation(.bouncy, value: data)
-
-//            .chartXScale(domain: xScale)
-            .padding(.vertical, 10)
+            .padding(.vertical, ContentStyle.VerticalPadding)
         }
-        .frame(maxHeight: 200)
+        .frame(maxHeight: ContentStyle.MaxHeight)
+    }
+    
+    struct ContentStyle {
+        static let CornerRadius: CGFloat = 2
+        struct Offset {
+            static let X: CGFloat = 10
+            static let Y: CGFloat = 5
+        }
+        static let HorizontalSpacing: CGFloat = 8
+        static let LineWidth: CGFloat = 0.5
+        static let VerticalPadding: CGFloat = 10
+        static let MaxHeight: CGFloat = 200
     }
 }

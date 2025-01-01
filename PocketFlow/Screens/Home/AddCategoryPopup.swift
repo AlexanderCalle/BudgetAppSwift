@@ -13,99 +13,75 @@ struct AddCategoryPopup: BottomPopup {
     @ObservedObject var categorieStore = AddCategoryViewModel()
     @Environment(Settings.self) var settings: Settings
     
-    @State private var name: String = ""
-    @State private var description: String = ""
-    @State private var amount: Float = 0
-    @State private var categoryType = CategoryType.expenses
-    
     var body: some View {
-        VStack(spacing: 20) {
-            HStack {
-                Spacer()
-                Button(action: { Task { await dismissLastPopup() }}) { Image(systemName: "xmark")
-                        .padding(8)
-                        .background(.secondary.opacity(0.2))
-                        .cornerRadius(.infinity)
-                        .tint(.primary)
-                }
-            }
+        VStack(spacing: ContentStyle.Spacing) {
+            CloseButton { Task { await dismissLastPopup() } }
             Text("Add new category")
-                .font(.system(size: 22, weight: .bold))
-            VStack(alignment: .leading, spacing: 20) {
-                VStack(alignment: .leading) {
-                    Text("Category name")
-                        .font(.headline)
-                    TextField("Enter category name", text: $name)
-                        .padding()
-                        .background(Color.secondary.opacity(0.2))
-                        .cornerRadius(10)
-                    if(categorieStore.validationErrors.contains(where: { $0.key == "name" })) {
-                        Text(categorieStore.validationErrors.first(where: { $0.key == "name" })?.message ?? "")
-                            .foregroundColor(.danger)
-                    }
-                }
-                VStack(alignment: .leading) {
-                    Text("Description")
-                        .font(.headline)
-                    TextField("Enter category description", text: $description)
-                        .padding()
-                        .background(Color.secondary.opacity(0.2))
-                        .cornerRadius(10)
-                }
-                VStack(alignment: .leading) {
-                    Text("Allocated amount")
-                        .font(.headline)
-                    HStack(spacing: 10) {
-                        Text(settings.currency.getSymbol())
-                        LimitedCurrencyField("Max spending for this catergory?", amount: $amount)
-                    }
-                    .padding()
-                    .background(Color.secondary.opacity(0.2))
-                    .cornerRadius(10)
-                    if(categorieStore.validationErrors.contains(where: { $0.key == "amount" })) {
-                        Text(categorieStore.validationErrors.first(where: { $0.key == "amount" })?.message ?? "")
-                            .foregroundColor(.danger)
-                    }
-                }
-                VStack(alignment: .leading) {
-                    Text("Category type")
-                        .font(.headline)
-                    Picker("Select category type", selection: $categoryType) {
-                        ForEach(CategoryType.allCases, id: \.self) { categoryType in
-                            Text(categoryType.rawValue)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-                }
-            }
+                .font(.system(size: ContentStyle.TitleFontSize, weight: .bold))
             
-            Button(action: {
-                categorieStore.addNewCategory(name: name, description: description, amount: amount, type: categoryType)
-            }){
-                Group {
-                    if case .loading = categorieStore.createdCatergoryState {
-                        ProgressView()
-                    } else {
-                        Text("Save Category")
-                    }
-                }
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(Color.primary)
-                .foregroundColor(.background)
-                .cornerRadius(10)
+            categoryInputs
+            
+            LargeButton(
+                "Save category",
+                theme: .primary,
+                loading: Binding<Bool?> (
+                    get: { categorieStore.createdCatergoryState == .loading },
+                    set: { _ = $0 }
+                )
+            ) {
+                categorieStore.addNewCategory()
             }
-            .padding(.top, 20)
+            .padding(.top, ContentStyle.Padding.Top)
         }
-        .onChange(of: categorieStore.createdCatergoryState) {
-            if case .success(_) = categorieStore.createdCatergoryState {
+        .onChange(of: categorieStore.createdCatergoryState) { _, value in
+            if case .success(_) = value {
                 Task { await dismissLastPopup() }
                 onCloseAction()
             }
         }
-        .padding(.vertical, 20)
-        .padding(.leading, 24)
-        .padding(.trailing, 16)
+        .padding(.vertical, ContentStyle.Padding.PopupVertical)
+        .padding(.leading, ContentStyle.Padding.PopupLeading)
+        .padding(.trailing, ContentStyle.Padding.PopupTrailing)
+    }
+    
+    private var categoryInputs: some View {
+        VStack(alignment: .leading, spacing: ContentStyle.Spacing) {
+            
+            TextFieldValidationView(label: "Category name", validationErrors: $categorieStore.validationErrors, validationKey: "name") {
+                TextField("Enter category name", text: $categorieStore.name)
+            }
+            
+            TextFieldValidationView(label: "Description", validationErrors: $categorieStore.validationErrors, validationKey: "description") {
+                TextField("Enter category description", text: $categorieStore.description)
+            }
+            
+            TextFieldValidationView(label: "Allocated amount", validationErrors: $categorieStore.validationErrors, validationKey: "amount") {
+                LimitedCurrencyField("Max spending for this category", amount: $categorieStore.amount)
+            }
+            
+            VStack(alignment: .leading) {
+                Text("Category type")
+                    .font(.headline)
+                Picker("Select category type", selection: $categorieStore.categoryType) {
+                    ForEach(CategoryType.allCases, id: \.self) { categoryType in
+                        Text(categoryType.rawValue)
+                    }
+                }
+                .pickerStyle(.segmented)
+            }
+        }
+    }
+    
+    struct ContentStyle {
+        static let Spacing: CGFloat = 20
+        static let TitleFontSize: CGFloat = 22
+        
+        struct Padding {
+            static let Top: CGFloat = 20
+            static let PopupVertical: CGFloat = 20
+            static let PopupLeading: CGFloat = 24
+            static let PopupTrailing: CGFloat = 16
+        }
     }
 }
 

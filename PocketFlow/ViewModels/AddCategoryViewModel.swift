@@ -8,6 +8,12 @@
 import Foundation
 
 class AddCategoryViewModel: ObservableObject {
+    
+    @Published var name: String = ""
+    @Published var description: String = ""
+    @Published var amount: Float = 0
+    @Published var categoryType: CategoryType = .expenses
+    
     @Published var createdCatergoryState: ViewState<Bool> = .idle
     @Published var validationErrors: [ValidationError] = []
     
@@ -16,13 +22,13 @@ class AddCategoryViewModel: ObservableObject {
     
     let api = ApiService()
     
+    func addNewCategory() {
+        addNewCategory(name: name, description: description, amount: amount, type: categoryType)
+    }
+    
     func addNewCategory(name: String, description: String, amount: Float?, type: CategoryType = .expenses) {
         print("Adding new category...")
-        guard !validateForm(name: name, description: description, amount: amount) else {
-            print("Validation failed.")
-            print(validationErrors)
-            return
-        }
+        guard validate(name: name, description: description, amount: amount) else { return }
         
         createdCatergoryState = .loading
         let newCategory = CreateEditCategorie(name: name, description: description, max_expense: amount!, type: type)
@@ -71,7 +77,9 @@ class AddCategoryViewModel: ObservableObject {
         }
     }
     
-    private func validateForm(name: String, description: String, amount: Float?) -> Bool {
+    // MARK: - Validation functions
+    
+    private func validate(name: String, description: String, amount: Float?) -> Bool {
         validationErrors.removeAll()
         if(name.isEmpty) {
             validationErrors.append(ValidationError(key: "name", message: "Name is required"))
@@ -94,6 +102,6 @@ class AddCategoryViewModel: ObservableObject {
             validationErrors.append(ValidationError(key: "amount", message: "Amount is required"))
         }
         
-        return validationErrors.count > 0
+        return validationErrors.count == 0
     }
 }

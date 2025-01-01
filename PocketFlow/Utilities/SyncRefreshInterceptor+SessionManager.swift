@@ -7,7 +7,7 @@
 
 import Foundation
 
-// MARK: -- Locks and sync variabl
+// MARK: -- Locks and sync variable
 private let requestLock = NSLock()
 private let isRefreshingLock = NSLock()
 
@@ -138,6 +138,7 @@ class SessionManager: NSObject, URLSessionDelegate {
     private func syncRefreshToken() -> Bool {
         requestLock.lock()
         
+        // Executes just before the func is closed
         defer {
             atomicSetRefreshing(newVal: false)
             requestLock.unlock()

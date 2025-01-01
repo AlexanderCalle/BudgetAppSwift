@@ -12,6 +12,8 @@ struct LimitedCurrencyField: View {
     @Binding private var amount: Float
     let label: String
     
+    @Environment(Settings.self) var settings: Settings
+    
     init(_ label: String, amount: Binding<Float>) {
         self.label = label
         self._amount = amount
@@ -27,8 +29,10 @@ struct LimitedCurrencyField: View {
     }()
 
     var body: some View {
-        TextField(label, value: $amount, formatter: currencyFormatter)
-            .keyboardType(.decimalPad)
-    
+        HStack(spacing: 10) {
+            Text(settings.currency.getSymbol())
+            TextField(label, value: $amount, formatter: currencyFormatter)
+                .keyboardType(.decimalPad)
+        }
     }
 }

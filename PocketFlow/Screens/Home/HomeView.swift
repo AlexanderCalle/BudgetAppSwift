@@ -18,7 +18,7 @@ struct HomeView: View {
     var body: some View {
         VStack {
             if (!isConnected) {
-                OfflineView(message: "Offline mode")
+                OfflineMessage(networkError: nil)
             } else {
                 TopBarView("Dashboard")
                 ScrollView {
@@ -27,27 +27,16 @@ struct HomeView: View {
                             .frame(height: 200)
                     }
                     VStack {
-                        switch categoriesStore.categoriesState {
-                        case .success(_):
+                        StateViewLoader(state: categoriesStore.categoriesState) { categories in
                             CategoryListView(
-                                categoryStore: categoriesStore, categories: categoriesStore.categories, onAddCategory: {
+                                categoryStore: categoriesStore,
+                                categories: categories,
+                                onAddCategory: {
                                     Task {
-                                        await AddCategoryPopup() {
-                                            categoriesStore.refreshCategories()
-                                        }.present()
+                                        await AddCategoryPopup() { categoriesStore.refreshCategories() }.present()
                                     }
                                 }
                             )
-                        case .loading:
-                            ProgressView()
-                        case .failure(let error):
-                            if let error = error as? NetworkError {
-                                OfflineView(networkError: error)
-                            } else {
-                                Text(error.localizedDescription)
-                            }
-                        case .idle:
-                            Text("")
                         }
                     }
                 }
@@ -72,65 +61,7 @@ struct HomeView: View {
         }
     }
     
-    var mainCategoryOverview: some View {
-        VStack {
-            LazyVGrid(
-                columns: [
-                    GridItem(.flexible(), alignment: .leading),
-                    GridItem(.fixed(80), alignment: .trailing),
-                    GridItem(.fixed(90), alignment: .trailing)
-                ],
-                spacing: 5 // Row spacing
-            ) {
-                Text("Monthly")
-                Text("Budgeted")
-                Text("Left")
-                Text("\(categoriesStore.daysLeftInCurrentMonth()) Days left")
-                Text(categoriesStore.total_budgetted, format: .defaultCurrency(code: settings.currency.rawValue))
-                Text((categoriesStore.total_budgetted - categoriesStore.total_expenses), format: .defaultCurrency(code: settings.currency.rawValue))
-            }
-            .padding(10)
-            .font(.subheadline)
-            .foregroundColor(.primary.opacity(0.7))
-            .overlay {
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(.secondary.opacity(0.1))
-                    .stroke(.secondary.opacity(0.2), lineWidth: 2)
-            }
-        }
-        .padding(.horizontal, 1)
-    }
-    
-    private func OfflineView(networkError: NetworkError?) -> some View {
-        if let networkError {
-            switch networkError {
-            case .invalidURL:
-                OfflineView(message: "Api url is invalid")
-            case .noInternet:
-                OfflineView(message: "No internet connection")
-            case .timeout:
-                OfflineView(message: "Timeout")
-            case .unReachable:
-                OfflineView(message: "Server unreachable")
-            case .interalError:
-                OfflineView(message: "Internal error")
-            @unknown default:
-                OfflineView(message: "Unknown error")
-            }
-        } else {
-            OfflineView(message: "No internet connection")
-        }
-    }
-    
-    private func OfflineView(message: String) -> some View {
-        HStack(alignment: .center) {
-            Image(systemName: "exclamationmark.triangle")
-            Text(message)
-                .font(.headline)
-                .padding()
-        }
-    }
-    
+    // Checks if there is an internet connection
     private func checkInternetConnection() {
         let monitor = NWPathMonitor()
         monitor.pathUpdateHandler = { path in

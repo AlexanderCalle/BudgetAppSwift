@@ -15,7 +15,6 @@ class CategoryStore: ObservableObject {
     {
         didSet {
             if case .success(let data) = categoriesState {
-                self.categories = data
                 self.total_expenses = data.reduce(0.0 as Float) { $0 + ($1.totalExpenses ?? 0) }
                 self.total_budgetted = data.reduce(0.0 as Float) { $0 + ($1.max_expense ?? 0) }
                 self.total_percentage = (self.total_expenses / self.total_budgetted)
@@ -23,7 +22,6 @@ class CategoryStore: ObservableObject {
             
         }
     }
-    @Published var categories: [Categorie] = []
     @Published var expenseOverview: [DayExpense]
     @Published var total_expenses: Float = 0.0 as Float
     @Published var total_budgetted: Float = 0.0 as Float
@@ -183,7 +181,7 @@ class CategoryStore: ObservableObject {
         }
     }
     
-    func daysLeftInCurrentMonth() -> Int {
+    var daysLeftInCurrentMonth: Int {
         let calendar = Calendar.current
         let today = Date()
                 guard let rangeOfDays = calendar.range(of: .day, in: .month, for: today) else {
