@@ -38,17 +38,17 @@ class UrlComponent {
 private let sessionManager = SessionManager()
 
 
-struct ApiService: APIServiceProtocol {
-    
+struct ApiService: APIServiceProtocol {    
+    // MARK: - Erorr mappers
     private func GuardResponseError<T>(_ error: Error) -> Result<T, Error> where T: Codable{
         if let error = error as? URLError {
             switch error.code {
             case .notConnectedToInternet:
                 print("No internet connection")
-                return.failure(NetworkError.noInternet)
+                return .failure(NetworkError.noInternet)
             case .timedOut:
                 print("The request timed out")
-                return.failure(NetworkError.timeout)
+                return .failure(NetworkError.timeout)
             case .cannotFindHost, .cannotConnectToHost:
                 print("Cannot reach the server")
                 return .failure(NetworkError.unReachable("Server cannot be reached"))
@@ -71,24 +71,25 @@ struct ApiService: APIServiceProtocol {
                 }
             }
             switch response.statusCode {
-            case 400:
-                return .failure(ApiError.badRequest(decoderError))
-            case 401:
-                return .failure(ApiError.unauthorized)
-            case 403:
-                return .failure(ApiError.forbidden)
-            case 404:
-                return .failure(ApiError.notFound(decoderError))
-            case 500:
-                return .failure(ApiError.internalError)
-            default :
-                return .failure(ApiError.unknown(response.statusCode, response.description))
+                case 400:
+                    return .failure(ApiError.badRequest(decoderError))
+                case 401:
+                    return .failure(ApiError.unauthorized)
+                case 403:
+                    return .failure(ApiError.forbidden)
+                case 404:
+                    return .failure(ApiError.notFound(decoderError))
+                case 500:
+                    return .failure(ApiError.internalError)
+                default :
+                    return .failure(ApiError.unknown(response.statusCode, response.description))
             }
         } catch {
             return .failure(error)
         }
     }
     
+    // MARK: - HTTP methods
     func get<T>(_ path: String, completion: @escaping (Result<T, any Error>) -> Void) where T : Codable {
         let url = UrlComponent(path: path).url
         var request = URLRequest(url: url)
@@ -97,28 +98,31 @@ struct ApiService: APIServiceProtocol {
         Task.init {
             do {
                 let (data, response) = try await sessionManager.request(with: request)
-                
+                // Guards agains non Http responses
                 guard let httpResponse = response as? HTTPURLResponse else {
                     return completion(.failure(NetworkError.interalError))
                 }
                 
+                // Checks of there is data
                 guard let data = data else {
                     return completion(.failure(NetworkError.interalError))
                 }
                 
-                if !(200...299).contains(httpResponse.statusCode) {
-                    completion(HttpErrorResponseMapper(httpResponse, data: data))
-                } else {
-                    do {
-                        let decoder = JSONDecoder()
-                        let formatter = DateFormatter.iso8601WithMilliseconds
-                        decoder.dateDecodingStrategy = .formatted(formatter)
-                        
-                        let response = try decoder.decode(T.self, from: data)
-                        completion(.success(response))
-                    } catch {
-                        completion(.failure(error))
-                    }
+                // Checks if response is successfull
+                // Otherwise return with corresponding Http Error message
+                guard (200...299).contains(httpResponse.statusCode) else {
+                    return completion(HttpErrorResponseMapper(httpResponse, data: data))
+                }
+ 
+                do {
+                    let decoder = JSONDecoder()
+                    let formatter = DateFormatter.iso8601WithMilliseconds
+                    decoder.dateDecodingStrategy = .formatted(formatter)
+                    
+                    let response = try decoder.decode(T.self, from: data)
+                    completion(.success(response))
+                } catch {
+                    completion(.failure(error))
                 }
             } catch {
                 completion(GuardResponseError(error))
@@ -143,15 +147,14 @@ struct ApiService: APIServiceProtocol {
                 let (data, response) = try await sessionManager.request(with: request)
                     
                 guard let httpResponse = response as? HTTPURLResponse else {
-                    completion(.failure(NetworkError.interalError))
-                    return
+                    return completion(.failure(NetworkError.interalError))
                 }
                 
-                if !(200...299).contains(httpResponse.statusCode) {
-                    completion(HttpErrorResponseMapper(httpResponse, data: data))
-                } else {
-                    completion(.success(body))
+                guard (200...299).contains(httpResponse.statusCode) else {
+                    return completion(HttpErrorResponseMapper(httpResponse, data: data))
                 }
+                
+                completion(.success(body))
             } catch {
                 completion(GuardResponseError(error))
             }
@@ -175,15 +178,14 @@ struct ApiService: APIServiceProtocol {
                 let (data, response) = try await sessionManager.request(with: request)
                 
                 guard let httpResponse = response as? HTTPURLResponse else {
-                    completion(.failure(NetworkError.interalError))
-                    return
+                    return completion(.failure(NetworkError.interalError))
                 }
                 
-                if !(200...299).contains(httpResponse.statusCode) {
-                    completion(HttpErrorResponseMapper(httpResponse, data: data))
-                } else {
-                    completion(.success(body))
+                guard (200...299).contains(httpResponse.statusCode) else {
+                    return completion(HttpErrorResponseMapper(httpResponse, data: data))
                 }
+                
+                completion(.success(body))
             } catch {
                 completion(GuardResponseError(error))
             }
@@ -204,11 +206,11 @@ struct ApiService: APIServiceProtocol {
                     return
                 }
                 
-                if !(200...299).contains(httpResponse.statusCode) {
-                    completion(HttpErrorResponseMapper(httpResponse, data: data))
-                } else {
-                    completion(.success(true))
+                guard (200...299).contains(httpResponse.statusCode) else {
+                    return completion(HttpErrorResponseMapper(httpResponse, data: data))
                 }
+                
+                completion(.success(true))
             } catch {
                 completion(GuardResponseError(error))
             }
@@ -216,7 +218,6 @@ struct ApiService: APIServiceProtocol {
     }
     
     // MARK: -- Authentication methods
-    
     func auth<T>(_ path: String, body: T, completion: @escaping (Result<Bool, any Error>) -> Void) where T : Codable {
         let url = UrlComponent(path: path).url
         var request = URLRequest(url: url)
@@ -226,48 +227,36 @@ struct ApiService: APIServiceProtocol {
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.addValue("application/json", forHTTPHeaderField: "Accept")
         
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-    
-            guard error == nil else {
-                // Network error mapper for error handling
-                completion(GuardResponseError(error!))
-                return
-            }
-                   
-            if let response = response as? HTTPURLResponse {
+        Task.init {
+            do {
+                let (data, response) = try await URLSession.shared.data(for: request)
+                        
+                guard let response = response as? HTTPURLResponse else { return completion(.failure(NetworkError.interalError)) }
+                       
                 if !(200...299).contains(response.statusCode) {
                     if (response.statusCode == 400) {
                         do {
-                            let decoder = JSONDecoder()
-                            if let data = data {
-                                let decoderError = try decoder.decode(AuthErrorResponse.self, from: data)
-                                completion(.failure(ApiError.authError(decoderError)))
-                                print(ApiError.authError(decoderError))
-                            }
+                            let decoderError = try JSONDecoder().decode(AuthErrorResponse.self, from: data)
+                            completion(.failure(ApiError.authError(decoderError)))
                         } catch {
                             completion(.failure(NetworkError.interalError))
-                            print(NetworkError.interalError)
                         }
                     } else {
                         completion(HttpErrorResponseMapper(response, data: data))
-                        print(response)
-
                     }
-                    print()
                 } else {
                     do {
-                        let authResponse = try JSONDecoder().decode(AuthResponse.self, from: data!)
+                        let authResponse = try JSONDecoder().decode(AuthResponse.self, from: data)
                         Auth.shared.setCredentials(accesToken: authResponse.session.accessToken, refreshToken: authResponse.session.refreshToken, isNewUser: path.contains("signup"))
                         completion(.success(true))
                     } catch {
-                        print("decoder error: \(error)")
                         completion(.failure(error))
                     }
                 }
+            } catch {
+                completion(GuardResponseError(error))
             }
         }
-        
-        task.resume()
     }
 }
 
@@ -275,8 +264,26 @@ enum NetworkError: Error {
     case invalidURL
     case noInternet
     case timeout
+    case refreshFailed
     case unReachable(String)
     case interalError
+    
+    var errorMessage: String? {
+        switch self {
+            case .invalidURL:
+                return "Invalid URL"
+            case .noInternet:
+                return "No Internet Connection"
+            case .timeout:
+                return "Timeout"
+            case .refreshFailed:
+                return "Refresh Authentication Failed"
+            case .unReachable(let message):
+                return message
+            case .interalError:
+                return "Internal Error"
+        }
+    }
 }
 
 enum ApiError: Error {
@@ -302,7 +309,7 @@ enum ApiError: Error {
             return "Unauthorized"
         case .internalError:
             return "Internal Error"
-        case .unknown(let code, let message):
+        case .unknown(_, let message):
             return message
         }
     }

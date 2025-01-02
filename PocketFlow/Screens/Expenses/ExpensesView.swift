@@ -108,6 +108,7 @@ struct ExpensesView: View {
                         .padding(ContentStyle.Padding.Section)
                         .foregroundColor(.secondary)
                         .background(.secondary.opacity(ContentStyle.Opacity.Header))
+                        .background(Color.background)
                         .font(.subheadline)
                         .cornerRadius(ContentStyle.CornerRadius.Small)
                 }
@@ -141,7 +142,7 @@ struct ExpensesView: View {
                 }
               
                 Text(expense.amount, format: .defaultCurrency(code: settings.currency.rawValue))
-                    .font(.headline)
+                    .font(.subheadline)
                     .foregroundColor(.secondary)
             }
             .padding(.vertical, ContentStyle.Padding.Section)

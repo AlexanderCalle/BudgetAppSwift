@@ -27,7 +27,7 @@ struct ContentView: View {
 
 
     var body: some View {
-        VStack(spacing: 0) {
+        VStack(spacing: ContentStyle.SpacingNone) {
             ZStack {
                     HomeView(categoriesStore: categoryStore)
                         .customTransition(
@@ -55,27 +55,10 @@ struct ContentView: View {
 
             }
             .background(Color.background)
-            
             customBottomBar
         }
         .fullScreenCover(isPresented: $appState.showAddExpense) {
-            RouterView {
-                AddAmountView()
-            }
-            .registerPopups() { $0
-                .center {
-                    $0.backgroundColor(.background)
-                      .cornerRadius(20)
-                      .popupHorizontalPadding(20)
-                      .tapOutsideToDismissPopup(true)
-                }
-                .vertical {
-                    $0.backgroundColor(.background)
-                      .cornerRadius(20)
-                      .enableStacking(true)
-                      .tapOutsideToDismissPopup(true)
-                }
-            }
+            addAmountView
         }
         .accentColor(.purple)
     }
@@ -88,7 +71,7 @@ struct ContentView: View {
                 Button{
                     previousTab = selected
                     direction = item.rawValue > selected ? .left : .right
-                    withAnimation(.spring(duration: 0.25, bounce: 0.3)) {
+                    withAnimation(ContentStyle.ScreenAnimation) {
                         selected = item.rawValue
                     }
                 } label: {
@@ -99,20 +82,54 @@ struct ContentView: View {
             }
         }
         .background(Color.background)
-        
-        .padding(20)
+        .padding(ContentStyle.BottomBarInnerPadding)
         .overlay(
-            BottomBorder().stroke(.secondary.opacity(0.3), lineWidth: 1)
+            BottomBorder().stroke(.secondary.opacity(ContentStyle.BorderOpacity), lineWidth: ContentStyle.BorderWidth)
         )
     }
     
     
     func CustomTabItem(imageName: String, title: String, isActive: Bool) -> some View{
         Image(systemName: imageName)
-            .font(.system(size: 25))
+            .font(.system(size: ContentStyle.IconSize))
             .foregroundColor(isActive ? .purple : .gray)
     }
-
+    
+    var addAmountView: some View{
+        RouterView {
+            AddAmountView()
+        }
+        .registerPopups() { $0
+            .center {
+                $0.backgroundColor(.background)
+                    .cornerRadius(ContentStyle.PopupCornRadius)
+                    .popupHorizontalPadding(ContentStyle.PopupHorPadding)
+                    .tapOutsideToDismissPopup(true)
+            }
+            .vertical {
+                $0.backgroundColor(.background)
+                    .cornerRadius(ContentStyle.PopupCornRadius)
+                    .enableStacking(true)
+                    .tapOutsideToDismissPopup(true)
+            }
+        }
+    }
+    
+    struct ContentStyle {
+        static let PopupHorPadding: CGFloat = 20
+        static let PopupCornRadius: CGFloat = 20
+        
+        static let SpacingNone: CGFloat = 0
+        
+        static let IconSize: CGFloat = 25
+        
+        static let BorderWidth: CGFloat = 1
+        static let BorderOpacity: Double = 0.3
+        
+        static let BottomBarInnerPadding: CGFloat = 20
+        
+        static let ScreenAnimation: Animation = Animation.spring(duration: 0.25, bounce: 0.3)
+    }
 }
 
 struct BottomBorder: Shape {

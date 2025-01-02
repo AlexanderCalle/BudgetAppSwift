@@ -21,6 +21,9 @@ struct BackButtonModifier: ViewModifier {
                     } label: {
                         Image(systemName: "chevron.left")
                             .tint(.primary)
+                            .padding(8)
+                            .background(Color.secondary.opacity(0.2))
+                            .clipShape(.circle)
                     }
                 }
             }

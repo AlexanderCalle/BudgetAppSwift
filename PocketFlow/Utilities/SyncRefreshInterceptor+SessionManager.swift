@@ -1,5 +1,5 @@
 //
-//  SyncRefreshInterceptor.swift
+//  SyncRefreshInterceptot+SessionManager.swift
 //  smart_budget
 //
 //  Created by Alexander Callebaut on 08/12/2024.
@@ -15,13 +15,11 @@ private var isRefreshing = false
 
 // **Atomically** check if there's a refresh request in flight, if no, update
 // `isRefreshing` to true and return true, otherwise return false
-// Essentially we are using a lock/mutex to implement compare-and-swap
 private func atomicCheckAndSetRefreshing() -> Bool {
     isRefreshingLock.lock(); defer { isRefreshingLock.unlock() }
     
     if !isRefreshing {
         isRefreshing = true
-        
         return true
     }
     
@@ -48,24 +46,6 @@ class SessionManager: NSObject, URLSessionDelegate {
         session = URLSession(configuration: config, delegate: self, delegateQueue: nil)
     }
     
-    func makeRequest(_ request: URLRequest, completion: @escaping (Data?, URLResponse?, Error?) -> Void) {
-        var modifiedRequest = request
-        let token = Auth.shared.getAccessToken() ?? ""
-        modifiedRequest.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-
-        session.dataTask(with: modifiedRequest) { data, response, error in
-            guard let httpResponse = response as? HTTPURLResponse else {
-                return completion(data, response, error)
-            }
-            
-            if httpResponse.statusCode == 401 {
-                self.handleUnauthorizedRequest(request, completion: completion)
-            } else {
-                completion(data, response, error)
-            }
-        }.resume()
-    }
-    
     func request(with urlRequest: URLRequest) async throws -> (Data?, URLResponse?) {
         // Add token to the request
         var modifiedRequest = urlRequest
@@ -78,16 +58,20 @@ class SessionManager: NSObject, URLSessionDelegate {
                 return (data, response)
             }
             
-            if httpResponse.statusCode == 401 {
-                var responseData: Data?
-                var urlResponse: URLResponse?
-                self.handleUnauthorizedRequest(urlRequest) { data, response, _ in
-                    responseData = data
-                    urlResponse = response
-                }
-                return (responseData, urlResponse)
+            guard httpResponse.statusCode == 401 else {
+                return (data, response)
             }
-            return (data, response)
+            
+            // Request failed with 401 and needs handling refresh (or no refresh)
+            var responseData: Data?
+            var urlResponse: URLResponse?
+            
+            self.handleUnauthorizedRequest(urlRequest) { data, response, _ in
+                responseData = data
+                urlResponse = response
+            }
+            
+            return (responseData, urlResponse)
         } catch {
             throw error
         }
@@ -129,7 +113,7 @@ class SessionManager: NSObject, URLSessionDelegate {
 
     private func failPendingRequests() {
         for (_, completion) in pendingRequests {
-            completion(nil, nil, NSError(domain: "TokenRefreshError", code: 401, userInfo: [NSLocalizedDescriptionKey: "Failed to refresh token"]))
+            completion(nil, nil, NetworkError.refreshFailed)
         }
 
         pendingRequests.removeAll()
@@ -151,6 +135,7 @@ class SessionManager: NSObject, URLSessionDelegate {
         request.httpMethod = "POST"
         request.httpBody = body
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        
         let (data, _) = session.synchronousData(with: request)
         if let data = data {
             let decodedResponse = try? JSONDecoder().decode(AuthResponse.self, from: data)

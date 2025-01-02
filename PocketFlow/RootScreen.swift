@@ -12,7 +12,7 @@ import MijickPopups
 
 
 struct RootScreen: View {
-    
+
     @EnvironmentObject var auth: Auth
     @Environment(\.modelContext) private var context
     @Environment(\.colorScheme) private var colorScheme
@@ -35,13 +35,13 @@ struct MainView: View {
             .registerPopups() { $0
                 .center {
                     $0.backgroundColor(.background)
-                      .cornerRadius(20)
-                      .popupHorizontalPadding(20)
+                        .cornerRadius(Constants.PopupCornerRadius)
+                      .popupHorizontalPadding(Constants.PopupHorizontalPadding)
                       .tapOutsideToDismissPopup(true)
                 }
                 .vertical {
                     $0.backgroundColor(.background)
-                      .cornerRadius(20)
+                      .cornerRadius(Constants.PopupCornerRadius)
                       .enableStacking(true)
                       .tapOutsideToDismissPopup(true)
                 }
@@ -70,6 +70,11 @@ struct PrimaryScreen: View {
     }
 }
 
+struct Constants {
+    static let PopupCornerRadius: CGFloat = 20
+    static let PopupHorizontalPadding: CGFloat = 20
+}
+
 #Preview {
     RootScreen()
         .fontDesign(.rounded)
@@ -79,13 +84,13 @@ struct PrimaryScreen: View {
         .registerPopups() { $0
             .center {
                 $0.backgroundColor(.background)
-                  .cornerRadius(20)
-                  .popupHorizontalPadding(20)
+                    .cornerRadius(Constants.PopupCornerRadius)
+                  .popupHorizontalPadding(Constants.PopupHorizontalPadding)
                   .tapOutsideToDismissPopup(true)
             }
             .vertical {
                 $0.backgroundColor(.background)
-                  .cornerRadius(20)
+                    .cornerRadius(Constants.PopupCornerRadius)
                   .enableStacking(true)
                   .tapOutsideToDismissPopup(true)
             }

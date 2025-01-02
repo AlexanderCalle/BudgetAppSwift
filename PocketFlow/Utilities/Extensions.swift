@@ -10,6 +10,7 @@ import Foundation
 import SwiftUICore
 import UIKit
 
+// Custom date formatter to support with API
 extension DateFormatter {
     static let iso8601WithMilliseconds: DateFormatter = {
         let formatter = DateFormatter()
@@ -21,10 +22,11 @@ extension DateFormatter {
 }
 
 extension View {
+    // Modifier for routes to have the custom back button
     func withCustomBackButton() -> some View {
         modifier(BackButtonModifier())
     }
-    
+    // Sets the next focus field
     func focusNextField<F: RawRepresentable>(_ field: FocusState<F?>.Binding) where F.RawValue == Int {
         guard let currentValue = field.wrappedValue else { return }
         let nextValue = currentValue.rawValue + 1
@@ -38,62 +40,31 @@ protocol Dated {
     var date: Date { get }
 }
 
+// Groups data by a date component (.day, .month, .year)
 extension Array where Element: Dated {
     func groupedBy(dateComponents: Set<Calendar.Component>) -> [Date: [Element]] {
-        let initial: [Date: [Element]] = [:]
-        let groupedByDateComponents = reduce(into: initial) { acc, cur in
+        return reduce(into: [Date: [Element]]()) { list, cur in
             let components = Calendar.current.dateComponents(dateComponents, from: cur.date)
             let date = Calendar.current.date(from: components)!
-            let existing = acc[date] ?? []
-            acc[date] = existing + [cur]
+            
+            list[date, default: []].append(cur)
         }
-        
-        return groupedByDateComponents
     }
 }
 
+// Groups data by a key of choosing
 extension Array where Element: Identifiable {
     func group<Key: Hashable>(by keySelector: (Element) -> Key) -> [Key: [Element]] {
-        reduce(into: [Key: [Element]]()) { acc, element in
-            let key = keySelector(element)
-            acc[key, default: []].append(element)
+        reduce(into: [Key: [Element]]()) { list, current in
+            let key = keySelector(current)
+            // If key does not exists it creates an empty array
+            list[key, default: []].append(current)
         }
-    }
-}
-
-extension Color {
-    init(hex: String) {
-        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
-        var int: UInt64 = 0
-        Scanner(string: hex).scanHexInt64(&int)
-        let a, r, g, b: UInt64
-        switch hex.count {
-        case 3: // RGB (12-bit)
-            (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
-        case 6: // RGB (24-bit)
-            (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
-        case 8: // ARGB (32-bit)
-            (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
-        default:
-            (a, r, g, b) = (1, 1, 1, 0)
-        }
-
-        self.init(
-            .sRGB,
-            red: Double(r) / 255,
-            green: Double(g) / 255,
-            blue:  Double(b) / 255,
-            opacity: Double(a) / 255
-        )
     }
 }
 
 extension Date {
-    /// - Parameters:
-    ///   - year: The desired year
-    ///   - month: The desired month
-    ///   - day: The desired day
-    /// - Returns: A `Date` object
+    // Returns a date for the given parameters
     static func from(year: Int, month: Int, day: Int) -> Date? {
         let calendar = Calendar(identifier: .gregorian)
         var dateComponents = DateComponents()
@@ -104,53 +75,11 @@ extension Date {
     }
 }
 
+// Narrow formatter (otherwise is dollar -> US$)
 extension FormatStyle where Self == FloatingPointFormatStyle<Float>.Currency {
-    /// gives the narrow currency symbol
     static func defaultCurrency(code: String) -> FloatingPointFormatStyle<Float>.Currency {
             return .init(code: code)
                 .locale(Locale(identifier: "en_US"))
                 .presentation(.narrow) // Use "$", "€", etc., without extra text
         }
 }
-    
-
-//extension Color {
-//    var primary: Color {
-//        return color(light: UIColor(hex: "#007AFF"), dark: UIColor(hex: "#0052CC"))
-//    }
-//    
-//    private func color(light: UIColor, dark: UIColor) -> Color {
-//        return Color(UIColor.dynamicColor(light: light, dark: dark))
-//    }
-//}
-//
-//extension UIColor {
-//    
-//    convenience init(hex: String) {
-//        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
-//        var int: UInt64 = 0
-//        Scanner(string: hex).scanHexInt64(&int)
-//        let a, r, g, b: UInt64
-//        switch hex.count {
-//        case 3: // RGB (12-bit)
-//            (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
-//        case 6: // RGB (24-bit)
-//            (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
-//        case 8: // ARGB (32-bit)
-//            (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
-//        default:
-//            (a, r, g, b) = (1, 1, 1, 0)
-//        }
-//
-//        self.init(
-//            red: Double(r) / 255,
-//            green: Double(g) / 255,
-//            blue:  Double(b) / 255,
-//            alpha: Double(a) / 255
-//        )
-//    }
-//    
-//    static func dynamicColor(light: UIColor, dark: UIColor) -> UIColor {
-//        return UIColor { $0.userInterfaceStyle == .dark ? dark : light }
-//    }
-//}
