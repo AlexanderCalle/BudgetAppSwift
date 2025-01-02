@@ -7,12 +7,14 @@
 
 import SwiftUI
 
-struct Constants {
+struct ContentStyle {
     static let inset: CGFloat = 8
     static let spacing: CGFloat = 20
     static let sectionSpacing: CGFloat = 10
     static let cardInset: CGFloat = 18
     static let cornerRadius: CGFloat = 10
+    static let profileImagePadding: CGFloat = 20
+    static let logoutPaddingTop: CGFloat = 20
     
     static let secondaryOpacity: CGFloat = 0.1
     
@@ -27,26 +29,14 @@ struct SettingsView: View {
     @Environment(Settings.self) private var settings: Settings
     
     var body: some View {
-        VStack(alignment: .leading, spacing: Constants.spacing) {
+        VStack(alignment: .leading, spacing: ContentStyle.spacing) {
             Text("Settings")
                 .font(.title)
             ScrollView {
-                VStack(alignment: .leading, spacing: Constants.spacing) {
-                    
+                VStack(alignment: .leading, spacing: ContentStyle.spacing) {
                     if profileViewModel.profile != nil {
-                        VStack(alignment: .leading, spacing: Constants.spacing) {
-                            
-                            HStack{
-                                Spacer()
-                                Text(profileViewModel.profile?.firstname.first?.uppercased() ?? "?")
-                                    .font(.system(size: 34, weight: .bold))
-                                    .padding(20)
-                                    .foregroundColor(.white)
-                                    .background(.purple)
-                                    .clipShape(.circle)
-                                Spacer()
-                            }
-                            
+                        VStack(alignment: .leading, spacing: ContentStyle.spacing) {
+                            profileImage
                             accountDetails(user: profileViewModel.profile!)
                             AppSettings(settings: settings)
                         }
@@ -59,17 +49,10 @@ struct SettingsView: View {
                         }
                     }
                     
-                    Button {
+                    LargeButton("Logout", theme: .warning) {
                         Auth.shared.logout()
-                    } label: {
-                        Text("Logout")
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.danger)
-                            .foregroundColor(.white)
-                            .cornerRadius(Constants.cornerRadius)
                     }
-                    .padding(.top, 20)
+                    .padding(.top, ContentStyle.logoutPaddingTop)
                 }
             }
         }
@@ -78,54 +61,33 @@ struct SettingsView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
     
+    var profileImage: some View {
+        HStack{
+            Spacer()
+            Text(profileViewModel.profile?.firstname.first?.uppercased() ?? "?")
+                .font(.system(size: ContentStyle.FontSize.largest, weight: .bold))
+                .padding(ContentStyle.profileImagePadding)
+                .foregroundColor(.white)
+                .background(.purple)
+                .clipShape(.circle)
+            Spacer()
+        }
+    }
+    
     private func accountDetails(user: User) -> some View {
         Section("Account settings") {
-            VStack(spacing: Constants.sectionSpacing) {
-                Button{
-                    Task {
-                        await ChangeNamePopup(profileViewModel: profileViewModel).present()
-                    }
-                } label: {
-                    Text("Name")
-                        .font(.system(size: Constants.FontSize.normal ,weight: .bold))
-                        .foregroundColor(.primary)
-                    Spacer()
-                    Text(user.firstname + " " + user.lastname)
-                        .font(.system(size: Constants.FontSize.normal))
-                        .foregroundColor(.secondary)
+            VStack(spacing: ContentStyle.sectionSpacing) {
+                SettingDetailButton("Name", text: user.firstname + " " + user.lastname) {
+                    Task { await ChangeNamePopup(profileViewModel: profileViewModel).present() }
                 }
-                .padding(Constants.cardInset)
-                .background(.secondary.opacity(Constants.secondaryOpacity))
-                .cornerRadius(Constants.cornerRadius)
-                Button{
-                    Task { await ChangeEmailPopup(profileViewModel: profileViewModel).present() }
-                } label: {
-                    Text("Email")
-                        .font(.system(size: Constants.FontSize.normal ,weight: .bold))
-                        .foregroundColor(.primary)
-                    Spacer()
-                    Text(user.email)
-                        .font(.system(size: Constants.FontSize.normal))
-                        .tint(.secondary)
-                        .foregroundColor(.secondary)
-                }
-                .padding(Constants.cardInset)
-                .background(.secondary.opacity(Constants.secondaryOpacity))
-                .cornerRadius(Constants.cornerRadius)
                 
-                Button {
-                    Task { await ChangePasswordPopup(profileViewModel: profileViewModel).present() }
-                } label: {
-                    Text("Change password")
-                        .font(.system(size: Constants.FontSize.normal ,weight: .bold))
-                        .foregroundColor(.primary)
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                        .foregroundColor(.secondary)
+                SettingDetailButton("Email", text: user.email) {
+                    Task { await ChangeEmailPopup(profileViewModel: profileViewModel).present() }
                 }
-                .padding(Constants.cardInset)
-                .background(.secondary.opacity(Constants.secondaryOpacity))
-                .cornerRadius(Constants.cornerRadius)
+                
+                SettingDetailButton("Change password", showIcon: true) {
+                    Task { await ChangePasswordPopup(profileViewModel: profileViewModel).present() }
+                }
             }
         }
     }
@@ -136,36 +98,65 @@ struct AppSettings: View {
     
     var body: some View {
         Section("App settings") {
-            Button {
-                Task { await ChangeCurrencyPopup(settings: settings, selectedType: settings.currency).present() }
-            } label: {
-                Text("Currency")
-                    .font(.system(size: Constants.FontSize.normal ,weight: .bold))
-                    .foregroundColor(.primary)
-                Spacer()
-                Text(settings.currency.rawValue)
-                    .font(.system(size: Constants.FontSize.normal))
+            VStack(spacing: ContentStyle.sectionSpacing) {
+                SettingDetailButton("Currency", text: settings.currency.rawValue) {
+                    Task { await ChangeCurrencyPopup(settings: settings, selectedType: settings.currency).present() }
+                }
+                
+                HStack {
+                    Text("Dark mode")
+                        .font(.system(size: ContentStyle.FontSize.normal ,weight: .bold))
+                    Spacer()
+                    Toggle(isOn: $settings.darKMode, label: {
+                        Text("Dark mode")
+                            .font(.system(size: ContentStyle.FontSize.normal))
+                            .foregroundColor(.secondary)
+                    })
+                    .toggleStyle(.switch)
+                    .labelsHidden()
+                }
+                .padding(ContentStyle.cardInset)
+                .background(.secondary.opacity(ContentStyle.secondaryOpacity))
+                .cornerRadius(ContentStyle.cornerRadius)
+            }
+        }
+    }
+}
+
+struct SettingDetailButton: View {
+    private let label: String
+    private let action: () -> Void
+    private let text: String
+    private var showIcon: Bool = false
+    
+    init(_ label: String, text: String = "", showIcon: Bool = false, action: @escaping () -> Void) {
+        self.label = label
+        self.action = action
+        self.text = text
+        self.showIcon = showIcon
+    }
+    
+    var body: some View {
+        Button{
+           action()
+        } label: {
+            Text(label)
+                .font(.system(size: ContentStyle.FontSize.normal ,weight: .bold))
+                .foregroundColor(.primary)
+            Spacer()
+            if(showIcon) {
+                Image(systemName: "chevron.right")
+                    .foregroundColor(.secondary)
+            } else {
+                Text(text)
+                    .font(.system(size: ContentStyle.FontSize.normal))
+                    .tint(.secondary)
                     .foregroundColor(.secondary)
             }
-            .padding(Constants.cardInset)
-            .background(.secondary.opacity(Constants.secondaryOpacity))
-            .cornerRadius(Constants.cornerRadius)
-            HStack {
-                Text("Dark mode")
-                    .font(.system(size: Constants.FontSize.normal ,weight: .bold))
-                Spacer()
-                Toggle(isOn: $settings.darKMode, label: {
-                    Text("Dark mode")
-                        .font(.system(size: Constants.FontSize.normal))
-                        .foregroundColor(.secondary)
-                })
-                .toggleStyle(.switch)
-                .labelsHidden()
-            }
-            .padding(Constants.cardInset)
-            .background(.secondary.opacity(Constants.secondaryOpacity))
-            .cornerRadius(Constants.cornerRadius)
         }
+        .padding(ContentStyle.cardInset)
+        .background(.secondary.opacity(ContentStyle.secondaryOpacity))
+        .cornerRadius(ContentStyle.cornerRadius)
     }
 }
 

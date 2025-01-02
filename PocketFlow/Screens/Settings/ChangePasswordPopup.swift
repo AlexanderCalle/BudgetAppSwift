@@ -12,76 +12,66 @@ import MijickPopups
 struct ChangePasswordPopup: BottomPopup {
     @ObservedObject var profileViewModel: ProfileViewModel
     
+    @FocusState var focusedField: Field?
+    enum Field: Int, Hashable {
+        case oldPassword
+        case password
+        case confirmPassword
+    }
+    
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
+        VStack(alignment: .leading, spacing: ContentStyle.Spacing) {
             CloseButton {
                 Task { await dismissLastPopup() }
             }
             
-            VStack(alignment: .leading) {
-                Text("Current password:")
+            TextFieldValidationView(label: "Current password:", validationErrors: $profileViewModel.validationErrors, validationKey: "oldPassword") {
                 SecureField("Current password...", text: $profileViewModel.oldPassword)
                     .textContentType(.password)
                     .textInputAutocapitalization(.never)
-                    .padding()
-                    .background(Color.secondary.opacity(0.2))
-                    .cornerRadius(10)
-                if(profileViewModel.validationErrors.contains(where: { $0.key == "oldPassword" })) {
-                    Text(profileViewModel.validationErrors.first(where: { $0.key == "oldPassword" })?.message ?? "")
-                        .foregroundColor(.danger)
-                }
+                    .focused($focusedField, equals: .oldPassword)
+                    .onSubmit { self.focusNextField($focusedField) }
+                    .submitLabel(.next)
             }
             Divider()
-            VStack(alignment: .leading) {
-                Text("New password:")
+            
+            TextFieldValidationView(label: "New password:", validationErrors: $profileViewModel.validationErrors, validationKey: "password") {
                 SecureField("New password...", text: $profileViewModel.password)
                     .textContentType(.password)
                     .textInputAutocapitalization(.never)
-                    .padding()
-                    .background(Color.secondary.opacity(0.2))
-                    .cornerRadius(10)
-                if(profileViewModel.validationErrors.contains(where: { $0.key == "password" })) {
-                    Text(profileViewModel.validationErrors.first(where: { $0.key == "password" })?.message ?? "")
-                        .foregroundColor(.danger)
-                }
+                    .focused($focusedField, equals: .password)
+                    .onSubmit { self.focusNextField($focusedField) }
+                    .submitLabel(.next)
             }
-            VStack(alignment: .leading) {
-                Text("Confirm password:")
+
+            TextFieldValidationView(label: "Confirm password:", validationErrors: $profileViewModel.validationErrors, validationKey: "confirmPassword") {
                 SecureField("Confirm password...", text: $profileViewModel.confirmPassword)
                     .textContentType(.password)
                     .textInputAutocapitalization(.never)
-                    .padding()
-                    .background(Color.secondary.opacity(0.2))
-                    .cornerRadius(10)
-                if(profileViewModel.validationErrors.contains(where: { $0.key == "confirmPassword" })) {
-                    Text(profileViewModel.validationErrors.first(where: { $0.key == "confirmPassword" })?.message ?? "")
-                        .foregroundColor(.danger)
-                }
+                    .focused($focusedField, equals: .confirmPassword)
+                    .submitLabel(.done)
             }
             
-            Button {
-                profileViewModel.editPassword()
-            } label: {
-                if case .loading = profileViewModel.changePasswordState {
-                    ProgressView()
-                        .foregroundStyle(Color.background)
-                        .padding()
-                } else {
-                    Text("Save")
-                        .foregroundStyle(Color.background)
-                        .padding()
-                }
-            }
-            .frame(maxWidth: .infinity)
-            .background(Color.primary)
-            .cornerRadius(10)
-            .padding(.top, 20)
+            LargeButton(
+                "Save",
+                theme: .primary,
+                loading: Binding<Bool?>(
+                    get: { profileViewModel.changePasswordState == .loading },
+                    set: { _ = $0 }
+                )
+            ) { profileViewModel.editPassword() }
+                .padding(.top, ContentStyle.PaddingTop)
         }
-        .onChange(of: profileViewModel.changePasswordState) { state in
+        .onChange(of: profileViewModel.changePasswordState) { _, state in
             if case .success(_) = state {
                 Task { await dismissLastPopup() }
             }
         }
         .padding()
+    }
+    
+    struct ContentStyle {
+        static let Spacing: CGFloat = 20
+        static let PaddingTop: CGFloat = 20
     }
 }

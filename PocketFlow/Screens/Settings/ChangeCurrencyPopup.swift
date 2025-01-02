@@ -13,22 +13,12 @@ struct ChangeCurrencyPopup: BottomPopup {
     @State var selectedType: Currency
     
     var body: some View {
-        VStack(spacing: 0) {
-            HStack {
-                Spacer()
-                Button(action: { Task { await dismissLastPopup() }})
-                {
-                    Image(systemName: "xmark")
-                        .padding(8)
-                        .background(.secondary.opacity(0.2))
-                        .cornerRadius(.infinity)
-                        .tint(.primary)
-                }
-            }
+        VStack {
+            CloseButton { Task { await dismissLastPopup() } }
             Spacer()
             Text("Select Currency")
                 .font(.headline)
-            VStack(spacing: 16) {
+            VStack(spacing: ContentStyle.Spacing) {
                 ForEach(Currency.allCases, id: \.self) { type in
                     SelectionRow(
                         title: type.rawValue,
@@ -39,22 +29,29 @@ struct ChangeCurrencyPopup: BottomPopup {
                 }
             }
             .padding()
-
-            Button(action: {
+            
+            LargeButton(
+                "Save and close",
+                theme: .primary
+            ) {
                 settings.currency = selectedType
                 Task { await dismissLastPopup() }
-            }) {
-                Text("Save and close")
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.primary)
-                    .foregroundColor(.background)
-                    .cornerRadius(10)
             }
-            .padding(.top, 20)
+            .padding(.top, ContentStyle.Padding.Top)
         }
-        .padding(.vertical, 20)
-        .padding(.leading, 24)
-        .padding(.trailing, 16)
+        .padding(.vertical, ContentStyle.Padding.Vertical)
+        .padding(.leading, ContentStyle.Padding.Leading)
+        .padding(.trailing, ContentStyle.Padding.Trailing)
+    }
+    
+    struct ContentStyle {
+        static let Spacing: CGFloat = 20
+        
+        struct Padding {
+            static let Top: CGFloat = 20
+            static let Vertical: CGFloat = 20
+            static let Leading: CGFloat = 24
+            static let Trailing: CGFloat = 16
+        }
     }
 }

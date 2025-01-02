@@ -12,64 +12,57 @@ import MijickPopups
 struct ChangeNamePopup: BottomPopup {
     @ObservedObject var profileViewModel: ProfileViewModel
     
+    @FocusState var focusedField: Field?
+    enum Field: Int, Hashable {
+        case firstname
+        case lastname
+    }
+    
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
+        VStack(alignment: .leading, spacing: ContentStyle.Spacing) {
             CloseButton {
                 Task { await dismissLastPopup() }
             }
             
-            VStack(alignment: .leading) {
-                Text("Firstname:")
+            TextFieldValidationView(label: "Firstname:", validationErrors: $profileViewModel.validationErrors, validationKey: "firstname") {
                 TextField("Firstname...", text: Binding(
                     get: { profileViewModel.profile?.firstname ?? "" },
                     set: { profileViewModel.profile!.firstname = $0 }
                 ))
-                    .padding()
-                    .background(Color.secondary.opacity(0.2))
-                    .cornerRadius(10)
-                if(profileViewModel.validationErrors.contains(where: { $0.key == "firstname" })) {
-                    Text(profileViewModel.validationErrors.first(where: { $0.key == "firstname" })?.message ?? "")
-                        .foregroundColor(.danger)
-                }
+                .focused($focusedField, equals: .firstname)
+                .onSubmit { self.focusNextField($focusedField) }
+                .submitLabel(.next)
             }
-            VStack(alignment: .leading) {
-                Text("Lastname:")
+            
+            TextFieldValidationView(label: "Lastname:", validationErrors: $profileViewModel.validationErrors, validationKey: "lastname"){
                 TextField("Lastname...", text: Binding(
                     get: { profileViewModel.profile?.lastname ?? "" },
                     set: { profileViewModel.profile!.lastname = $0 }
                 ))
-                    .padding()
-                    .background(Color.secondary.opacity(0.2))
-                    .cornerRadius(10)
-                if(profileViewModel.validationErrors.contains(where: { $0.key == "lastname" })) {
-                    Text(profileViewModel.validationErrors.first(where: { $0.key == "lastname" })?.message ?? "")
-                        .foregroundColor(.danger)
-                }
+                .focused($focusedField, equals: .lastname)
+                .submitLabel(.done)
             }
             
-            Button {
-                profileViewModel.editProfile()
-            } label: {
-                if case .loading = profileViewModel.editState {
-                    ProgressView()
-                        .foregroundStyle(Color.background)
-                        .padding()
-                } else {
-                    Text("Save")
-                        .foregroundStyle(Color.background)
-                        .padding()
-                }
-            }
-            .frame(maxWidth: .infinity)
-            .background(Color.primary)
-            .cornerRadius(10)
-            .padding(.top, 20)
+            LargeButton(
+                "Save",
+                theme: .primary,
+                loading: Binding<Bool?>(
+                    get: { profileViewModel.editState == .loading },
+                    set: { _ = $0 }
+                )
+            ) { profileViewModel.editProfile() }
+                .padding(.top, ContentStyle.PaddingTop)
         }
-        .onChange(of: profileViewModel.editState) { state in
+        .onChange(of: profileViewModel.editState) { _, state in
             if case .success(_) = state {
                 Task { await dismissLastPopup() }
             }
         }
         .padding()
+    }
+    
+    struct ContentStyle {
+        static let Spacing: CGFloat = 20
+        static let PaddingTop: CGFloat = 20
     }
 }
