@@ -239,7 +239,9 @@ struct EditExpensePopup: BottomPopup {
         }
         .onChange(of: expenseStore.editState) { _, state in
             if case .success = state {
-                NotificationCenter.default.post(name: .expenseCreated, object: nil)
+                DispatchQueue.main.async {
+                    NotificationCenter.default.post(name: .expenseCreated, object: nil)
+                }                
                 Task { await dismissLastPopup() }
             }
         }

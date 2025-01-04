@@ -39,7 +39,9 @@ struct AddExpenseView: View {
         .onChange(of: addExpenseViewModel.shouldNavigate) { _, value in
             if value {
                 // Sends message to notify a fetch request
-                NotificationCenter.default.post(name: .expenseCreated, object: nil)
+                DispatchQueue.main.async {
+                    NotificationCenter.default.post(name: .expenseCreated, object: nil)
+                }
                 appState.showAddExpense = false
             }
         }
