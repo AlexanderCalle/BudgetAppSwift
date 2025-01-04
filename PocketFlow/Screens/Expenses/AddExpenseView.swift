@@ -18,10 +18,12 @@ struct AddExpenseView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: ContentStyle.Spacing.Medium) {
-            expenseForm
-            
-            selectCategory
-            
+            ScrollView {
+                VStack {
+                    expenseForm
+                    selectCategory
+                }
+            }
             LargeButton(
                 "Save Expense",
                 theme: .purple,

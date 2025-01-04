@@ -13,25 +13,35 @@ struct AddCategoryPopup: BottomPopup {
     @ObservedObject var categorieStore = AddCategoryViewModel()
     @Environment(Settings.self) var settings: Settings
     
+    let isLandscape = UIScreen.main.bounds.width > UIScreen.main.bounds.height
+    func configurePopup(config: BottomPopupConfig) -> BottomPopupConfig {
+        config
+            .enableDragGesture(!isLandscape)
+    }
+    
     var body: some View {
         VStack(spacing: ContentStyle.Spacing) {
             CloseButton { Task { await dismissLastPopup() } }
             Text("Add new category")
                 .font(.system(size: ContentStyle.TitleFontSize, weight: .bold))
             
-            categoryInputs
-            
-            LargeButton(
-                "Save category",
-                theme: .primary,
-                loading: Binding<Bool?> (
-                    get: { categorieStore.createdCatergoryState == .loading },
-                    set: { _ = $0 }
-                )
-            ) {
-                categorieStore.addNewCategory()
+            ScrollView {
+                VStack(spacing: ContentStyle.Spacing) {
+                    categoryInputs
+                    
+                    LargeButton(
+                        "Save category",
+                        theme: .primary,
+                        loading: Binding<Bool?> (
+                            get: { categorieStore.createdCatergoryState == .loading },
+                            set: { _ = $0 }
+                        )
+                    ) {
+                        categorieStore.addNewCategory()
+                    }
+                    .padding(.top, ContentStyle.Padding.Top)
+                }
             }
-            .padding(.top, ContentStyle.Padding.Top)
         }
         .onChange(of: categorieStore.createdCatergoryState) { _, value in
             if case .success(_) = value {

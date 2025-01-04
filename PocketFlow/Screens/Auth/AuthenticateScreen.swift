@@ -59,9 +59,11 @@ struct LoginPopup: BottomPopup {
         case password
     }
     
+    let isLandscape = UIScreen.main.bounds.width > UIScreen.main.bounds.height
     func configurePopup(config: BottomPopupConfig) -> BottomPopupConfig {
         config
             .heightMode(.large)
+            .enableDragGesture(!isLandscape)
     }
     
     var body: some View {
@@ -172,9 +174,11 @@ struct SignupPopup: BottomPopup {
         case lastname
     }
     
+    let isLandscape = UIScreen.main.bounds.width > UIScreen.main.bounds.height
     func configurePopup(config: BottomPopupConfig) -> BottomPopupConfig {
         config
             .heightMode(.large)
+            .enableDragGesture(!isLandscape)
     }
     
     var body: some View {

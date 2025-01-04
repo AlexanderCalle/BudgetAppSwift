@@ -10,10 +10,14 @@ import SwiftUI
 struct NumPadButton: View {
     let key: String
     let action: (String) -> Void
+    let size: CGFloat
+    let font: Font
     
-    init(key: String, action: @escaping (String) -> Void) {
+    init(key: String, size: CGFloat = 70, font: Font = .system(size: 22, weight: .bold), action: @escaping (String) -> Void) {
         self.key = key
         self.action = action
+        self.size = size
+        self.font = font
     }
 
     var body: some View {
@@ -21,9 +25,9 @@ struct NumPadButton: View {
             action(key)
         }) {
             Text(key)
-                .font(.system(size: 25, weight: .bold))
+                .font(font)
                 .foregroundColor(.primary)
-                .frame(width: 70, height: 70)
+                .frame(width: size, height: size)
         }
     }
 }

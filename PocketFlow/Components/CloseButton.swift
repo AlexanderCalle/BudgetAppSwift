@@ -28,6 +28,7 @@ struct CloseButton: View {
             .font(.headline)
             .foregroundColor(.primary)
         }
+        .tint(.background)
     }
 }
 

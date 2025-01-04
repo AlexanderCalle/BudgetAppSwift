@@ -25,13 +25,8 @@ struct AddAmountView: View {
                 appState.showAddExpense = false
             }
             .padding(.horizontal, ContentStyle.Padding.Default)
-           
-            Spacer()
             // Display amount
-            amountDisplay
-            Spacer()
-            // Custom keypad
-            NumPad(columns: columns, handleKeyPress: handleKeyPress, handleDelete: handleDelete)
+            input
             // Continue button
             LargeButton(
                 "Continue",
@@ -47,9 +42,28 @@ struct AddAmountView: View {
             }
             .padding()
         }
+        .padding(.top, 5)
         .toolbar(.hidden, for: .tabBar)
         .toolbar(.hidden, for: .navigationBar)
         .background(Color.background.ignoresSafeArea())
+    }
+    
+    private var input: some View {
+        GeometryReader { geometry in
+            let buttonSize = UIScreen.main.bounds.height / 9
+            VStack {
+                Spacer()
+                amountDisplay
+                Spacer()
+                // Custom keypad
+                NumPad(
+                    columns: columns,
+                    handleKeyPress: handleKeyPress,
+                    handleDelete: handleDelete,
+                    buttonSize: buttonSize
+                )
+            }
+        }
     }
     
     // Handle button press logic
@@ -162,6 +176,7 @@ struct NumPad: View {
     let columns: [GridItem]
     let handleKeyPress: (String) -> Void
     let handleDelete: () -> Void
+    let buttonSize: CGFloat
 
     var body: some View {
         LazyVGrid(columns: columns, spacing: ContentStyle.Spacing) {
@@ -169,25 +184,23 @@ struct NumPad: View {
                 Button(action: {
                     handleKeyPress(key)
                 }) {
-                    NumPadButton(key: key, action: handleKeyPress)
+                    NumPadButton(key: key, size: buttonSize, action: handleKeyPress)
                 }
             }
-            NumPadButton(key: ".", action: handleKeyPress)
-            NumPadButton(key: "0", action: handleKeyPress)
+            NumPadButton(key: ".", size: buttonSize, action: handleKeyPress)
+            NumPadButton(key: "0", size: buttonSize, action: handleKeyPress)
             Button(action: handleDelete) {
                 Image(systemName: "delete.left")
-                    .font(.system(size: ContentStyle.FontSize))
+                    .font(.system(size: ContentStyle.FontSize, weight: .bold))
                     .foregroundColor(.primary)
-                    .frame(width: ContentStyle.Size, height: ContentStyle.Size)
+                    .frame(width: buttonSize, height: buttonSize)
             }
         }
-        .padding(.horizontal)
     }
     
     struct ContentStyle {
         static let Spacing: CGFloat = 10
-        static let FontSize: CGFloat = 25
-        static let Size: CGFloat = 70
+        static let FontSize: CGFloat = 22
     }
 }
 

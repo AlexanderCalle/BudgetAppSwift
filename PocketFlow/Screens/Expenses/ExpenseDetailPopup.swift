@@ -14,6 +14,7 @@ struct ExpenseDetailPopup: BottomPopup {
     @Environment(Settings.self) var settings: Settings
     
     @State var isConfirmingDelete = false
+    var isLandscape = UIScreen.main.bounds.width > UIScreen.main.bounds.height
     
     func performDeleteAction(_ expense: Expense) {
         expensesStore.deleteExpense(expense)
@@ -24,10 +25,16 @@ struct ExpenseDetailPopup: BottomPopup {
             CloseButton {
                 Task { await dismissLastPopup() }
             }
-            amountDetail
-            expenseDetails
-            Spacer()
-            detailActions
+            ScrollView {
+                VStack(alignment: .leading, spacing: isLandscape ? ContentStyle.Spacing.Small : ContentStyle.Spacing.Large) {
+                    amountDetail
+                    expenseDetails
+                    Spacer()
+                    if(isLandscape) {
+                        detailActionsHorizontal
+                    } else { detailActionsVertical }
+                }
+            }
         }
         .padding(.vertical, ContentStyle.Padding.Vertical)
         .padding(.leading, ContentStyle.Padding.Leading)
@@ -63,7 +70,60 @@ struct ExpenseDetailPopup: BottomPopup {
         .font(.headline)
     }
     
-    private var detailActions: some View {
+    private var detailActionsHorizontal: some View {
+        HStack(spacing: ContentStyle.Spacing.Small) {
+            LargeButton(
+                "Edit Expense",
+                theme: .secondary
+            ) {
+                Task { await EditExpensePopup(
+                    expenseStore: expensesStore,
+                    editExpense: expensesStore.selectedExpense!).present() }
+            }
+            if isConfirmingDelete {
+                HStack {
+                    LargeButton(
+                        "Cancel",
+                        theme: .secondary,
+                        loading: Binding<Bool?>(
+                            get: { expensesStore.deleteState == .loading },
+                            set: { _ = $0 }
+                        )
+                    ) {
+                        isConfirmingDelete = false
+                    }
+                    
+                    LargeButton(
+                        "Delete",
+                        theme: .warning,
+                        loading: Binding<Bool?>(
+                            get: { expensesStore.deleteState == .loading },
+                            set: { _ = $0 }
+                        )
+                    ) {
+                        expensesStore.deleteExpense(expensesStore.selectedExpense!)
+                        Task { await dismissLastPopup() }
+                    }
+                }
+            } else {
+                LargeButton(
+                    "Delete expense",
+                    theme: .warning,
+                    loading: Binding<Bool?>(
+                        get: { expensesStore.deleteState == .loading },
+                        set: { _ = $0 })
+                ) { isConfirmingDelete = true }
+            }
+        }
+        .onChange(of: expensesStore.deleteState) { _, value in
+            if case .success(_) = value {
+                NotificationCenter.default.post(name: .expenseCreated, object: nil)
+            }
+        }
+        .font(.system(size: ContentStyle.FontSize.Regular, weight: .bold))
+    }
+    
+    private var detailActionsVertical: some View {
         VStack(spacing: ContentStyle.Spacing.Small) {
             LargeButton(
                 "Edit Expense",
@@ -143,6 +203,7 @@ struct EditExpensePopup: BottomPopup {
     @StateObject var expenseStore: ExpensesViewModel
     @Environment(Settings.self) var settings: Settings
     @State var editExpense: Expense
+    var isLandscape = UIScreen.main.bounds.width > UIScreen.main.bounds.height
     
     @FocusState var focusedField: Field?
     enum Field: Int, Hashable {
@@ -169,8 +230,12 @@ struct EditExpensePopup: BottomPopup {
                 Spacer()
                 saveButton
             }
-            expenseForm
-            categorySelection
+            ScrollView {
+                VStack {
+                    expenseForm
+                    categorySelection
+                }
+            }
         }
         .onChange(of: expenseStore.editState) { _, state in
             if case .success = state {
